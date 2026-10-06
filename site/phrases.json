@@ -1,0 +1,106 @@
+{
+  "lang": "pt-PT",
+  "voice": "pt-PT-DuarteNeural",
+  "sections": [
+    {
+      "id": "morning",
+      "title": "Morning",
+      "hours": [5, 12],
+      "phrases": [
+        { "id": "bom-dia", "en": "Good morning", "pt": "Bom dia", "ph": "bohng DEE-uh" },
+        {
+          "id": "um-cafe", "en": "A coffee (espresso), please", "pt": "Um café, por favor", "ph": "oom kuh-FEH, poor fuh-VOR",
+          "note": "Um café works everywhere.",
+          "alt": [
+            { "id": "uma-bica", "tag": "Lisbon", "pt": "Uma bica, por favor", "ph": "OO-muh BEE-kuh, poor fuh-VOR" },
+            { "id": "um-cimbalino", "tag": "Porto", "pt": "Um cimbalino, por favor", "ph": "oom seem-buh-LEE-noo, poor fuh-VOR" }
+          ]
+        },
+        { "id": "dois-cafes", "en": "Two coffees, please", "pt": "Dois cafés, por favor", "ph": "DOYSH kuh-FESH, poor fuh-VOR" },
+        { "id": "um-galao", "en": "A milky coffee (in a glass)", "pt": "Um galão, por favor", "ph": "oom guh-LOWNG, poor fuh-VOR", "note": "Meia de leite is the same idea, served in a cup." },
+        { "id": "pastel-de-nata", "en": "A custard tart", "pt": "Um pastel de nata", "ph": "oom push-TEL duh NAH-tuh" },
+        { "id": "dois-pasteis", "en": "Two custard tarts", "pt": "Dois pastéis de nata", "ph": "DOYSH push-TAYSH duh NAH-tuh" },
+        { "id": "para-levar", "en": "To take away", "pt": "Para levar", "ph": "PAH-ruh luh-VAR" }
+      ]
+    },
+    {
+      "id": "lunch",
+      "title": "Lunch",
+      "hours": [12, 15],
+      "phrases": [
+        { "id": "boa-tarde-l", "en": "Good afternoon (from noon)", "pt": "Boa tarde", "ph": "BOH-uh TARD" },
+        { "id": "mesa-dois-l", "en": "A table for two", "pt": "Uma mesa para dois", "ph": "OO-muh MAY-zuh PAH-ruh DOYSH" },
+        { "id": "ementa", "en": "The menu, please", "pt": "A ementa, por favor", "ph": "uh ee-MEN-tuh, poor fuh-VOR" },
+        { "id": "prato-do-dia", "en": "What is the dish of the day?", "pt": "Qual é o prato do dia?", "ph": "KWAHL EH oo PRAH-too doo DEE-uh" },
+        { "id": "queria-isto", "en": "I'd like this, please", "pt": "Queria isto, por favor", "ph": "kuh-REE-uh EESH-too, poor fuh-VOR" },
+        { "id": "agua", "en": "Still / sparkling water", "pt": "Água sem gás / com gás", "say": "Água sem gás. Água com gás.", "ph": "AH-gwuh sayng GAHSH / kohng GAHSH" },
+        { "id": "nao-obrigado", "en": "No, thank you", "pt": "Não, obrigado", "ph": "NOWNG, oh-bree-GAH-doo", "note": "Bread and olives put on the table are charged if eaten. Decline with this." }
+      ]
+    },
+    {
+      "id": "afternoon",
+      "title": "Afternoon",
+      "hours": [15, 19],
+      "phrases": [
+        { "id": "boa-tarde", "en": "Good afternoon", "pt": "Boa tarde", "ph": "BOH-uh TARD" },
+        {
+          "id": "cerveja", "en": "A beer, please", "pt": "Uma cerveja, por favor", "ph": "OO-muh sir-VAY-zhuh, poor fuh-VOR",
+          "note": "For a small draught, ask by the local name.",
+          "alt": [
+            { "id": "imperial", "tag": "Lisbon", "pt": "Uma imperial, por favor", "ph": "OO-muh eem-puh-ree-AHL, poor fuh-VOR" },
+            { "id": "fino", "tag": "Porto", "pt": "Um fino, por favor", "ph": "oom FEE-noo, poor fuh-VOR" }
+          ]
+        },
+        { "id": "dois-bilhetes", "en": "Two tickets, please", "pt": "Dois bilhetes, por favor", "ph": "DOYSH beel-YETSH, poor fuh-VOR" },
+        { "id": "a-que-horas-fecha", "en": "What time does it close?", "pt": "A que horas fecha?", "ph": "uh kuh OR-ush FAY-shuh" },
+        { "id": "tirar-foto", "en": "Can I take a photo?", "pt": "Posso tirar uma foto?", "ph": "POH-soo tee-RAR OO-muh FOH-too" }
+      ]
+    },
+    {
+      "id": "evening",
+      "title": "Evening",
+      "hours": [19, 5],
+      "phrases": [
+        { "id": "boa-noite", "en": "Good evening / Good night", "pt": "Boa noite", "ph": "BOH-uh NOYT" },
+        { "id": "tem-mesa", "en": "Do you have a table for two?", "pt": "Tem mesa para dois?", "ph": "tayng MAY-zuh PAH-ruh DOYSH" },
+        { "id": "reserva", "en": "I have a reservation under ...", "pt": "Tenho uma reserva em nome de ...", "say": "Tenho uma reserva em nome de", "ph": "TAYN-yoo OO-muh ruh-ZAIR-vuh ayng NOHM duh" },
+        { "id": "vinho", "en": "A glass of red / white wine", "pt": "Um copo de vinho tinto / branco", "say": "Um copo de vinho tinto. Um copo de vinho branco.", "ph": "oom KOH-poo duh VEEN-yoo TEEN-too / BRAHN-koo" },
+        { "id": "saude", "en": "Cheers!", "pt": "Saúde!", "ph": "suh-OOD" },
+        { "id": "delicioso", "en": "It was delicious", "pt": "Estava delicioso", "ph": "ish-TAH-vuh duh-lee-see-OH-zoo" },
+        { "id": "taxi", "en": "Can you call a taxi?", "pt": "Pode chamar um táxi?", "ph": "POHD shuh-MAR oom TAK-see" }
+      ]
+    },
+    {
+      "id": "core",
+      "title": "Always",
+      "phrases": [
+        { "id": "ola", "en": "Hello", "pt": "Olá", "ph": "oh-LAH" },
+        { "id": "por-favor", "en": "Please", "pt": "Por favor", "ph": "poor fuh-VOR" },
+        { "id": "obrigado", "en": "Thank you", "pt": "Obrigado", "ph": "oh-bree-GAH-doo" },
+        { "id": "muito-obrigado", "en": "Thank you very much", "pt": "Muito obrigado", "ph": "MWEEN-too oh-bree-GAH-doo" },
+        { "id": "de-nada", "en": "You're welcome", "pt": "De nada", "ph": "duh NAH-duh" },
+        { "id": "com-licenca", "en": "Excuse me (to pass, or get attention)", "pt": "Com licença", "ph": "kohng lee-SEN-suh" },
+        { "id": "desculpe", "en": "Sorry", "pt": "Desculpe", "ph": "dish-KOOLP" },
+        { "id": "sim-nao", "en": "Yes / No", "pt": "Sim / Não", "say": "Sim. Não.", "ph": "SEENG / NOWNG" },
+        { "id": "nao-falo", "en": "I don't speak Portuguese", "pt": "Não falo português", "ph": "NOWNG FAH-loo poor-too-GAYSH" },
+        { "id": "fala-ingles", "en": "Do you speak English?", "pt": "Fala inglês?", "ph": "FAH-luh eeng-GLAYSH" },
+        { "id": "nao-percebo", "en": "I don't understand", "pt": "Não percebo", "ph": "NOWNG pur-SAY-boo" },
+        { "id": "devagar", "en": "More slowly, please", "pt": "Mais devagar, por favor", "ph": "mysh duh-vuh-GAR, poor fuh-VOR" },
+        { "id": "adeus", "en": "Goodbye", "pt": "Adeus", "ph": "uh-DAY-oosh", "note": "Casual: tchau (CHOW)." }
+      ]
+    },
+    {
+      "id": "around",
+      "title": "Getting around",
+      "phrases": [
+        { "id": "casa-de-banho", "en": "Where is the bathroom?", "pt": "Onde é a casa de banho?", "ph": "OHND EH uh KAH-zuh duh BAHN-yoo" },
+        { "id": "onde-metro", "en": "Where is the metro?", "pt": "Onde é o metro?", "ph": "OHND EH oo MEH-troo" },
+        { "id": "fica-longe", "en": "Is it far?", "pt": "Fica longe?", "ph": "FEE-kuh LOHNZH" },
+        { "id": "bilhete-para", "en": "A ticket to ...", "pt": "Um bilhete para ...", "say": "Um bilhete para", "ph": "oom beel-YET PAH-ruh" },
+        { "id": "quanto-custa", "en": "How much is it?", "pt": "Quanto custa?", "ph": "KWAN-too KOOSH-tuh" },
+        { "id": "a-conta", "en": "The bill, please", "pt": "A conta, por favor", "ph": "uh KOHN-tuh, poor fuh-VOR" },
+        { "id": "cartao", "en": "Can I pay by card?", "pt": "Posso pagar com cartão?", "ph": "POH-soo puh-GAR kohng kur-TOWNG" }
+      ]
+    }
+  ]
+}
