@@ -10,7 +10,8 @@ self.addEventListener('install', e => {
     const data = await (await c.match('phrases.json')).json();
     const ids = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])])).map(p => p.id);
     // Missing clips are tolerated; the page falls back to the device voice.
-    await Promise.all(ids.map(id => c.add(`audio/${id}.mp3`).catch(() => {})));
+    const paths = ids.flatMap(id => [`audio/${id}.mp3`, `audio/f/${id}.mp3`]);
+    await Promise.all(paths.map(p => c.add(p).catch(() => {})));
     await self.skipWaiting();
   })());
 });

@@ -1,6 +1,6 @@
 {
   "lang": "pt-PT",
-  "voice": "pt-PT-DuarteNeural",
+  "voices": { "m": "pt-PT-DuarteNeural", "f": "pt-PT-RaquelNeural" },
   "sections": [
     {
       "id": "morning",
@@ -34,7 +34,7 @@
         { "id": "prato-do-dia", "en": "What is the dish of the day?", "pt": "Qual é o prato do dia?", "ph": "KWAHL EH oo PRAH-too doo DEE-uh" },
         { "id": "queria-isto", "en": "I'd like this, please", "pt": "Queria isto, por favor", "ph": "kuh-REE-uh EESH-too, poor fuh-VOR" },
         { "id": "agua", "en": "Still / sparkling water", "pt": "Água sem gás / com gás", "say": "Água sem gás. Água com gás.", "ph": "AH-gwuh sayng GAHSH / kohng GAHSH" },
-        { "id": "nao-obrigado", "en": "No, thank you", "pt": "Não, obrigado", "ph": "NOWNG, oh-bree-GAH-doo", "note": "Bread and olives put on the table are charged if eaten. Decline with this." }
+        { "id": "nao-obrigado", "en": "No, thank you", "pt": "Não, obrigado", "ph": "NOWNG, oh-bree-GAH-doo", "f": { "pt": "Não, obrigada", "ph": "NOWNG, oh-bree-GAH-duh" }, "note": "Bread and olives put on the table are charged if eaten. Decline with this." }
       ]
     },
     {
@@ -76,8 +76,8 @@
       "phrases": [
         { "id": "ola", "en": "Hello", "pt": "Olá", "ph": "oh-LAH" },
         { "id": "por-favor", "en": "Please", "pt": "Por favor", "ph": "poor fuh-VOR" },
-        { "id": "obrigado", "en": "Thank you", "pt": "Obrigado", "ph": "oh-bree-GAH-doo" },
-        { "id": "muito-obrigado", "en": "Thank you very much", "pt": "Muito obrigado", "ph": "MWEEN-too oh-bree-GAH-doo" },
+        { "id": "obrigado", "en": "Thank you", "pt": "Obrigado", "ph": "oh-bree-GAH-doo", "f": { "pt": "Obrigada", "ph": "oh-bree-GAH-duh" } },
+        { "id": "muito-obrigado", "en": "Thank you very much", "pt": "Muito obrigado", "ph": "MWEEN-too oh-bree-GAH-doo", "f": { "pt": "Muito obrigada", "ph": "MWEEN-too oh-bree-GAH-duh" } },
         { "id": "de-nada", "en": "You're welcome", "pt": "De nada", "ph": "duh NAH-duh" },
         { "id": "com-licenca", "en": "Excuse me (to pass, or get attention)", "pt": "Com licença", "ph": "kohng lee-SEN-suh" },
         { "id": "desculpe", "en": "Sorry", "pt": "Desculpe", "ph": "dish-KOOLP" },

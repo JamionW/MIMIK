@@ -1,4 +1,7 @@
-"""Generate one MP3 per phrase in site/phrases.json using edge-tts.
+"""Generate one MP3 per phrase and voice in site/phrases.json using edge-tts.
+
+Masculine clips go to site/audio/<id>.mp3, feminine to site/audio/f/<id>.mp3;
+a phrase's "f" object overrides its text for the feminine voice.
 
 Usage: python scripts/gen_audio.py [--dry-run] [--force]
 Existing clips are skipped unless --force. Failures are reported but not fatal:
@@ -20,10 +23,12 @@ def items(data):
             yield from p.get("alt", [])
 
 
-async def generate(voice, item, force):
+async def generate(voice, item, force, gender):
     import edge_tts
 
-    dest = OUT / f"{item['id']}.mp3"
+    if gender == "f":
+        item = {**item, **item.get("f", {})}
+    dest = (OUT / "f" if gender == "f" else OUT) / f"{item['id']}.mp3"
     if dest.exists() and dest.stat().st_size and not force:
         return True
     text = item.get("say") or item["pt"]
@@ -37,7 +42,7 @@ async def generate(voice, item, force):
             err = e
             await asyncio.sleep(2 ** attempt)
     dest.unlink(missing_ok=True)
-    print(f"::warning::audio failed for {item['id']}: {err}")
+    print(f"::warning::audio failed for {gender}/{item['id']}: {err}")
     return False
 
 
@@ -50,17 +55,18 @@ async def main():
         sys.exit(f"duplicate phrase ids: {sorted(dupes)}")
     if "--dry-run" in sys.argv:
         for i in all_items:
-            print(f"{i['id']:20} {i.get('say') or i['pt']}")
+            f = {**i, **i.get("f", {})}
+            print(f"{i['id']:20} {i.get('say') or i['pt']}  |  {f.get('say') or f['pt']}")
         return
-    OUT.mkdir(exist_ok=True)
+    (OUT / "f").mkdir(parents=True, exist_ok=True)
     force = "--force" in sys.argv
     sem = asyncio.Semaphore(4)
 
-    async def run(i):
+    async def run(i, g):
         async with sem:
-            return await generate(data["voice"], i, force)
+            return await generate(data["voices"][g], i, force, g)
 
-    ok = await asyncio.gather(*(run(i) for i in all_items))
+    ok = await asyncio.gather(*(run(i, g) for g in ("m", "f") for i in all_items))
     print(f"{sum(ok)}/{len(ok)} clips ready")
 
 

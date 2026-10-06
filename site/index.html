@@ -56,6 +56,12 @@
   }
   .clock { display: flex; justify-content: space-between; align-items: baseline; color: var(--muted); font-size: 15px; }
   .clock b { color: var(--text); font-size: 22px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .who { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .who button {
+    border: 0; background: transparent; color: var(--muted);
+    font: inherit; font-size: 14px; padding: 5px 12px; min-height: 32px;
+  }
+  .who button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
   nav { display: flex; gap: 6px; margin-top: 10px; }
   nav button {
     flex: 1; min-height: 40px;
@@ -111,7 +117,7 @@
 <body>
 <main>
   <header>
-    <div class="clock"><span id="where">Portuguese</span><b id="time">--:--</b></div>
+    <div class="clock"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><b id="time">--:--</b></div>
     <nav id="tabs"></nav>
   </header>
   <section id="now"></section>
@@ -124,8 +130,15 @@
   const SLOW_RATE = 0.7;
   const audio = new Audio();
   audio.preload = 'auto';
-  const clips = new Map();      // id -> object URL, or null when the clip is missing
+  const clips = new Map();      // "gender/id" -> object URL, or null when the clip is missing
   let data, lang, timed, chosen = null, lastAuto = null, activeBtn = null;
+  let gender = 'm';
+  try { if (localStorage.getItem('gender') === 'f') gender = 'f'; } catch {}
+
+  // Feminine overrides (obrigada etc.) live in a phrase's "f" object; clips in audio/f/.
+  const form = item => gender === 'f' && item.f ? { ...item, ...item.f } : item;
+  const clipKey = id => `${gender}/${id}`;
+  const clipPath = (id, g = gender) => g === 'f' ? `audio/f/${id}.mp3` : `audio/${id}.mp3`;
 
   // Non-breaking hyphens keep each phonetic word on one line.
   const nb = s => s.replace(/-/g, '\u2011');
@@ -171,17 +184,19 @@
     clearActive();
     activeBtn = btn;
     btn.classList.add('on');
+    item = form(item);
+    const key = clipKey(item.id);
     const text = item.say || item.pt;
-    const cached = clips.get(item.id);
+    const cached = clips.get(key);
     if (cached === null) return speak(text, slow);
     // play() must start synchronously inside the tap for iOS, so no awaits before it.
-    audio.src = cached || `audio/${item.id}.mp3`;
+    audio.src = cached || clipPath(item.id);
     audio.playbackRate = slow ? SLOW_RATE : 1;
     audio.preservesPitch = audio.webkitPreservesPitch = true;
     audio.onended = clearActive;
-    audio.onerror = () => { clips.set(item.id, null); speak(text, slow); };
+    audio.onerror = () => { clips.set(key, null); speak(text, slow); };
     audio.play().catch(err => {
-      if (err.name !== 'AbortError') { clips.set(item.id, null); speak(text, slow); }
+      if (err.name !== 'AbortError') { clips.set(key, null); speak(text, slow); }
     });
   }
 
@@ -200,6 +215,7 @@
   }
 
   function card(item) {
+    item = form(item);
     const c = el('article', 'card');
     const row = el('div', 'row');
     const t = el('div', 'txt');
@@ -261,29 +277,47 @@
   }
 
   // Preload clips as blobs: avoids Safari's range-request issues and lets play() run synchronously.
-  async function preload() {
+  async function preload(g) {
     const items = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])]));
-    await Promise.all(items.map(async it => {
+    await Promise.all(items.filter(it => !clips.has(`${g}/${it.id}`)).map(async it => {
+      const key = `${g}/${it.id}`;
       try {
-        const r = await fetch(`audio/${it.id}.mp3`);
+        const r = await fetch(clipPath(it.id, g));
         if (!r.ok) throw 0;
-        clips.set(it.id, URL.createObjectURL(await r.blob()));
-      } catch { clips.set(it.id, null); }
+        clips.set(key, URL.createObjectURL(await r.blob()));
+      } catch { clips.set(key, null); }
     }));
+  }
+
+  function renderAlways() {
+    const always = document.getElementById('always');
+    always.replaceChildren();
+    for (const s of data.sections.filter(s => !s.hours)) renderSection(always, s);
+  }
+
+  function setGender(g) {
+    gender = g;
+    try { localStorage.setItem('gender', g); } catch {}
+    for (const b of document.querySelectorAll('.who button')) b.setAttribute('aria-pressed', String(b.dataset.g === g));
+    if (!data) return;
+    audio.pause();
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    clearActive();
+    renderAlways();
+    render();
+    preload(g);
   }
 
   async function init() {
     data = await (await fetch('phrases.json')).json();
     lang = data.lang;
     timed = data.sections.filter(s => s.hours);
-    const always = document.getElementById('always');
-    for (const s of data.sections.filter(s => !s.hours)) renderSection(always, s);
-    render();
+    for (const b of document.querySelectorAll('.who button')) b.onclick = () => setGender(b.dataset.g);
+    setGender(gender);
     tick();
     setInterval(tick, 20000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
     if ('speechSynthesis' in window) speechSynthesis.getVoices();
-    preload();
   }
 
   if ('serviceWorker' in navigator) {
