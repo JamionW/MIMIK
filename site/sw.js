@@ -1,7 +1,7 @@
 // VERSION is replaced with the commit SHA at deploy time; a new value refreshes the cache.
 const VERSION = 'dev';
 const CACHE = `mimik-${VERSION}`;
-const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
+const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
