@@ -1,6 +1,7 @@
 {
   "name": "Portuguese",
   "native": "Português",
+  "color": "#046a38",
   "lang": "pt-PT",
   "voices": { "m": "pt-PT-DuarteNeural", "f": "pt-PT-RaquelNeural" },
   "deviceVoice": "Joana",

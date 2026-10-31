@@ -6,7 +6,7 @@ const VERSION = 'dev';
 // and only ever clears its own.
 const PREFIX = `mimik-${LANG}-`;
 const CACHE = PREFIX + VERSION;
-const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', '../icon-180.png', '../icon-512.png', '../icon.svg'];
+const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {

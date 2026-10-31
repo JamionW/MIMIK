@@ -1,6 +1,7 @@
 {
   "name": "French",
   "native": "Français",
+  "color": "#0d2b6b",
   "lang": "fr-FR",
   "voices": { "m": "fr-FR-HenriNeural", "f": "fr-FR-DeniseNeural" },
   "deviceVoice": "Thomas",

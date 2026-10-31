@@ -47,8 +47,8 @@ def main():
             "background_color": "#121212",
             "theme_color": "#121212",
             "icons": [
-                {"src": "../icon-180.png", "sizes": "180x180", "type": "image/png"},
-                {"src": "../icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+                {"src": "icon-180.png", "sizes": "180x180", "type": "image/png"},
+                {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
             ],
         }
         (folder / "manifest.webmanifest").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")

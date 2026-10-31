@@ -1,6 +1,7 @@
 {
   "name": "Dutch",
   "native": "Nederlands",
+  "color": "#e8590c",
   "lang": "nl-NL",
   "voices": { "m": "nl-NL-MaartenNeural", "f": "nl-NL-FennaNeural" },
   "deviceVoice": "Xander",

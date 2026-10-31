@@ -1,6 +1,7 @@
 {
   "name": "Japanese",
   "native": "日本語",
+  "color": "#bc002d",
   "lang": "ja-JP",
   "voices": { "m": "ja-JP-KeitaNeural", "f": "ja-JP-NanamiNeural" },
   "deviceVoice": "Kyoko",

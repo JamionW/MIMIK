@@ -1,6 +1,7 @@
 {
   "name": "Bosnian",
   "native": "Bosanski",
+  "color": "#a67c00",
   "lang": "bs-BA",
   "voices": { "m": "bs-BA-GoranNeural", "f": "bs-BA-VesnaNeural" },
   "deviceLangs": ["hr-HR"],

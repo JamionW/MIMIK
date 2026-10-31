@@ -4,15 +4,17 @@ A pocket phrasebook that surfaces the phrases you're likely to need at the curre
 
 Live at https://jamionw.github.io/MIMIK/
 
-| Folder | Language | Voices |
-| --- | --- | --- |
-| `bs/` | Bosnian | Goran / Vesna |
-| `de/` | German | Conrad / Katja |
-| `es/` | Spanish (Mexico) | Jorge / Dalia |
-| `fr/` | French (France) | Henri / Denise |
-| `ja/` | Japanese | Keita / Nanami |
-| `nl/` | Dutch | Maarten / Fenna |
-| `pt/` | Portuguese (Portugal) | Duarte / Raquel |
+| Folder | Language | Voices | Icon |
+| --- | --- | --- | --- |
+| `bs/` | Bosnian | Goran / Vesna | gold |
+| `de/` | German | Conrad / Katja | black |
+| `es/` | Spanish (Mexico) | Jorge / Dalia | pink |
+| `fr/` | French (France) | Henri / Denise | navy |
+| `ja/` | Japanese | Keita / Nanami | red |
+| `nl/` | Dutch | Maarten / Fenna | orange |
+| `pt/` | Portuguese (Portugal) | Duarte / Raquel | green |
+
+Each language has the same tilde mark on its own colour, so several installs are easy to tell apart on the home screen. The root picker keeps the original blue.
 
 The root page is a picker. It forwards to the last language used unless opened as `?pick`, and the language name in each page's header links back to it.
 
@@ -42,6 +44,7 @@ Each language's content lives in `site/<code>/phrases.json`, and a push to `main
 {
   "name": "Portuguese",
   "native": "Português",
+  "color": "#046a38",
   "lang": "pt-PT",
   "voices": { "m": "pt-PT-DuarteNeural", "f": "pt-PT-RaquelNeural" },
   "deviceVoice": "Joana",
@@ -70,7 +73,7 @@ Ids must be unique within a language, since they name the audio clips; the gener
 
 Open the app once online after a deploy so it picks up the new version.
 
-To add a language, create `site/<code>/phrases.json` (any edge-tts locale works; `edge-tts --list-voices` lists them). The build picks it up and adds it to the picker.
+To add a language, create `site/<code>/phrases.json` (any edge-tts locale works; `edge-tts --list-voices` lists them), then run `python3 scripts/gen_icons.py` (needs `pip install pillow`) to draw its icons from `color`. The icons are committed; the build picks up the folder and adds it to the picker.
 
 ## How the build works
 
