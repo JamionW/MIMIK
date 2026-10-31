@@ -4,7 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mimik</title>
-<meta name="description" content="Time-of-day Portuguese phrases with audio.">
+<meta name="description" content="Time-of-day travel phrases with audio.">
+<script>
+  // Return to the last language used, unless the picker was asked for.
+  (() => {
+    let saved = null;
+    try { saved = localStorage.getItem('lang'); } catch {}
+    if (!new URLSearchParams(location.search).has('pick') && /^[a-z]{2}$/.test(saved || '')) location.replace(`${saved}/`);
+  })();
+</script>
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,8 +30,6 @@
     --text: #1a1a1a;
     --muted: #6b665e;
     --accent: #1f4e9c;
-    --accent-ink: #ffffff;
-    --tag: #e8eef8;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -33,8 +39,6 @@
       --text: #f2efe9;
       --muted: #9a958c;
       --accent: #7fa8e8;
-      --accent-ink: #0f1a2c;
-      --tag: #1f2a3c;
     }
   }
   * { box-sizing: border-box; }
@@ -44,295 +48,68 @@
     background: var(--bg);
     color: var(--text);
     font: 17px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: 0 16px calc(env(safe-area-inset-bottom) + 32px);
+    padding: calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 32px);
     -webkit-tap-highlight-color: transparent;
   }
   main { max-width: 640px; margin: 0 auto; }
-
-  header {
-    position: sticky; top: 0; z-index: 1;
-    background: var(--bg);
-    padding: calc(env(safe-area-inset-top) + 14px) 0 10px;
-  }
-  .clock { display: flex; justify-content: space-between; align-items: baseline; color: var(--muted); font-size: 15px; }
-  .clock b { color: var(--text); font-size: 22px; font-variant-numeric: tabular-nums; font-weight: 600; }
-  .who { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-  .who button {
-    border: 0; background: transparent; color: var(--muted);
-    font: inherit; font-size: 14px; padding: 5px 12px; min-height: 32px;
-  }
-  .who button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-  nav { display: flex; gap: 6px; margin-top: 10px; }
-  nav button {
-    flex: 1; min-height: 40px;
-    border: 1px solid var(--line); border-radius: 10px;
-    background: transparent; color: var(--muted);
-    font: inherit; font-size: 15px;
-  }
-  nav button.now { color: var(--text); }
-  nav button.now::after { content: " \2022"; color: var(--accent); }
-  nav button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  nav button[aria-pressed="true"]::after { color: var(--accent-ink); }
-
-  h2 {
-    margin: 26px 0 10px; font-size: 13px; font-weight: 600;
-    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
-  }
-  .card {
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  .sub { margin: 0 0 20px; color: var(--muted); font-size: 15px; }
+  a.lang {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
     background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 14px 14px 14px 16px; margin-bottom: 10px;
+    padding: 16px; margin-bottom: 10px;
+    color: var(--text); text-decoration: none;
   }
-  .row { display: flex; gap: 12px; align-items: center; }
-  .txt { flex: 1; min-width: 0; }
-  .en { margin: 0; color: var(--muted); font-size: 16px; }
-  .pt { margin: 2px 0 2px; font-size: 30px; line-height: 1.15; font-weight: 700; overflow-wrap: anywhere; }
-  .ph { margin: 0; color: var(--accent); font-size: 19px; }
-  .note { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
-  .alt { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
-  .alt .pt { font-size: 22px; }
-  .alt .ph { font-size: 17px; }
-  .tag {
-    display: inline-block; padding: 1px 8px; border-radius: 6px;
-    background: var(--tag); color: var(--accent); font-size: 13px; font-weight: 600;
-  }
-
-  .btns { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .play {
-    width: 58px; height: 58px; border-radius: 50%; border: 0;
-    background: var(--accent); color: var(--accent-ink);
-    display: grid; place-items: center;
-  }
-  .alt .play { width: 46px; height: 46px; }
-  .play svg { width: 40%; height: 40%; margin-left: 8%; fill: currentColor; }
-  .play.on { opacity: .55; }
-  .slow {
-    border: 0; background: none; color: var(--muted);
-    font: inherit; font-size: 13px; padding: 4px 6px; min-height: 28px;
-  }
-  .slow.on { color: var(--accent); }
-  button { cursor: pointer; }
-  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  a.lang b { font-size: 24px; font-weight: 700; }
+  a.lang span { color: var(--muted); font-size: 15px; }
+  a.lang:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <div class="clock"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><b id="time">--:--</b></div>
-    <nav id="tabs"></nav>
-  </header>
-  <section id="now"></section>
-  <section id="always"></section>
+  <h1>Mimik</h1>
+  <p class="sub">Pick a language. To use it offline, add its page to your home screen and open it once while online.</p>
+  <nav id="list"></nav>
 </main>
-
 <script>
-(() => {
-  const PLAY = '<svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12Z"/></svg>';
-  const SLOW_RATE = 0.7;
-  const audio = new Audio();
-  audio.preload = 'auto';
-  const clips = new Map();      // "gender/id" -> object URL, or null when the clip is missing
-  let data, lang, timed, chosen = null, lastAuto = null, activeBtn = null;
-  let gender = 'm';
-  try { if (localStorage.getItem('gender') === 'f') gender = 'f'; } catch {}
-
-  // Feminine overrides (obrigada etc.) live in a phrase's "f" object; clips in audio/f/.
-  const form = item => gender === 'f' && item.f ? { ...item, ...item.f } : item;
-  const clipKey = id => `${gender}/${id}`;
-  const clipPath = (id, g = gender) => g === 'f' ? `audio/f/${id}.mp3` : `audio/${id}.mp3`;
-
-  // Non-breaking hyphens keep each phonetic word on one line.
-  const nb = s => s.replace(/-/g, '\u2011');
-
-  const el = (tag, cls, text) => {
-    const n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
-  };
-
-  const inBucket = (h, [a, b]) => a < b ? h >= a && h < b : h >= a || h < b;
-
-  // Device voice fallback: prefer a European Portuguese voice (Joana on iOS).
-  function pickVoice() {
-    const vs = speechSynthesis.getVoices();
-    const norm = v => v.lang.replace('_', '-').toLowerCase();
-    return vs.find(v => norm(v) === 'pt-pt' && /joana/i.test(v.name))
-      || vs.find(v => norm(v) === 'pt-pt')
-      || vs.find(v => norm(v).startsWith('pt'));
-  }
-
-  function speak(text, slow) {
-    if (!('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang;
-    const v = pickVoice();
-    if (v) u.voice = v;
-    u.rate = slow ? 0.6 : 0.9;
-    u.onend = u.onerror = clearActive;
-    speechSynthesis.speak(u);
-  }
-
-  function clearActive() {
-    if (activeBtn) activeBtn.classList.remove('on');
-    activeBtn = null;
-  }
-
-  function play(item, slow, btn) {
-    audio.pause();
-    if ('speechSynthesis' in window) speechSynthesis.cancel();
-    clearActive();
-    activeBtn = btn;
-    btn.classList.add('on');
-    item = form(item);
-    const key = clipKey(item.id);
-    const text = item.say || item.pt;
-    const cached = clips.get(key);
-    if (cached === null) return speak(text, slow);
-    // play() must start synchronously inside the tap for iOS, so no awaits before it.
-    audio.src = cached || clipPath(item.id);
-    audio.playbackRate = slow ? SLOW_RATE : 1;
-    audio.preservesPitch = audio.webkitPreservesPitch = true;
-    audio.onended = clearActive;
-    audio.onerror = () => { clips.set(key, null); speak(text, slow); };
-    audio.play().catch(err => {
-      if (err.name !== 'AbortError') { clips.set(key, null); speak(text, slow); }
-    });
-  }
-
-  function controls(item) {
-    const box = el('div', 'btns');
-    const p = el('button', 'play');
-    p.innerHTML = PLAY;
-    p.setAttribute('aria-label', `Play: ${item.pt}`);
-    p.onclick = () => play(item, false, p);
-    box.append(p);
-    const s = el('button', 'slow', 'slow');
-    s.setAttribute('aria-label', `Play slowly: ${item.pt}`);
-    s.onclick = () => play(item, true, s);
-    box.append(s);
-    return box;
-  }
-
-  function card(item) {
-    item = form(item);
-    const c = el('article', 'card');
-    const row = el('div', 'row');
-    const t = el('div', 'txt');
-    t.append(el('p', 'en', item.en));
-    const pt = el('p', 'pt', item.pt);
-    pt.lang = lang;
-    t.append(pt, el('p', 'ph', nb(item.ph)));
-    if (item.note) t.append(el('p', 'note', item.note));
-    row.append(t, controls(item));
-    c.append(row);
-    for (const a of item.alt || []) {
-      const r = el('div', 'row alt');
-      const at = el('div', 'txt');
-      at.append(el('span', 'tag', a.tag));
-      const apt = el('p', 'pt', a.pt);
-      apt.lang = lang;
-      at.append(apt, el('p', 'ph', nb(a.ph)));
-      r.append(at, controls(a));
-      c.append(r);
+(async () => {
+  // A home-screen install from before the language folders was Portuguese, and its old
+  // cache is still here on the first launch after the update: carry it over to pt/.
+  if ('caches' in window && !new URLSearchParams(location.search).has('pick')) {
+    const legacy = (await caches.keys()).filter(k => /^mimik-(dev|[0-9a-f]{12})$/.test(k));
+    if (legacy.length) {
+      for (const k of legacy) await caches.delete(k);
+      try { localStorage.setItem('lang', 'pt'); } catch {}
+      location.replace('pt/');
+      return;
     }
-    return c;
   }
-
-  function renderSection(target, sec) {
-    target.append(el('h2', null, sec.title));
-    for (const p of sec.phrases) target.append(card(p));
+  const list = document.getElementById('list');
+  const langs = await (await fetch('languages.json')).json();
+  for (const l of langs) {
+    const a = document.createElement('a');
+    a.className = 'lang';
+    a.href = `${l.code}/`;
+    const b = document.createElement('b');
+    b.textContent = l.native;
+    b.lang = l.code;
+    const s = document.createElement('span');
+    s.textContent = l.name;
+    a.append(b, s);
+    list.append(a);
   }
-
-  function currentId() {
-    const h = new Date().getHours();
-    return (timed.find(s => inBucket(h, s.hours)) || timed[0]).id;
-  }
-
-  function render() {
-    const nowId = currentId();
-    // Follow the clock unless the user picked a tab during this time bucket.
-    if (nowId !== lastAuto) { chosen = null; lastAuto = nowId; }
-    const show = chosen || nowId;
-
-    const tabs = document.getElementById('tabs');
-    tabs.replaceChildren();
-    for (const s of timed) {
-      const b = el('button', s.id === nowId ? 'now' : '', s.title);
-      b.setAttribute('aria-pressed', String(s.id === show));
-      b.onclick = () => { chosen = s.id === nowId ? null : s.id; render(); };
-      tabs.append(b);
-    }
-
-    const now = document.getElementById('now');
-    now.replaceChildren();
-    renderSection(now, timed.find(s => s.id === show));
-  }
-
-  function tick() {
-    const d = new Date();
-    document.getElementById('time').textContent =
-      d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    if (currentId() !== lastAuto) render();
-  }
-
-  // Preload clips as blobs: avoids Safari's range-request issues and lets play() run synchronously.
-  async function preload(g) {
-    const items = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])]));
-    await Promise.all(items.filter(it => !clips.has(`${g}/${it.id}`)).map(async it => {
-      const key = `${g}/${it.id}`;
-      try {
-        const r = await fetch(clipPath(it.id, g));
-        if (!r.ok) throw 0;
-        clips.set(key, URL.createObjectURL(await r.blob()));
-      } catch { clips.set(key, null); }
-    }));
-  }
-
-  function renderAlways() {
-    const always = document.getElementById('always');
-    always.replaceChildren();
-    for (const s of data.sections.filter(s => !s.hours)) renderSection(always, s);
-  }
-
-  function setGender(g) {
-    gender = g;
-    try { localStorage.setItem('gender', g); } catch {}
-    for (const b of document.querySelectorAll('.who button')) b.setAttribute('aria-pressed', String(b.dataset.g === g));
-    if (!data) return;
-    audio.pause();
-    if ('speechSynthesis' in window) speechSynthesis.cancel();
-    clearActive();
-    renderAlways();
-    render();
-    preload(g);
-  }
-
-  async function init() {
-    data = await (await fetch('phrases.json')).json();
-    lang = data.lang;
-    timed = data.sections.filter(s => s.hours);
-    for (const b of document.querySelectorAll('.who button')) b.onclick = () => setGender(b.dataset.g);
-    setGender(gender);
-    tick();
-    setInterval(tick, 20000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
-    if ('speechSynthesis' in window) speechSynthesis.getVoices();
-  }
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-    // Reload once when an updated worker takes over, but not on the very first install.
-    let reloaded = !navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (reloaded) return;
-      reloaded = true;
-      location.reload();
-    });
-  }
-
-  init();
 })();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+  // Reload once when an updated worker takes over, but not on the very first install.
+  let reloaded = !navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
+}
 </script>
 </body>
 </html>

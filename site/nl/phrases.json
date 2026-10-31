@@ -1,0 +1,98 @@
+{
+  "name": "Dutch",
+  "native": "Nederlands",
+  "color": "#e8590c",
+  "lang": "nl-NL",
+  "voices": { "m": "nl-NL-MaartenNeural", "f": "nl-NL-FennaNeural" },
+  "deviceVoice": "Xander",
+  "sections": [
+    {
+      "id": "morning",
+      "title": "Morning",
+      "hours": [5, 12],
+      "phrases": [
+        { "id": "goedemorgen", "en": "Good morning", "text": "Goedemorgen", "ph": "khoo-duh-MOR-khun", "note": "The g is a throaty kh, as in Scottish loch." },
+        { "id": "koffie", "en": "A coffee, please", "text": "Een koffie, alstublieft", "ph": "un KOF-fee, ahl-stoo-BLEEFT" },
+        { "id": "koffie-verkeerd", "en": "A milky coffee", "text": "Een koffie verkeerd, alstublieft", "ph": "un KOF-fee fur-KAIRT, ahl-stoo-BLEEFT", "note": "Literally 'coffee the wrong way': more milk than coffee." },
+        { "id": "jus-dorange", "en": "An orange juice", "text": "Een jus d'orange, alstublieft", "ph": "un ZHOO doh-RAHNZH, ahl-stoo-BLEEFT" },
+        { "id": "broodje-kaas", "en": "A cheese roll", "text": "Een broodje kaas, alstublieft", "ph": "un BROHT-yuh KAHS, ahl-stoo-BLEEFT" },
+        { "id": "meenemen", "en": "To take away", "text": "Om mee te nemen", "ph": "om MAY tuh NAY-mun", "note": "To eat in: hier opeten (HEER OP-ay-tun)." }
+      ]
+    },
+    {
+      "id": "lunch",
+      "title": "Lunch",
+      "hours": [12, 14],
+      "phrases": [
+        { "id": "goedemiddag-l", "en": "Good afternoon", "text": "Goedemiddag", "ph": "khoo-duh-MID-dakh" },
+        { "id": "tafel-voor-twee-l", "en": "A table for two", "text": "Een tafel voor twee", "ph": "un TAH-ful vor TVAY" },
+        { "id": "de-kaart", "en": "The menu, please", "text": "De kaart, alstublieft", "ph": "duh KAHRT, ahl-stoo-BLEEFT" },
+        { "id": "soep-van-de-dag", "en": "What is the soup of the day?", "text": "Wat is de soep van de dag?", "ph": "vat is duh SOOP fun duh DAKH" },
+        { "id": "uitsmijter", "en": "An uitsmijter, please", "text": "Een uitsmijter, alstublieft", "ph": "un OUT-smy-tur, ahl-stoo-BLEEFT", "note": "Fried eggs on bread with ham or cheese: the classic lunch." },
+        { "id": "ik-neem-deze", "en": "I'll have this one, please", "text": "Ik neem deze, alstublieft", "ph": "ik NAYM DAY-zuh, ahl-stoo-BLEEFT" },
+        { "id": "kraanwater", "en": "A glass of tap water", "text": "Een glas kraanwater, alstublieft", "ph": "un KHLAHS KRAHN-vah-tur, ahl-stoo-BLEEFT", "note": "Not always offered; asking is fine." },
+        { "id": "nee-dank-u", "en": "No, thank you", "text": "Nee, dank u", "ph": "NAY, DAHNK oo" }
+      ]
+    },
+    {
+      "id": "afternoon",
+      "title": "Afternoon",
+      "hours": [14, 18],
+      "phrases": [
+        { "id": "goedemiddag", "en": "Good afternoon", "text": "Goedemiddag", "ph": "khoo-duh-MID-dakh" },
+        { "id": "biertje", "en": "A beer, please", "text": "Een biertje, alstublieft", "ph": "un BEER-tyuh, ahl-stoo-BLEEFT", "note": "You get a small glass of draught unless you ask otherwise." },
+        { "id": "appeltaart", "en": "Apple pie with whipped cream", "text": "Appeltaart met slagroom", "ph": "AH-pul-tahrt met SLAKH-rohm" },
+        { "id": "twee-kaartjes", "en": "Two tickets, please", "text": "Twee kaartjes, alstublieft", "ph": "TVAY KAHRT-yus, ahl-stoo-BLEEFT" },
+        { "id": "hoe-laat-dicht", "en": "What time does it close?", "text": "Hoe laat gaat het dicht?", "ph": "hoo LAHT khaht ut DIKHT" },
+        { "id": "foto", "en": "Can I take a photo?", "text": "Mag ik een foto maken?", "ph": "makh ik un FOH-toh MAH-kun" }
+      ]
+    },
+    {
+      "id": "evening",
+      "title": "Evening",
+      "hours": [18, 5],
+      "phrases": [
+        { "id": "goedenavond", "en": "Good evening", "text": "Goedenavond", "ph": "khoo-dun-AH-vont" },
+        { "id": "heeft-u-een-tafel", "en": "Do you have a table for two?", "text": "Heeft u een tafel voor twee?", "ph": "HAYFT oo un TAH-ful vor TVAY" },
+        { "id": "reservering", "en": "I have a reservation under ...", "text": "Ik heb een reservering op naam van ...", "say": "Ik heb een reservering op naam van", "ph": "ik HEP un ray-zur-VAY-ring op NAHM fun" },
+        { "id": "wijn", "en": "A glass of red / white wine", "text": "Een glas rode / witte wijn", "say": "Een glas rode wijn. Een glas witte wijn.", "ph": "un KHLAHS ROH-duh / VIT-tuh VINE" },
+        { "id": "bitterballen", "en": "Bitterballen, please", "text": "Bitterballen, alstublieft", "ph": "BIT-tur-bahl-lun, ahl-stoo-BLEEFT", "note": "Fried ragout balls with mustard: the bar snack." },
+        { "id": "proost", "en": "Cheers!", "text": "Proost!", "ph": "PROHST" },
+        { "id": "heerlijk", "en": "It was delicious", "text": "Het was heerlijk", "ph": "ut vas HAIR-luk", "note": "Lekker works for anything good." },
+        { "id": "taxi", "en": "Can you call a taxi?", "text": "Kunt u een taxi bellen?", "ph": "KUNT oo un TAHK-see BEL-lun" }
+      ]
+    },
+    {
+      "id": "core",
+      "title": "Always",
+      "phrases": [
+        { "id": "hallo", "en": "Hello", "text": "Hallo", "ph": "HAH-loh", "note": "Casual: hoi." },
+        { "id": "alstublieft", "en": "Please", "text": "Alstublieft", "ph": "ahl-stoo-BLEEFT", "note": "Casual: alsjeblieft. Both also mean 'here you go'." },
+        { "id": "dank-u-wel", "en": "Thank you", "text": "Dank u wel", "ph": "DAHNK oo vel", "note": "Casual: dank je wel." },
+        { "id": "hartelijk-bedankt", "en": "Thank you very much", "text": "Hartelijk bedankt", "ph": "HAR-tuh-luk buh-DAHNKT" },
+        { "id": "graag-gedaan", "en": "You're welcome", "text": "Graag gedaan", "ph": "KHRAHKH khuh-DAHN" },
+        { "id": "pardon", "en": "Excuse me", "text": "Pardon", "ph": "par-DON" },
+        { "id": "sorry", "en": "Sorry", "text": "Sorry", "ph": "SOR-ree" },
+        { "id": "ja-nee", "en": "Yes / No", "text": "Ja / Nee", "say": "Ja. Nee.", "ph": "YAH / NAY" },
+        { "id": "geen-nederlands", "en": "I don't speak Dutch", "text": "Ik spreek geen Nederlands", "ph": "ik SPRAYK khayn NAY-dur-lahnts" },
+        { "id": "spreekt-u-engels", "en": "Do you speak English?", "text": "Spreekt u Engels?", "ph": "SPRAYKT oo ENG-uls", "note": "Nearly everyone does; asking first is still polite." },
+        { "id": "begrijp-niet", "en": "I don't understand", "text": "Ik begrijp het niet", "ph": "ik buh-KHRAIP ut NEET" },
+        { "id": "langzamer", "en": "More slowly, please", "text": "Langzamer, alstublieft", "ph": "LAHNG-zah-mur, ahl-stoo-BLEEFT" },
+        { "id": "dag", "en": "Goodbye", "text": "Dag", "ph": "DAKH", "note": "Also: doei (DOO-ee), or tot ziens (tot ZEENS)." }
+      ]
+    },
+    {
+      "id": "around",
+      "title": "Getting around",
+      "phrases": [
+        { "id": "toilet", "en": "Where is the toilet?", "text": "Waar is het toilet?", "ph": "VAHR is ut twah-LET" },
+        { "id": "station", "en": "Where is the station?", "text": "Waar is het station?", "ph": "VAHR is ut stah-SYON" },
+        { "id": "is-het-ver", "en": "Is it far?", "text": "Is het ver?", "ph": "is ut FAIR" },
+        { "id": "kaartje-naar", "en": "A ticket to ...", "text": "Een kaartje naar ...", "say": "Een kaartje naar", "ph": "un KAHRT-yuh nahr", "note": "Trains and trams take a contactless bank card: tap in and tap out." },
+        { "id": "hoeveel-kost-het", "en": "How much is it?", "text": "Hoeveel kost het?", "ph": "hoo-VAYL KOST ut" },
+        { "id": "de-rekening", "en": "The bill, please", "text": "De rekening, alstublieft", "ph": "duh RAY-kuh-ning, ahl-stoo-BLEEFT" },
+        { "id": "pinnen", "en": "Can I pay by card?", "text": "Kan ik pinnen?", "ph": "kahn ik PIN-nun", "note": "Many places are card-only; cash is what gets refused." }
+      ]
+    }
+  ]
+}

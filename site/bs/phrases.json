@@ -1,0 +1,96 @@
+{
+  "name": "Bosnian",
+  "native": "Bosanski",
+  "color": "#a67c00",
+  "lang": "bs-BA",
+  "voices": { "m": "bs-BA-GoranNeural", "f": "bs-BA-VesnaNeural" },
+  "deviceLangs": ["hr-HR"],
+  "sections": [
+    {
+      "id": "morning",
+      "title": "Morning",
+      "hours": [5, 12],
+      "phrases": [
+        { "id": "dobro-jutro", "en": "Good morning", "text": "Dobro jutro", "ph": "DOH-broh YOO-troh" },
+        { "id": "bosanska-kafa", "en": "A Bosnian coffee, please", "text": "Jednu bosansku kafu, molim", "ph": "YED-noo BOH-sahn-skoo KAH-foo, MOH-leem", "note": "Comes in a copper džezva with sugar cubes and a lokum. Let the grounds settle." },
+        { "id": "espresso", "en": "An espresso, please", "text": "Jedan espresso, molim", "ph": "YEH-dahn es-PRES-soh, MOH-leem" },
+        { "id": "kafa-s-mlijekom", "en": "A coffee with milk", "text": "Kafu s mlijekom, molim", "ph": "KAH-foo s MLYEH-kohm, MOH-leem" },
+        { "id": "burek", "en": "A meat pie (burek)", "text": "Jedan burek, molim", "ph": "YEH-dahn BOO-rek, MOH-leem", "note": "Here burek is always meat. Cheese is sirnica, spinach zeljanica, potato krompiruša." },
+        { "id": "sirnica", "en": "A cheese pie", "text": "Jednu sirnicu, molim", "ph": "YED-noo SEER-nee-tsoo, MOH-leem" },
+        { "id": "za-ponijeti", "en": "To take away", "text": "Za ponijeti", "ph": "zah POH-nyeh-tee" }
+      ]
+    },
+    {
+      "id": "lunch",
+      "title": "Lunch",
+      "hours": [12, 16],
+      "phrases": [
+        { "id": "dobar-dan-l", "en": "Good afternoon / Hello", "text": "Dobar dan", "ph": "DOH-bar DAHN" },
+        { "id": "sto-za-dvoje-l", "en": "A table for two", "text": "Sto za dvoje", "ph": "STOH zah DVOH-yeh" },
+        { "id": "jelovnik", "en": "The menu, please", "text": "Jelovnik, molim", "ph": "YEH-lohv-neek, MOH-leem" },
+        { "id": "cevapi", "en": "A portion of ćevapi, please", "text": "Porciju ćevapa, molim", "ph": "POR-tsee-yoo CHEH-vah-pah, MOH-leem", "note": "Ask for pola (five) or desetka (ten), sa lukom (with onion). Served in somun bread." },
+        { "id": "htio-bih-ovo", "en": "I'd like this, please", "text": "Htio bih ovo, molim", "ph": "HTEE-oh beeh OH-voh, MOH-leem", "f": { "text": "Htjela bih ovo, molim", "ph": "HTYEH-lah beeh OH-voh, MOH-leem" } },
+        { "id": "voda", "en": "Still / sparkling water", "text": "Negazirana / gazirana voda", "say": "Negazirana voda. Gazirana voda.", "ph": "NEH-gah-zee-rah-nah / GAH-zee-rah-nah VOH-dah", "note": "Tap water in Sarajevo is good to drink." },
+        { "id": "ne-hvala", "en": "No, thank you", "text": "Ne, hvala", "ph": "NEH, HVAH-lah" }
+      ]
+    },
+    {
+      "id": "afternoon",
+      "title": "Afternoon",
+      "hours": [16, 19],
+      "phrases": [
+        { "id": "dobar-dan", "en": "Good afternoon / Hello", "text": "Dobar dan", "ph": "DOH-bar DAHN" },
+        { "id": "pivo", "en": "A beer, please", "text": "Jedno pivo, molim", "ph": "YED-noh PEE-voh, MOH-leem", "note": "Sarajevsko is the local beer." },
+        { "id": "baklava", "en": "A baklava, please", "text": "Jednu baklavu, molim", "ph": "YED-noo BAH-klah-voo, MOH-leem" },
+        { "id": "dvije-karte", "en": "Two tickets, please", "text": "Dvije karte, molim", "ph": "DVYEH-yeh KAR-teh, MOH-leem" },
+        { "id": "kad-zatvarate", "en": "What time do you close?", "text": "Kad zatvarate?", "ph": "kahd zaht-VAH-rah-teh" },
+        { "id": "slikati", "en": "Can I take a photo?", "text": "Mogu li slikati?", "ph": "MOH-goo lee SLEE-kah-tee", "note": "Ask before taking photos inside a mosque." }
+      ]
+    },
+    {
+      "id": "evening",
+      "title": "Evening",
+      "hours": [19, 5],
+      "phrases": [
+        { "id": "dobro-vece", "en": "Good evening", "text": "Dobro veče", "ph": "DOH-broh VEH-cheh", "note": "Good night: laku noć (LAH-koo NOHCH)." },
+        { "id": "imate-li-sto", "en": "Do you have a table for two?", "text": "Imate li sto za dvoje?", "ph": "EE-mah-teh lee STOH zah DVOH-yeh" },
+        { "id": "rezervacija", "en": "I have a reservation under ...", "text": "Imam rezervaciju na ime ...", "say": "Imam rezervaciju na ime", "ph": "EE-mahm reh-zer-VAH-tsee-yoo nah EE-meh" },
+        { "id": "vino", "en": "A glass of red / white wine", "text": "Čašu crnog / bijelog vina", "say": "Čašu crnog vina. Čašu bijelog vina.", "ph": "CHAH-shoo TSR-nog / BYEH-log VEE-nah", "note": "Red wine is crno, 'black'. Try a Žilavka (white) or Blatina (red) from Herzegovina." },
+        { "id": "zivjeli", "en": "Cheers!", "text": "Živjeli!", "ph": "ZHEE-vyeh-lee" },
+        { "id": "ukusno", "en": "It was delicious", "text": "Bilo je jako ukusno", "ph": "BEE-loh yeh YAH-koh OO-koos-noh" },
+        { "id": "taksi", "en": "Can you call a taxi?", "text": "Možete li pozvati taksi?", "ph": "MOH-zheh-teh lee POHZ-vah-tee TAHK-see" }
+      ]
+    },
+    {
+      "id": "core",
+      "title": "Always",
+      "phrases": [
+        { "id": "zdravo", "en": "Hello", "text": "Zdravo", "ph": "ZDRAH-voh", "note": "Merhaba and selam are common too." },
+        { "id": "molim", "en": "Please", "text": "Molim", "ph": "MOH-leem", "note": "Also means 'pardon?' and 'you're welcome'." },
+        { "id": "hvala", "en": "Thank you", "text": "Hvala", "ph": "HVAH-lah" },
+        { "id": "hvala-puno", "en": "Thank you very much", "text": "Hvala puno", "ph": "HVAH-lah POO-noh" },
+        { "id": "nema-na-cemu", "en": "You're welcome", "text": "Nema na čemu", "ph": "NEH-mah nah CHEH-moo" },
+        { "id": "izvinite", "en": "Excuse me / Sorry", "text": "Izvinite", "ph": "eez-VEE-nee-teh" },
+        { "id": "da-ne", "en": "Yes / No", "text": "Da / Ne", "say": "Da. Ne.", "ph": "DAH / NEH" },
+        { "id": "ne-govorim", "en": "I don't speak Bosnian", "text": "Ne govorim bosanski", "ph": "neh GOH-voh-reem BOH-sahn-skee" },
+        { "id": "engleski", "en": "Do you speak English?", "text": "Govorite li engleski?", "ph": "goh-VOH-ree-teh lee EN-gles-kee" },
+        { "id": "ne-razumijem", "en": "I don't understand", "text": "Ne razumijem", "ph": "neh rah-ZOO-mee-yem" },
+        { "id": "polako", "en": "More slowly, please", "text": "Polako, molim", "ph": "POH-lah-koh, MOH-leem" },
+        { "id": "dovidjenja", "en": "Goodbye", "text": "Doviđenja", "ph": "doh-vee-JEH-nyah", "note": "Casual: ćao (CHAH-oh)." }
+      ]
+    },
+    {
+      "id": "around",
+      "title": "Getting around",
+      "phrases": [
+        { "id": "toalet", "en": "Where is the toilet?", "text": "Gdje je toalet?", "ph": "GDYEH yeh toh-AH-let" },
+        { "id": "tramvaj", "en": "Where is the tram stop?", "text": "Gdje je tramvajska stanica?", "ph": "GDYEH yeh TRAHM-vai-skah STAH-nee-tsah" },
+        { "id": "daleko", "en": "Is it far?", "text": "Je li daleko?", "ph": "YEH lee DAH-leh-koh" },
+        { "id": "kartu-do", "en": "A ticket to ...", "text": "Jednu kartu do ...", "say": "Jednu kartu do", "ph": "YED-noo KAR-too doh" },
+        { "id": "koliko-kosta", "en": "How much is it?", "text": "Koliko košta?", "ph": "KOH-lee-koh KOHSH-tah" },
+        { "id": "racun", "en": "The bill, please", "text": "Račun, molim", "ph": "RAH-choon, MOH-leem" },
+        { "id": "karticom", "en": "Can I pay by card?", "text": "Mogu li platiti karticom?", "ph": "MOH-goo lee PLAH-tee-tee KAR-tee-tsohm", "note": "Carry cash (KM) for cafés, bakeries and taxis." }
+      ]
+    }
+  ]
+}

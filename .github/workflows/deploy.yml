@@ -23,9 +23,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install --upgrade edge-tts
+      - name: Build language folders and stamp service worker versions
+        run: python scripts/build.py --version "${GITHUB_SHA::12}"
       - run: python scripts/gen_audio.py
-      - name: Stamp service worker version
-        run: sed -i "s/^const VERSION = 'dev';/const VERSION = '${GITHUB_SHA::12}';/" site/sw.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

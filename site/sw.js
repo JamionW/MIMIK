@@ -1,56 +1,43 @@
+// Root worker: keeps the language picker available offline. Each language folder registers
+// its own worker with a narrower scope, which takes over for pages in that folder.
 // VERSION is replaced with the commit SHA at deploy time; a new value refreshes the cache.
 const VERSION = 'dev';
-const CACHE = `mimik-${VERSION}`;
-const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
+const PREFIX = 'mimik-root-';
+const CACHE = PREFIX + VERSION;
+const SHELL = ['./', 'index.html', 'languages.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
+const OWN = new Set(SHELL.map(p => new URL(p, location).href));
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
     await c.addAll(SHELL);
-    const data = await (await c.match('phrases.json')).json();
-    const ids = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])])).map(p => p.id);
-    // Missing clips are tolerated; the page falls back to the device voice.
-    const paths = ids.flatMap(id => [`audio/${id}.mp3`, `audio/f/${id}.mp3`]);
-    await Promise.all(paths.map(p => c.add(p).catch(() => {})));
     await self.skipWaiting();
   })());
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k);
+    // The pre-language-folder cache (mimik-<sha>) is left for the picker, which uses it
+    // to send an existing Portuguese install straight to pt/ and then deletes it.
+    for (const k of await caches.keys()) if (k.startsWith(PREFIX) && k !== CACHE) await caches.delete(k);
     await self.clients.claim();
   })());
 });
 
-// Safari requests media with Range headers and will not play a plain 200 from a worker.
-async function ranged(req, res) {
-  const m = /bytes=(\d*)-(\d*)/.exec(req.headers.get('range') || '');
-  if (!m) return res;
-  const buf = await res.arrayBuffer();
-  const start = m[1] ? +m[1] : 0;
-  const end = m[2] ? Math.min(+m[2], buf.byteLength - 1) : buf.byteLength - 1;
-  return new Response(buf.slice(start, end + 1), {
-    status: 206,
-    headers: {
-      'Content-Type': res.headers.get('Content-Type') || 'audio/mpeg',
-      'Content-Range': `bytes ${start}-${end}/${buf.byteLength}`,
-      'Content-Length': String(end - start + 1),
-      'Accept-Ranges': 'bytes',
-    },
-  });
-}
-
 self.addEventListener('fetch', e => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  url.search = '';
+  // Anything outside the picker's own files goes to the network untouched.
+  if (req.method !== 'GET' || !OWN.has(url.href)) return;
   e.respondWith((async () => {
-    const hit = await caches.match(req, { ignoreSearch: true });
-    if (hit) return req.headers.has('range') ? ranged(req, hit) : hit;
+    const c = await caches.open(CACHE);
+    const hit = await c.match(req, { ignoreSearch: true });
+    if (hit) return hit;
     try {
       return await fetch(req);
     } catch {
-      return req.mode === 'navigate' ? caches.match('index.html') : Response.error();
+      return req.mode === 'navigate' ? c.match('index.html') : Response.error();
     }
   })());
 });
