@@ -14,7 +14,7 @@ Status values: `planned`, `in progress`, `done`, `dropped`.
 | 6 | Phrase linter in CI | done (branch `claude/stoic-cori-vgqowh`) |
 | 7 | Human recordings override TTS | done (branch `claude/stoic-cori-vgqowh`) |
 | 8 | Numbers and prices | dropped |
-| 9 | Live earbud interpreter (research spike) | planned |
+| 9 | Live earbud interpreter (research spike) | in progress (`docs/spike-interpreter.md`) |
 
 ## 1. Offline-ready indicator
 
