@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mimik</title>
+<meta name="description" content="Time-of-day travel phrases with audio.">
+<script>
+  // Return to the last language used, unless the picker was asked for.
+  (() => {
+    let saved = null;
+    try { saved = localStorage.getItem('lang'); } catch {}
+    if (!new URLSearchParams(location.search).has('pick') && /^[a-z]{2}$/.test(saved || '')) location.replace(`${saved}/`);
+  })();
+</script>
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mimik">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --card: #ffffff;
+    --line: #e4dfd6;
+    --text: #1a1a1a;
+    --muted: #6b665e;
+    --accent: #1f4e9c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121212;
+      --card: #1c1c1c;
+      --line: #2c2c2c;
+      --text: #f2efe9;
+      --muted: #9a958c;
+      --accent: #7fa8e8;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 32px);
+    -webkit-tap-highlight-color: transparent;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  .sub { margin: 0 0 20px; color: var(--muted); font-size: 15px; }
+  a.lang {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px; margin-bottom: 10px;
+    color: var(--text); text-decoration: none;
+  }
+  a.lang b { font-size: 24px; font-weight: 700; }
+  a.lang span { color: var(--muted); font-size: 15px; }
+  a.lang:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mimik</h1>
+  <p class="sub">Pick a language. To use it offline, add its page to your home screen and open it once while online.</p>
+  <nav id="list"></nav>
+</main>
+<script>
+(async () => {
+  // A home-screen install from before the language folders was Portuguese, and its old
+  // cache is still here on the first launch after the update: carry it over to pt/.
+  if ('caches' in window && !new URLSearchParams(location.search).has('pick')) {
+    const legacy = (await caches.keys()).filter(k => /^mimik-(dev|[0-9a-f]{12})$/.test(k));
+    if (legacy.length) {
+      for (const k of legacy) await caches.delete(k);
+      try { localStorage.setItem('lang', 'pt'); } catch {}
+      location.replace('pt/');
+      return;
+    }
+  }
+  const list = document.getElementById('list');
+  const langs = await (await fetch('languages.json')).json();
+  for (const l of langs) {
+    const a = document.createElement('a');
+    a.className = 'lang';
+    a.href = `${l.code}/`;
+    const b = document.createElement('b');
+    b.textContent = l.native;
+    b.lang = l.code;
+    const s = document.createElement('span');
+    s.textContent = l.name;
+    a.append(b, s);
+    list.append(a);
+  }
+})();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+  // Reload once when an updated worker takes over, but not on the very first install.
+  let reloaded = !navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
+}
+</script>
+</body>
+</html>

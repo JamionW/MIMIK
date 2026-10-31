@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mimik</title>
-<meta name="description" content="Time-of-day Portuguese phrases with audio.">
+<title>{{TITLE}}</title>
+<meta name="description" content="Time-of-day {{NAME}} phrases with audio.">
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mimik">
+<meta name="apple-mobile-web-app-title" content="{{TITLE}}">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
 <style>
   :root {
     --bg: #f6f3ee;
@@ -62,6 +62,8 @@
     font: inherit; font-size: 14px; padding: 5px 12px; min-height: 32px;
   }
   .who button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .left { display: flex; align-items: center; gap: 12px; }
+  .lang { color: var(--muted); font-size: 14px; text-decoration: none; padding: 6px 0; }
   nav { display: flex; gap: 6px; margin-top: 10px; }
   nav button {
     flex: 1; min-height: 40px;
@@ -85,11 +87,12 @@
   .row { display: flex; gap: 12px; align-items: center; }
   .txt { flex: 1; min-width: 0; }
   .en { margin: 0; color: var(--muted); font-size: 16px; }
-  .pt { margin: 2px 0 2px; font-size: 30px; line-height: 1.15; font-weight: 700; overflow-wrap: anywhere; }
+  .text { margin: 2px 0 2px; font-size: 30px; line-height: 1.15; font-weight: 700; overflow-wrap: anywhere; }
+  .rom { margin: 0 0 2px; font-size: 17px; }
   .ph { margin: 0; color: var(--accent); font-size: 19px; }
   .note { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
   .alt { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
-  .alt .pt { font-size: 22px; }
+  .alt .text { font-size: 22px; }
   .alt .ph { font-size: 17px; }
   .tag {
     display: inline-block; padding: 1px 8px; border-radius: 6px;
@@ -117,7 +120,7 @@
 <body>
 <main>
   <header>
-    <div class="clock"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><b id="time">--:--</b></div>
+    <div class="clock"><div class="left"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><a id="lang" class="lang" href="../?pick" aria-label="Change language"></a></div><b id="time">--:--</b></div>
     <nav id="tabs"></nav>
   </header>
   <section id="now"></section>
@@ -152,13 +155,15 @@
 
   const inBucket = (h, [a, b]) => a < b ? h >= a && h < b : h >= a || h < b;
 
-  // Device voice fallback: prefer a European Portuguese voice (Joana on iOS).
+  // Device voice fallback: the named voice for the exact locale (Joana for pt-PT on iOS),
+  // then any voice for that locale or the listed stand-ins, then any voice for the language.
   function pickVoice() {
     const vs = speechSynthesis.getVoices();
     const norm = v => v.lang.replace('_', '-').toLowerCase();
-    return vs.find(v => norm(v) === 'pt-pt' && /joana/i.test(v.name))
-      || vs.find(v => norm(v) === 'pt-pt')
-      || vs.find(v => norm(v).startsWith('pt'));
+    const want = [lang, ...(data.deviceLangs || [])].map(l => l.toLowerCase());
+    return (data.deviceVoice && vs.find(v => norm(v) === want[0] && v.name.includes(data.deviceVoice)))
+      || want.map(l => vs.find(v => norm(v) === l)).find(Boolean)
+      || vs.find(v => norm(v).startsWith(want[0].slice(0, 2)));
   }
 
   function speak(text, slow) {
@@ -167,7 +172,7 @@
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     const v = pickVoice();
-    if (v) u.voice = v;
+    if (v) { u.voice = v; u.lang = v.lang; }
     u.rate = slow ? 0.6 : 0.9;
     u.onend = u.onerror = clearActive;
     speechSynthesis.speak(u);
@@ -186,7 +191,7 @@
     btn.classList.add('on');
     item = form(item);
     const key = clipKey(item.id);
-    const text = item.say || item.pt;
+    const text = item.say || item.text;
     const cached = clips.get(key);
     if (cached === null) return speak(text, slow);
     // play() must start synchronously inside the tap for iOS, so no awaits before it.
@@ -204,14 +209,23 @@
     const box = el('div', 'btns');
     const p = el('button', 'play');
     p.innerHTML = PLAY;
-    p.setAttribute('aria-label', `Play: ${item.pt}`);
+    p.setAttribute('aria-label', `Play: ${item.text}`);
     p.onclick = () => play(item, false, p);
     box.append(p);
     const s = el('button', 'slow', 'slow');
-    s.setAttribute('aria-label', `Play slowly: ${item.pt}`);
+    s.setAttribute('aria-label', `Play slowly: ${item.text}`);
     s.onclick = () => play(item, true, s);
     box.append(s);
     return box;
+  }
+
+  // Target-language line, then the romanization where the script needs one (Japanese).
+  function lines(box, item) {
+    const t = el('p', 'text', item.text);
+    t.lang = lang;
+    box.append(t);
+    if (item.rom) box.append(el('p', 'rom', item.rom));
+    box.append(el('p', 'ph', nb(item.ph)));
   }
 
   function card(item) {
@@ -220,9 +234,7 @@
     const row = el('div', 'row');
     const t = el('div', 'txt');
     t.append(el('p', 'en', item.en));
-    const pt = el('p', 'pt', item.pt);
-    pt.lang = lang;
-    t.append(pt, el('p', 'ph', nb(item.ph)));
+    lines(t, item);
     if (item.note) t.append(el('p', 'note', item.note));
     row.append(t, controls(item));
     c.append(row);
@@ -230,9 +242,7 @@
       const r = el('div', 'row alt');
       const at = el('div', 'txt');
       at.append(el('span', 'tag', a.tag));
-      const apt = el('p', 'pt', a.pt);
-      apt.lang = lang;
-      at.append(apt, el('p', 'ph', nb(a.ph)));
+      lines(at, a);
       r.append(at, controls(a));
       c.append(r);
     }
@@ -312,6 +322,9 @@
     data = await (await fetch('phrases.json')).json();
     lang = data.lang;
     timed = data.sections.filter(s => s.hours);
+    document.getElementById('lang').textContent = data.native;
+    // The root picker forwards here on the next launch.
+    try { localStorage.setItem('lang', location.pathname.split('/').filter(Boolean).pop()); } catch {}
     for (const b of document.querySelectorAll('.who button')) b.onclick = () => setGender(b.dataset.g);
     setGender(gender);
     tick();
@@ -322,8 +335,10 @@
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
-    // Reload once when an updated worker takes over, but not on the very first install.
-    let reloaded = !navigator.serviceWorker.controller;
+    // Reload once when an updated worker takes over, but not on the very first install,
+    // including when the root worker controlled this page before ours claimed it.
+    const ctl = navigator.serviceWorker.controller;
+    let reloaded = !ctl || ctl.scriptURL !== new URL('sw.js', location).href;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (reloaded) return;
       reloaded = true;

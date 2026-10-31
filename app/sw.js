@@ -1,7 +1,12 @@
-// VERSION is replaced with the commit SHA at deploy time; a new value refreshes the cache.
+// scripts/build.py copies this into each language folder and fills in LANG and VERSION.
+// VERSION is the commit SHA at deploy time; a new value refreshes the cache.
+const LANG = 'xx';
 const VERSION = 'dev';
-const CACHE = `mimik-${VERSION}`;
-const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
+// Caches are shared by every worker on the origin, so each language owns a name prefix
+// and only ever clears its own.
+const PREFIX = `mimik-${LANG}-`;
+const CACHE = PREFIX + VERSION;
+const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', '../icon-180.png', '../icon-512.png', '../icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
@@ -18,7 +23,7 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k);
+    for (const k of await caches.keys()) if (k.startsWith(PREFIX) && k !== CACHE) await caches.delete(k);
     await self.clients.claim();
   })());
 });
@@ -45,12 +50,13 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   e.respondWith((async () => {
-    const hit = await caches.match(req, { ignoreSearch: true });
+    const c = await caches.open(CACHE);
+    const hit = await c.match(req, { ignoreSearch: true });
     if (hit) return req.headers.has('range') ? ranged(req, hit) : hit;
     try {
       return await fetch(req);
     } catch {
-      return req.mode === 'navigate' ? caches.match('index.html') : Response.error();
+      return req.mode === 'navigate' ? c.match('index.html') : Response.error();
     }
   })());
 });

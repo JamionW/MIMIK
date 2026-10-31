@@ -1,0 +1,111 @@
+{
+  "name": "German",
+  "native": "Deutsch",
+  "lang": "de-DE",
+  "voices": { "m": "de-DE-ConradNeural", "f": "de-DE-KatjaNeural" },
+  "deviceVoice": "Anna",
+  "sections": [
+    {
+      "id": "morning",
+      "title": "Morning",
+      "hours": [5, 12],
+      "phrases": [
+        { "id": "guten-morgen", "en": "Good morning", "text": "Guten Morgen", "ph": "GOO-ten MOR-gen" },
+        { "id": "kaffee", "en": "A coffee, please", "text": "Einen Kaffee, bitte", "ph": "EYE-nen kah-FAY, BIT-tuh" },
+        { "id": "milchkaffee", "en": "A milky coffee", "text": "Einen Milchkaffee, bitte", "ph": "EYE-nen MILKH-kah-fay, BIT-tuh" },
+        {
+          "id": "broetchen", "en": "Two bread rolls, please", "text": "Zwei Brötchen, bitte", "ph": "TSVY BRURT-khen, BIT-tuh",
+          "alt": [
+            { "id": "semmeln", "tag": "Bavaria", "text": "Zwei Semmeln, bitte", "ph": "TSVY ZEM-meln, BIT-tuh" },
+            { "id": "schrippen", "tag": "Berlin", "text": "Zwei Schrippen, bitte", "ph": "TSVY SHRIP-pen, BIT-tuh" }
+          ]
+        },
+        { "id": "brezel", "en": "A pretzel, please", "text": "Eine Brezel, bitte", "ph": "EYE-nuh BRAY-tsel, BIT-tuh", "note": "In Bavaria: Breze or Brezn." },
+        { "id": "zum-mitnehmen", "en": "To take away", "text": "Zum Mitnehmen", "ph": "tsoom MIT-nay-men", "note": "To eat in: zum Hieressen (tsoom HEER-es-sen)." }
+      ]
+    },
+    {
+      "id": "lunch",
+      "title": "Lunch",
+      "hours": [12, 14],
+      "phrases": [
+        { "id": "mahlzeit", "en": "Enjoy your lunch (midday greeting)", "text": "Mahlzeit!", "ph": "MAHL-tsite", "note": "Heard around noon at work and in canteens. Reply with the same." },
+        { "id": "tisch-fuer-zwei", "en": "A table for two, please", "text": "Einen Tisch für zwei, bitte", "ph": "EYE-nen TISH fewr TSVY, BIT-tuh" },
+        { "id": "speisekarte", "en": "The menu, please", "text": "Die Speisekarte, bitte", "ph": "dee SHPY-zuh-kar-tuh, BIT-tuh" },
+        { "id": "tagesgericht", "en": "What is the dish of the day?", "text": "Was ist das Tagesgericht?", "ph": "vahs ist dahs TAH-ges-guh-rikht" },
+        { "id": "ich-haette-gern", "en": "I'd like this, please", "text": "Ich hätte gern das hier, bitte", "ph": "ikh HET-tuh GERN dahs HEER, BIT-tuh" },
+        { "id": "wasser", "en": "Still / sparkling water", "text": "Wasser ohne / mit Kohlensäure", "say": "Wasser ohne Kohlensäure. Wasser mit Kohlensäure.", "ph": "VAHS-ser OH-nuh / mit KOH-len-zoy-ruh", "note": "Tap water is Leitungswasser; not every place will serve it." },
+        { "id": "nein-danke", "en": "No, thank you", "text": "Nein, danke", "ph": "NINE, DAHN-kuh" }
+      ]
+    },
+    {
+      "id": "afternoon",
+      "title": "Afternoon",
+      "hours": [14, 18],
+      "phrases": [
+        { "id": "stueck-kuchen", "en": "A slice of cake, please", "text": "Ein Stück Kuchen, bitte", "ph": "ine SHTEWK KOO-khen, BIT-tuh", "note": "Kaffee und Kuchen is the mid-afternoon ritual." },
+        {
+          "id": "bier", "en": "A beer, please", "text": "Ein Bier, bitte", "ph": "ine BEER, BIT-tuh",
+          "note": "Ask for the local beer by name.",
+          "alt": [
+            { "id": "koelsch", "tag": "Cologne", "text": "Ein Kölsch, bitte", "ph": "ine KURLSH, BIT-tuh" },
+            { "id": "mass", "tag": "Bavaria", "text": "Eine Maß, bitte", "ph": "EYE-nuh MAHS, BIT-tuh" }
+          ]
+        },
+        { "id": "zwei-karten", "en": "Two tickets, please", "text": "Zwei Karten, bitte", "ph": "TSVY KAR-ten, BIT-tuh" },
+        { "id": "wann-schliessen", "en": "What time do you close?", "text": "Wann schließen Sie?", "ph": "VAHN SHLEE-sen zee", "note": "Most shops close on Sundays." },
+        { "id": "foto", "en": "Can I take a photo?", "text": "Darf ich ein Foto machen?", "ph": "DARF ikh ine FOH-toh MAH-khen" }
+      ]
+    },
+    {
+      "id": "evening",
+      "title": "Evening",
+      "hours": [18, 5],
+      "phrases": [
+        { "id": "guten-abend", "en": "Good evening", "text": "Guten Abend", "ph": "GOO-ten AH-bent" },
+        { "id": "haben-sie-einen-tisch", "en": "Do you have a table for two?", "text": "Haben Sie einen Tisch für zwei?", "ph": "HAH-ben zee EYE-nen TISH fewr TSVY" },
+        { "id": "reservierung", "en": "I have a reservation under ...", "text": "Ich habe eine Reservierung auf den Namen ...", "say": "Ich habe eine Reservierung auf den Namen", "ph": "ikh HAH-buh EYE-nuh reh-zer-VEER-oong owf dayn NAH-men" },
+        { "id": "wein", "en": "A glass of red / white wine", "text": "Ein Glas Rotwein / Weißwein", "say": "Ein Glas Rotwein. Ein Glas Weißwein.", "ph": "ine GLAHS ROHT-vine / VICE-vine" },
+        { "id": "prost", "en": "Cheers!", "text": "Prost!", "ph": "PROHST", "note": "Look each person in the eye as you clink." },
+        { "id": "lecker", "en": "It was delicious", "text": "Es war sehr lecker", "ph": "es VAHR zair LEK-ker" },
+        { "id": "taxi", "en": "Can you call me a taxi?", "text": "Können Sie mir ein Taxi rufen?", "ph": "KURN-nen zee meer ine TAHK-see ROO-fen" }
+      ]
+    },
+    {
+      "id": "core",
+      "title": "Always",
+      "phrases": [
+        {
+          "id": "hallo", "en": "Hello", "text": "Hallo", "ph": "HAH-loh",
+          "alt": [
+            { "id": "gruess-gott", "tag": "Bavaria", "text": "Grüß Gott", "ph": "GREWSS GOT" }
+          ]
+        },
+        { "id": "bitte", "en": "Please", "text": "Bitte", "ph": "BIT-tuh", "note": "Also 'you're welcome' and 'pardon?'." },
+        { "id": "danke", "en": "Thank you", "text": "Danke", "ph": "DAHN-kuh" },
+        { "id": "vielen-dank", "en": "Thank you very much", "text": "Vielen Dank", "ph": "FEE-len DAHNK" },
+        { "id": "gern-geschehen", "en": "You're welcome", "text": "Gern geschehen", "ph": "GERN guh-SHAY-en" },
+        { "id": "entschuldigung", "en": "Excuse me / Sorry", "text": "Entschuldigung", "ph": "ent-SHOOL-dee-goong" },
+        { "id": "ja-nein", "en": "Yes / No", "text": "Ja / Nein", "say": "Ja. Nein.", "ph": "YAH / NINE" },
+        { "id": "kein-deutsch", "en": "I don't speak German", "text": "Ich spreche kein Deutsch", "ph": "ikh SHPREH-khuh kine DOYTCH" },
+        { "id": "englisch", "en": "Do you speak English?", "text": "Sprechen Sie Englisch?", "ph": "SHPREH-khen zee ENG-lish" },
+        { "id": "verstehe-nicht", "en": "I don't understand", "text": "Ich verstehe nicht", "ph": "ikh fer-SHTAY-uh NIKHT" },
+        { "id": "langsamer", "en": "More slowly, please", "text": "Langsamer, bitte", "ph": "LAHNG-zah-mer, BIT-tuh" },
+        { "id": "tschuess", "en": "Goodbye", "text": "Tschüss", "ph": "CHEWSS", "note": "Formal: auf Wiedersehen (owf VEE-der-zay-en)." }
+      ]
+    },
+    {
+      "id": "around",
+      "title": "Getting around",
+      "phrases": [
+        { "id": "toilette", "en": "Where is the toilet?", "text": "Wo ist die Toilette?", "ph": "VOH ist dee toy-LET-tuh", "note": "Station toilets usually cost 50 cents to 1 euro." },
+        { "id": "bahnhof", "en": "Where is the station?", "text": "Wo ist der Bahnhof?", "ph": "VOH ist dair BAHN-hohf" },
+        { "id": "ist-es-weit", "en": "Is it far?", "text": "Ist es weit?", "ph": "ist es VITE" },
+        { "id": "fahrkarte-nach", "en": "A ticket to ...", "text": "Eine Fahrkarte nach ...", "say": "Eine Fahrkarte nach", "ph": "EYE-nuh FAHR-kar-tuh nahkh", "note": "Stamp paper tickets in the machines before you board." },
+        { "id": "was-kostet-das", "en": "How much is it?", "text": "Was kostet das?", "ph": "vahs KOS-tet dahs" },
+        { "id": "zahlen", "en": "The bill, please", "text": "Zahlen, bitte", "ph": "TSAH-len, BIT-tuh", "note": "Say the total with tip as you pay, about 10 percent rounded up." },
+        { "id": "mit-karte", "en": "Can I pay by card?", "text": "Kann ich mit Karte zahlen?", "ph": "kahn ikh mit KAR-tuh TSAH-len", "note": "Many bars and bakeries still take cash only." }
+      ]
+    }
+  ]
+}

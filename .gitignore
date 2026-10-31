@@ -1,2 +1,7 @@
-site/audio/
+# Build output: scripts/build.py and scripts/gen_audio.py
+site/*/audio/
+site/*/index.html
+site/*/sw.js
+site/*/manifest.webmanifest
+site/languages.json
 __pycache__/

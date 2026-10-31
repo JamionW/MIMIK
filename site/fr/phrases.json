@@ -1,0 +1,100 @@
+{
+  "name": "French",
+  "native": "Français",
+  "lang": "fr-FR",
+  "voices": { "m": "fr-FR-HenriNeural", "f": "fr-FR-DeniseNeural" },
+  "deviceVoice": "Thomas",
+  "sections": [
+    {
+      "id": "morning",
+      "title": "Morning",
+      "hours": [5, 12],
+      "phrases": [
+        { "id": "bonjour", "en": "Good morning / Hello", "text": "Bonjour", "ph": "bohn-ZHOOR", "note": "Say it on entering any shop. Skipping it reads as rude." },
+        { "id": "un-cafe", "en": "A coffee (espresso), please", "text": "Un café, s'il vous plaît", "ph": "uhn kah-FAY, seel voo PLEH" },
+        { "id": "cafe-creme", "en": "A coffee with milk", "text": "Un café crème, s'il vous plaît", "ph": "uhn kah-FAY KREHM, seel voo PLEH", "note": "Café au lait is mostly a home drink; cafés serve a crème." },
+        { "id": "croissant", "en": "A croissant, please", "text": "Un croissant, s'il vous plaît", "ph": "uhn krwah-SAHN, seel voo PLEH" },
+        {
+          "id": "pain-au-chocolat", "en": "A chocolate pastry", "text": "Un pain au chocolat", "ph": "uhn PAN oh shoh-koh-LAH",
+          "alt": [
+            { "id": "chocolatine", "tag": "South-west", "text": "Une chocolatine", "ph": "ewn shoh-koh-lah-TEEN" }
+          ]
+        },
+        { "id": "baguette", "en": "A baguette, please", "text": "Une baguette, s'il vous plaît", "ph": "ewn bah-GET, seel voo PLEH", "note": "Une tradition is the better loaf for a few cents more." },
+        { "id": "a-emporter", "en": "To take away", "text": "À emporter", "ph": "ah ahn-por-TAY", "note": "To eat in: sur place (sewr PLAHSS)." }
+      ]
+    },
+    {
+      "id": "lunch",
+      "title": "Lunch",
+      "hours": [12, 15],
+      "phrases": [
+        { "id": "table-pour-deux-l", "en": "A table for two", "text": "Une table pour deux", "ph": "ewn TAH-bluh poor DUH" },
+        { "id": "la-carte", "en": "The menu, please", "text": "La carte, s'il vous plaît", "ph": "lah KART, seel voo PLEH", "note": "Le menu means the fixed-price set meal." },
+        { "id": "formule", "en": "What is the lunch set?", "text": "Quelle est la formule du midi ?", "ph": "kel EH lah for-MEWL dew mee-DEE", "note": "Two or three courses at a set price, lunch only." },
+        { "id": "je-voudrais", "en": "I'd like this, please", "text": "Je voudrais ça, s'il vous plaît", "ph": "zhuh voo-DREH SAH, seel voo PLEH" },
+        { "id": "carafe-deau", "en": "A jug of tap water", "text": "Une carafe d'eau, s'il vous plaît", "ph": "ewn kah-RAHF DOH, seel voo PLEH", "note": "Tap water is free; bottled is not." },
+        { "id": "non-merci", "en": "No, thank you", "text": "Non, merci", "ph": "NOHN, mehr-SEE" }
+      ]
+    },
+    {
+      "id": "afternoon",
+      "title": "Afternoon",
+      "hours": [15, 19],
+      "phrases": [
+        { "id": "un-demi", "en": "A small draught beer", "text": "Un demi, s'il vous plaît", "ph": "uhn duh-MEE, seel voo PLEH", "note": "About 25 cl. Une pression is draught of any size." },
+        { "id": "une-boule", "en": "One scoop (ice cream), please", "text": "Une boule, s'il vous plaît", "ph": "ewn BOOL, seel voo PLEH", "note": "Cornet is a cone, pot a cup." },
+        { "id": "deux-billets", "en": "Two tickets, please", "text": "Deux billets, s'il vous plaît", "ph": "DUH bee-YAY, seel voo PLEH" },
+        { "id": "ca-ferme", "en": "What time does it close?", "text": "À quelle heure ça ferme ?", "ph": "ah kel UHR sah FEHRM" },
+        { "id": "photo", "en": "Can I take a photo?", "text": "Je peux prendre une photo ?", "ph": "zhuh PUH PRAHN-druh ewn foh-TOH" }
+      ]
+    },
+    {
+      "id": "evening",
+      "title": "Evening",
+      "hours": [19, 5],
+      "phrases": [
+        { "id": "bonsoir", "en": "Good evening", "text": "Bonsoir", "ph": "bohn-SWAHR", "note": "Bonne nuit is only for bedtime." },
+        { "id": "une-table", "en": "Do you have a table for two?", "text": "Vous avez une table pour deux ?", "ph": "voo-zah-VAY ewn TAH-bluh poor DUH" },
+        { "id": "reservation", "en": "I have a reservation under ...", "text": "J'ai une réservation au nom de ...", "say": "J'ai une réservation au nom de", "ph": "zhay ewn ray-zehr-vah-SYOHN oh NOHN duh" },
+        { "id": "vin", "en": "A glass of red / white wine", "text": "Un verre de vin rouge / blanc", "say": "Un verre de vin rouge. Un verre de vin blanc.", "ph": "uhn VEHR duh van ROOZH / BLAHN" },
+        { "id": "sante", "en": "Cheers!", "text": "Santé !", "say": "Santé !", "ph": "sahn-TAY", "note": "Also: à la vôtre (ah lah VOH-truh)." },
+        { "id": "delicieux", "en": "It was delicious", "text": "C'était délicieux", "ph": "say-TEH day-lee-SYUH" },
+        { "id": "taxi", "en": "Can you call me a taxi?", "text": "Vous pouvez m'appeler un taxi ?", "ph": "voo poo-VAY mah-PLAY uhn tahk-SEE" }
+      ]
+    },
+    {
+      "id": "core",
+      "title": "Always",
+      "phrases": [
+        { "id": "bonjour-madame", "en": "Hello (to a woman / a man)", "text": "Bonjour madame / monsieur", "say": "Bonjour madame. Bonjour monsieur.", "ph": "bohn-ZHOOR mah-DAHM / muh-SYUH" },
+        { "id": "sil-vous-plait", "en": "Please", "text": "S'il vous plaît", "ph": "seel voo PLEH" },
+        { "id": "merci", "en": "Thank you", "text": "Merci", "ph": "mehr-SEE" },
+        { "id": "merci-beaucoup", "en": "Thank you very much", "text": "Merci beaucoup", "ph": "mehr-SEE boh-KOO" },
+        { "id": "de-rien", "en": "You're welcome", "text": "De rien", "ph": "duh RYAN" },
+        { "id": "excusez-moi", "en": "Excuse me (to get attention)", "text": "Excusez-moi", "ph": "ex-kew-ZAY MWAH" },
+        { "id": "pardon", "en": "Excuse me (to pass)", "text": "Pardon", "ph": "par-DOHN" },
+        { "id": "desole", "en": "I'm sorry", "text": "Désolé", "ph": "day-zoh-LAY", "f": { "text": "Désolée" } },
+        { "id": "oui-non", "en": "Yes / No", "text": "Oui / Non", "say": "Oui. Non.", "ph": "WEE / NOHN" },
+        { "id": "je-ne-parle-pas", "en": "I don't speak French", "text": "Je ne parle pas français", "ph": "zhuh nuh PARL pah frahn-SEH" },
+        { "id": "vous-parlez-anglais", "en": "Do you speak English?", "text": "Vous parlez anglais ?", "ph": "voo par-LAY ahn-GLEH" },
+        { "id": "je-ne-comprends-pas", "en": "I don't understand", "text": "Je ne comprends pas", "ph": "zhuh nuh kohn-PRAHN PAH" },
+        { "id": "plus-lentement", "en": "More slowly, please", "text": "Plus lentement, s'il vous plaît", "ph": "plew lahnt-MAHN, seel voo PLEH" },
+        { "id": "au-revoir", "en": "Goodbye", "text": "Au revoir", "ph": "oh ruh-VWAHR", "note": "Casual: salut (sah-LEW)." }
+      ]
+    },
+    {
+      "id": "around",
+      "title": "Getting around",
+      "phrases": [
+        { "id": "toilettes", "en": "Where are the toilets?", "text": "Où sont les toilettes ?", "ph": "OO sohn lay twah-LET" },
+        { "id": "metro", "en": "Where is the metro?", "text": "Où est le métro ?", "ph": "OO eh luh may-TROH" },
+        { "id": "cest-loin", "en": "Is it far?", "text": "C'est loin ?", "ph": "seh LWAN" },
+        { "id": "billet-pour", "en": "A ticket to ...", "text": "Un billet pour ...", "say": "Un billet pour", "ph": "uhn bee-YAY poor" },
+        { "id": "cest-combien", "en": "How much is it?", "text": "C'est combien ?", "ph": "seh kohn-BYAN" },
+        { "id": "laddition", "en": "The bill, please", "text": "L'addition, s'il vous plaît", "ph": "lah-dee-SYOHN, seel voo PLEH", "note": "It won't come until you ask. Service is included." },
+        { "id": "par-carte", "en": "Can I pay by card?", "text": "Je peux payer par carte ?", "ph": "zhuh PUH peh-YAY par KART" }
+      ]
+    }
+  ]
+}
