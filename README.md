@@ -26,6 +26,8 @@ Each card carries the English, the phrase, a romanization where the script needs
 
 Tapping the text of a card (or of a regional row) opens show mode: the phrase alone, as large as fits the screen, with the screen kept awake, for turning the phone toward a waiter or clerk when pronunciation fails. A tap or swipe closes it.
 
+The last phrase played can be replayed without taking the phone out. On the lock screen and in Control Centre, play replays it, the forward button replays it slowly, and the back button replays it at normal speed; on AirPods the same mapping applies to a single press, a double press and a triple press. The lock screen shows the phrase and its English. iOS shows these controls only for the voice clips, not for phrases spoken by the device voice, and drops them a short while after the screen locks.
+
 The He / She toggle switches gendered forms (obrigado, obrigada) and the voice. The choice persists on the device and carries across languages.
 
 ## Installing on an iPhone
