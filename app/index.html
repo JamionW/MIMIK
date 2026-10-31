@@ -132,6 +132,12 @@
   .show-text { max-width: 100%; margin: 0; font-weight: 700; line-height: 1.15; text-align: center; overflow-wrap: normal; }
   .show-hint { margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
   body.showing { overflow: hidden; }
+  .replies { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 8px; }
+  .replies summary { color: var(--muted); font-size: 14px; padding: 4px 0; cursor: pointer; }
+  .replies .row { margin-top: 10px; }
+  .replies .text { font-size: 20px; }
+  .replies .en { font-size: 15px; }
+  .replies .play { width: 40px; height: 40px; }
   button { cursor: pointer; }
   button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
@@ -167,7 +173,10 @@
 
   // Feminine overrides (obrigada etc.) live in a phrase's "f" object; clips in audio/f/.
   const form = item => gender === 'f' && item.f ? { ...item, ...item.f } : item;
-  const clipKey = id => `${gender}/${id}`;
+  const clipKey = (id, g = gender) => `${g}/${id}`;
+  // Replies are the other person speaking, so they take the voice opposite the user's.
+  const other = g => g === 'f' ? 'm' : 'f';
+  const voiceOf = (item, g = gender) => item.reply ? other(g) : g;
   const clipPath = (id, g = gender) => g === 'f' ? `audio/f/${id}.mp3` : `audio/${id}.mp3`;
 
   // Non-breaking hyphens keep each phonetic word on one line.
@@ -219,12 +228,13 @@
     last = item;
     item = form(item);
     nowPlaying(item);
-    const key = clipKey(item.id);
+    const g = voiceOf(item);
+    const key = clipKey(item.id, g);
     const text = item.say || item.text;
     const cached = clips.get(key);
     if (cached === null) return speak(text, slow);
     // play() must start synchronously inside the tap for iOS, so no awaits before it.
-    audio.src = cached || clipPath(item.id);
+    audio.src = cached || clipPath(item.id, g);
     audio.playbackRate = slow ? SLOW_RATE : 1;
     audio.preservesPitch = audio.webkitPreservesPitch = true;
     audio.onended = clearActive;
@@ -376,6 +386,23 @@
       r.append(at, controls({ en, ...a }));
       c.append(r);
     }
+    // Likely responses from the other person, collapsed: heard, not said, so no phonetics.
+    if (item.replies && item.replies.length) {
+      const d = el('details', 'replies');
+      d.append(el('summary', null, "What you'll hear"));
+      for (const rep of item.replies) {
+        const r = el('div', 'row');
+        const rt = el('div', 'txt');
+        const t = el('p', 'text', rep.text);
+        t.lang = lang;
+        rt.append(t);
+        if (rep.rom) rt.append(el('p', 'rom', rep.rom));
+        rt.append(el('p', 'en', rep.en));
+        r.append(rt, controls({ ...rep, reply: true }));
+        d.append(r);
+      }
+      c.append(d);
+    }
     return c;
   }
 
@@ -461,11 +488,13 @@
 
   // Preload clips as blobs: avoids Safari's range-request issues and lets play() run synchronously.
   async function preload(g) {
-    const items = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])]));
-    await Promise.all(items.filter(it => !clips.has(`${g}/${it.id}`)).map(async it => {
-      const key = `${g}/${it.id}`;
+    const items = data.sections.flatMap(s => s.phrases.flatMap(p =>
+      [p, ...(p.alt || []), ...(p.replies || []).map(r => ({ ...r, reply: true }))]));
+    await Promise.all(items.filter(it => !clips.has(clipKey(it.id, voiceOf(it, g)))).map(async it => {
+      const v = voiceOf(it, g);
+      const key = clipKey(it.id, v);
       try {
-        const r = await fetch(clipPath(it.id, g));
+        const r = await fetch(clipPath(it.id, v));
         if (!r.ok) throw 0;
         clips.set(key, URL.createObjectURL(await r.blob()));
       } catch { clips.set(key, null); }

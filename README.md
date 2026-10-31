@@ -69,11 +69,14 @@ and a phrase looks like this:
   "f": { "text": "Obrigada", "ph": "oh-bree-GAH-duh" },
   "say": "optional text for the audio when text contains slashes or ellipses",
   "note": "optional muted footnote",
-  "alt": [{ "id": "...", "tag": "Lisbon", "text": "...", "ph": "..." }]
+  "alt": [{ "id": "...", "tag": "Lisbon", "text": "...", "ph": "..." }],
+  "replies": [{ "id": "obrigado-r1", "text": "...", "rom": "optional", "en": "..." }]
 }
 ```
 
-Ids must be unique within a language, since they name the audio clips; the generator refuses to run on duplicates. A section with `hours: [start, end]` is time-bound, and a range like `[19, 5]` wraps past midnight. A section without `hours` always shows.
+`replies` lists what the other person is likely to say back, shown collapsed under the card as "What you'll hear". They are for recognising, not saying, so they carry no phonetics. Each is rendered in both voices, and the app plays the one opposite the He / She setting so the exchange sounds like two people. Reply ids follow the pattern `<phrase id>-r1`, `-r2`, and so on; add replies only where the response is predictable.
+
+Ids, reply ids included, must be unique within a language, since they name the audio clips; the generator refuses to run on duplicates. A section with `hours: [start, end]` is time-bound, and a range like `[19, 5]` wraps past midnight. A section without `hours` always shows.
 
 Open the app once online after a deploy so it picks up the new version.
 

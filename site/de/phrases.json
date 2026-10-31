@@ -12,13 +12,21 @@
       "hours": [5, 12],
       "phrases": [
         { "id": "guten-morgen", "en": "Good morning", "text": "Guten Morgen", "ph": "GOO-ten MOR-gen" },
-        { "id": "kaffee", "en": "A coffee, please", "text": "Einen Kaffee, bitte", "ph": "EYE-nen kah-FAY, BIT-tuh" },
+        {
+          "id": "kaffee", "en": "A coffee, please", "text": "Einen Kaffee, bitte", "ph": "EYE-nen kah-FAY, BIT-tuh",
+          "replies": [
+            { "id": "kaffee-r1", "text": "Für hier oder zum Mitnehmen?", "en": "For here or to take away?" }
+          ]
+        },
         { "id": "milchkaffee", "en": "A milky coffee", "text": "Einen Milchkaffee, bitte", "ph": "EYE-nen MILKH-kah-fay, BIT-tuh" },
         {
           "id": "broetchen", "en": "Two bread rolls, please", "text": "Zwei Brötchen, bitte", "ph": "TSVY BRURT-khen, BIT-tuh",
           "alt": [
             { "id": "semmeln", "tag": "Bavaria", "text": "Zwei Semmeln, bitte", "ph": "TSVY ZEM-meln, BIT-tuh" },
             { "id": "schrippen", "tag": "Berlin", "text": "Zwei Schrippen, bitte", "ph": "TSVY SHRIP-pen, BIT-tuh" }
+          ],
+          "replies": [
+            { "id": "broetchen-r1", "text": "Darf's sonst noch etwas sein?", "en": "Anything else?" }
           ]
         },
         { "id": "brezel", "en": "A pretzel, please", "text": "Eine Brezel, bitte", "ph": "EYE-nuh BRAY-tsel, BIT-tuh", "note": "In Bavaria: Breze or Brezn." },
@@ -31,7 +39,14 @@
       "hours": [12, 14],
       "phrases": [
         { "id": "mahlzeit", "en": "Enjoy your lunch (midday greeting)", "text": "Mahlzeit!", "ph": "MAHL-tsite", "note": "Heard around noon at work and in canteens. Reply with the same." },
-        { "id": "tisch-fuer-zwei", "en": "A table for two, please", "text": "Einen Tisch für zwei, bitte", "ph": "EYE-nen TISH fewr TSVY, BIT-tuh" },
+        {
+          "id": "tisch-fuer-zwei", "en": "A table for two, please", "text": "Einen Tisch für zwei, bitte", "ph": "EYE-nen TISH fewr TSVY, BIT-tuh",
+          "replies": [
+            { "id": "tisch-fuer-zwei-r1", "text": "Haben Sie reserviert?", "en": "Have you booked?" },
+            { "id": "tisch-fuer-zwei-r2", "text": "Drinnen oder draußen?", "en": "Inside or outside?" },
+            { "id": "tisch-fuer-zwei-r3", "text": "Kommen Sie bitte mit.", "en": "Please come with me." }
+          ]
+        },
         { "id": "speisekarte", "en": "The menu, please", "text": "Die Speisekarte, bitte", "ph": "dee SHPY-zuh-kar-tuh, BIT-tuh" },
         { "id": "tagesgericht", "en": "What is the dish of the day?", "text": "Was ist das Tagesgericht?", "ph": "vahs ist dahs TAH-ges-guh-rikht" },
         { "id": "ich-haette-gern", "en": "I'd like this, please", "text": "Ich hätte gern das hier, bitte", "ph": "ikh HET-tuh GERN dahs HEER, BIT-tuh" },
@@ -51,11 +66,25 @@
           "alt": [
             { "id": "koelsch", "tag": "Cologne", "text": "Ein Kölsch, bitte", "ph": "ine KURLSH, BIT-tuh" },
             { "id": "mass", "tag": "Bavaria", "text": "Eine Maß, bitte", "ph": "EYE-nuh MAHS, BIT-tuh" }
+          ],
+          "replies": [
+            { "id": "bier-r1", "text": "Groß oder klein?", "en": "Large or small?" }
           ]
         },
-        { "id": "zwei-karten", "en": "Two tickets, please", "text": "Zwei Karten, bitte", "ph": "TSVY KAR-ten, BIT-tuh" },
+        {
+          "id": "zwei-karten", "en": "Two tickets, please", "text": "Zwei Karten, bitte", "ph": "TSVY KAR-ten, BIT-tuh",
+          "replies": [
+            { "id": "zwei-karten-r1", "text": "Zwei Erwachsene?", "en": "Two adults?" }
+          ]
+        },
         { "id": "wann-schliessen", "en": "What time do you close?", "text": "Wann schließen Sie?", "ph": "VAHN SHLEE-sen zee", "note": "Most shops close on Sundays." },
-        { "id": "foto", "en": "Can I take a photo?", "text": "Darf ich ein Foto machen?", "ph": "DARF ikh ine FOH-toh MAH-khen" }
+        {
+          "id": "foto", "en": "Can I take a photo?", "text": "Darf ich ein Foto machen?", "ph": "DARF ikh ine FOH-toh MAH-khen",
+          "replies": [
+            { "id": "foto-r1", "text": "Ja, gerne.", "en": "Yes, go ahead." },
+            { "id": "foto-r2", "text": "Bitte ohne Blitz.", "en": "No flash, please." }
+          ]
+        }
       ]
     },
     {
@@ -64,8 +93,21 @@
       "hours": [18, 5],
       "phrases": [
         { "id": "guten-abend", "en": "Good evening", "text": "Guten Abend", "ph": "GOO-ten AH-bent" },
-        { "id": "haben-sie-einen-tisch", "en": "Do you have a table for two?", "text": "Haben Sie einen Tisch für zwei?", "ph": "HAH-ben zee EYE-nen TISH fewr TSVY" },
-        { "id": "reservierung", "en": "I have a reservation under ...", "text": "Ich habe eine Reservierung auf den Namen ...", "say": "Ich habe eine Reservierung auf den Namen", "ph": "ikh HAH-buh EYE-nuh reh-zer-VEER-oong owf dayn NAH-men" },
+        {
+          "id": "haben-sie-einen-tisch", "en": "Do you have a table for two?", "text": "Haben Sie einen Tisch für zwei?", "ph": "HAH-ben zee EYE-nen TISH fewr TSVY",
+          "replies": [
+            { "id": "haben-sie-einen-tisch-r1", "text": "Haben Sie reserviert?", "en": "Have you booked?" },
+            { "id": "haben-sie-einen-tisch-r2", "text": "Drinnen oder draußen?", "en": "Inside or outside?" },
+            { "id": "haben-sie-einen-tisch-r3", "text": "Kommen Sie bitte mit.", "en": "Please come with me." }
+          ]
+        },
+        {
+          "id": "reservierung", "en": "I have a reservation under ...", "text": "Ich habe eine Reservierung auf den Namen ...", "say": "Ich habe eine Reservierung auf den Namen", "ph": "ikh HAH-buh EYE-nuh reh-zer-VEER-oong owf dayn NAH-men",
+          "replies": [
+            { "id": "reservierung-r1", "text": "Auf welchen Namen?", "en": "Under what name?" },
+            { "id": "reservierung-r2", "text": "Für wie viele Personen?", "en": "For how many people?" }
+          ]
+        },
         { "id": "wein", "en": "A glass of red / white wine", "text": "Ein Glas Rotwein / Weißwein", "say": "Ein Glas Rotwein. Ein Glas Weißwein.", "ph": "ine GLAHS ROHT-vine / VICE-vine" },
         { "id": "prost", "en": "Cheers!", "text": "Prost!", "ph": "PROHST", "note": "Look each person in the eye as you clink." },
         { "id": "lecker", "en": "It was delicious", "text": "Es war sehr lecker", "ph": "es VAHR zair LEK-ker" },
@@ -89,7 +131,13 @@
         { "id": "entschuldigung", "en": "Excuse me / Sorry", "text": "Entschuldigung", "ph": "ent-SHOOL-dee-goong" },
         { "id": "ja-nein", "en": "Yes / No", "text": "Ja / Nein", "say": "Ja. Nein.", "ph": "YAH / NINE" },
         { "id": "kein-deutsch", "en": "I don't speak German", "text": "Ich spreche kein Deutsch", "ph": "ikh SHPREH-khuh kine DOYTCH" },
-        { "id": "englisch", "en": "Do you speak English?", "text": "Sprechen Sie Englisch?", "ph": "SHPREH-khen zee ENG-lish" },
+        {
+          "id": "englisch", "en": "Do you speak English?", "text": "Sprechen Sie Englisch?", "ph": "SHPREH-khen zee ENG-lish",
+          "replies": [
+            { "id": "englisch-r1", "text": "Ein bisschen.", "en": "A little." },
+            { "id": "englisch-r2", "text": "Ja, kein Problem.", "en": "Yes, no problem." }
+          ]
+        },
         { "id": "verstehe-nicht", "en": "I don't understand", "text": "Ich verstehe nicht", "ph": "ikh fer-SHTAY-uh NIKHT" },
         { "id": "langsamer", "en": "More slowly, please", "text": "Langsamer, bitte", "ph": "LAHNG-zah-mer, BIT-tuh" },
         { "id": "tschuess", "en": "Goodbye", "text": "Tschüss", "ph": "CHEWSS", "note": "Formal: auf Wiedersehen (owf VEE-der-zay-en)." }
@@ -101,11 +149,34 @@
       "phrases": [
         { "id": "toilette", "en": "Where is the toilet?", "text": "Wo ist die Toilette?", "ph": "VOH ist dee toy-LET-tuh", "note": "Station toilets usually cost 50 cents to 1 euro." },
         { "id": "bahnhof", "en": "Where is the station?", "text": "Wo ist der Bahnhof?", "ph": "VOH ist dair BAHN-hohf" },
-        { "id": "ist-es-weit", "en": "Is it far?", "text": "Ist es weit?", "ph": "ist es VITE" },
-        { "id": "fahrkarte-nach", "en": "A ticket to ...", "text": "Eine Fahrkarte nach ...", "say": "Eine Fahrkarte nach", "ph": "EYE-nuh FAHR-kar-tuh nahkh", "note": "Stamp paper tickets in the machines before you board." },
+        {
+          "id": "ist-es-weit", "en": "Is it far?", "text": "Ist es weit?", "ph": "ist es VITE",
+          "replies": [
+            { "id": "ist-es-weit-r1", "text": "Nein, nur ein paar Minuten zu Fuß.", "en": "No, just a few minutes on foot." },
+            { "id": "ist-es-weit-r2", "text": "Ja, nehmen Sie lieber die U-Bahn.", "en": "Yes, better take the underground." }
+          ]
+        },
+        {
+          "id": "fahrkarte-nach", "en": "A ticket to ...", "text": "Eine Fahrkarte nach ...", "say": "Eine Fahrkarte nach", "ph": "EYE-nuh FAHR-kar-tuh nahkh", "note": "Stamp paper tickets in the machines before you board.",
+          "replies": [
+            { "id": "fahrkarte-nach-r1", "text": "Einfach oder hin und zurück?", "en": "One way or return?" }
+          ]
+        },
         { "id": "was-kostet-das", "en": "How much is it?", "text": "Was kostet das?", "ph": "vahs KOS-tet dahs" },
-        { "id": "zahlen", "en": "The bill, please", "text": "Zahlen, bitte", "ph": "TSAH-len, BIT-tuh", "note": "Say the total with tip as you pay, about 10 percent rounded up." },
-        { "id": "mit-karte", "en": "Can I pay by card?", "text": "Kann ich mit Karte zahlen?", "ph": "kahn ikh mit KAR-tuh TSAH-len", "note": "Many bars and bakeries still take cash only." }
+        {
+          "id": "zahlen", "en": "The bill, please", "text": "Zahlen, bitte", "ph": "TSAH-len, BIT-tuh", "note": "Say the total with tip as you pay, about 10 percent rounded up.",
+          "replies": [
+            { "id": "zahlen-r1", "text": "Zusammen oder getrennt?", "en": "Together or separately?" },
+            { "id": "zahlen-r2", "text": "Mit Karte oder bar?", "en": "Card or cash?" }
+          ]
+        },
+        {
+          "id": "mit-karte", "en": "Can I pay by card?", "text": "Kann ich mit Karte zahlen?", "ph": "kahn ikh mit KAR-tuh TSAH-len", "note": "Many bars and bakeries still take cash only.",
+          "replies": [
+            { "id": "mit-karte-r1", "text": "Ja, natürlich.", "en": "Yes, of course." },
+            { "id": "mit-karte-r2", "text": "Leider nur bar.", "en": "Cash only, sorry." }
+          ]
+        }
       ]
     }
   ]

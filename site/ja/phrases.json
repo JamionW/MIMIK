@@ -12,11 +12,28 @@
       "hours": [5, 11],
       "phrases": [
         { "id": "ohayou", "en": "Good morning", "text": "おはようございます", "rom": "ohayō gozaimasu", "ph": "oh-hah-yoh goh-zai-mahs", "note": "Casual: ohayō." },
-        { "id": "koohii", "en": "A coffee, please", "text": "コーヒーをください", "rom": "kōhī o kudasai", "ph": "koh-hee oh koo-dah-sai" },
+        {
+          "id": "koohii", "en": "A coffee, please", "text": "コーヒーをください", "rom": "kōhī o kudasai", "ph": "koh-hee oh koo-dah-sai",
+          "replies": [
+            { "id": "koohii-r1", "text": "サイズはいかがなさいますか？", "rom": "saizu wa ikaga nasaimasu ka", "en": "What size would you like?" },
+            { "id": "koohii-r2", "text": "店内でお召し上がりですか？", "rom": "tennai de omeshiagari desu ka", "en": "Will you have it here?" }
+          ]
+        },
         { "id": "hotto-aisu", "en": "Hot / iced", "text": "ホット / アイス", "say": "ホット。アイス。", "rom": "hotto / aisu", "ph": "hoht-toh / ai-soo" },
-        { "id": "mooningu", "en": "The morning set, please", "text": "モーニングセットをお願いします", "rom": "mōningu setto o onegai shimasu", "ph": "moh-neen-goo set-toh oh oh-neh-gai shee-mahs", "note": "Café breakfast deal: toast and egg with your coffee, usually until 11." },
+        {
+          "id": "mooningu", "en": "The morning set, please", "text": "モーニングセットをお願いします", "rom": "mōningu setto o onegai shimasu", "ph": "moh-neen-goo set-toh oh oh-neh-gai shee-mahs", "note": "Café breakfast deal: toast and egg with your coffee, usually until 11.",
+          "replies": [
+            { "id": "mooningu-r1", "text": "お飲み物は何になさいますか？", "rom": "onomimono wa nan ni nasaimasu ka", "en": "What would you like to drink?" }
+          ]
+        },
         { "id": "tennai-mochikaeri", "en": "To eat here / to take away", "text": "店内で / 持ち帰りで", "say": "店内で。持ち帰りで。", "rom": "tennai de / mochikaeri de", "ph": "ten-nai deh / moh-chee-kah-eh-ree deh", "note": "The counter will ask which; answer with one." },
-        { "id": "atatamete", "en": "Please heat it up", "text": "温めてください", "rom": "atatamete kudasai", "ph": "ah-tah-tah-meh-teh koo-dah-sai", "note": "For a konbini bento. They often ask first." },
+        {
+          "id": "atatamete", "en": "Please heat it up", "text": "温めてください", "rom": "atatamete kudasai", "ph": "ah-tah-tah-meh-teh koo-dah-sai", "note": "For a konbini bento. They often ask first.",
+          "replies": [
+            { "id": "atatamete-r1", "text": "少々お待ちください。", "rom": "shōshō omachi kudasai", "en": "Please wait a moment." },
+            { "id": "atatamete-r2", "text": "お箸はお付けしますか？", "rom": "ohashi wa otsuke shimasu ka", "en": "Would you like chopsticks?" }
+          ]
+        },
         { "id": "fukuro", "en": "No bag, thanks", "text": "袋はいりません", "rom": "fukuro wa irimasen", "ph": "foo-koo-roh wah ee-ree-mah-sen", "note": "Shops charge a few yen for bags." }
       ]
     },
@@ -26,7 +43,13 @@
       "hours": [11, 14],
       "phrases": [
         { "id": "konnichiwa-l", "en": "Hello / Good afternoon", "text": "こんにちは", "rom": "konnichiwa", "ph": "kohn-nee-chee-wah" },
-        { "id": "futari", "en": "Two people", "text": "二人です", "rom": "futari desu", "ph": "foo-tah-ree des", "note": "Staff greet you with irasshaimase and ask how many. Hold up fingers too." },
+        {
+          "id": "futari", "en": "Two people", "text": "二人です", "rom": "futari desu", "ph": "foo-tah-ree des", "note": "Staff greet you with irasshaimase and ask how many. Hold up fingers too.",
+          "replies": [
+            { "id": "futari-r1", "text": "こちらへどうぞ。", "rom": "kochira e dōzo", "en": "This way, please." },
+            { "id": "futari-r2", "text": "カウンター席でもよろしいですか？", "rom": "kauntā seki demo yoroshii desu ka", "en": "Is the counter all right?" }
+          ]
+        },
         { "id": "menyuu", "en": "The menu, please", "text": "メニューをください", "rom": "menyū o kudasai", "ph": "meh-nyoo oh koo-dah-sai", "note": "English menu: eigo no menyū (ay-goh noh meh-nyoo)." },
         { "id": "osusume", "en": "What do you recommend?", "text": "おすすめは何ですか？", "rom": "osusume wa nan desu ka", "ph": "oh-soo-soo-meh wah nahn des kah" },
         { "id": "kore", "en": "This one, please", "text": "これをお願いします", "rom": "kore o onegai shimasu", "ph": "koh-reh oh oh-neh-gai shee-mahs", "note": "Point at the menu or the plastic food in the window." },
@@ -43,9 +66,27 @@
         { "id": "konnichiwa", "en": "Hello / Good afternoon", "text": "こんにちは", "rom": "konnichiwa", "ph": "kohn-nee-chee-wah" },
         { "id": "chiketto", "en": "Two tickets, please", "text": "チケットを二枚ください", "rom": "chiketto o nimai kudasai", "ph": "chee-ket-toh oh nee-mai koo-dah-sai", "note": "Adult: otona (oh-toh-nah)." },
         { "id": "nanji-shimarimasu", "en": "What time does it close?", "text": "何時に閉まりますか？", "rom": "nanji ni shimarimasu ka", "ph": "nahn-jee nee shee-mah-ree-mahs kah" },
-        { "id": "shashin", "en": "Can I take a photo?", "text": "写真を撮ってもいいですか？", "rom": "shashin o tottemo ii desu ka", "ph": "shah-sheen oh toht-teh-moh ee des kah" },
-        { "id": "shichaku", "en": "Can I try it on?", "text": "試着してもいいですか？", "rom": "shichaku shitemo ii desu ka", "ph": "shee-chah-koo shee-teh-moh ee des kah" },
-        { "id": "menzei", "en": "Tax-free, please", "text": "免税でお願いします", "rom": "menzei de onegai shimasu", "ph": "men-zay deh oh-neh-gai shee-mahs", "note": "Bring your passport." }
+        {
+          "id": "shashin", "en": "Can I take a photo?", "text": "写真を撮ってもいいですか？", "rom": "shashin o tottemo ii desu ka", "ph": "shah-sheen oh toht-teh-moh ee des kah",
+          "replies": [
+            { "id": "shashin-r1", "text": "どうぞ。", "rom": "dōzo", "en": "Go ahead." },
+            { "id": "shashin-r2", "text": "撮影は禁止です。", "rom": "satsuei wa kinshi desu", "en": "Photography is not allowed." },
+            { "id": "shashin-r3", "text": "フラッシュはご遠慮ください。", "rom": "furasshu wa goenryo kudasai", "en": "Please don't use flash." }
+          ]
+        },
+        {
+          "id": "shichaku", "en": "Can I try it on?", "text": "試着してもいいですか？", "rom": "shichaku shitemo ii desu ka", "ph": "shee-chah-koo shee-teh-moh ee des kah",
+          "replies": [
+            { "id": "shichaku-r1", "text": "こちらへどうぞ。", "rom": "kochira e dōzo", "en": "This way, please." },
+            { "id": "shichaku-r2", "text": "サイズはいかがですか？", "rom": "saizu wa ikaga desu ka", "en": "How is the size?" }
+          ]
+        },
+        {
+          "id": "menzei", "en": "Tax-free, please", "text": "免税でお願いします", "rom": "menzei de onegai shimasu", "ph": "men-zay deh oh-neh-gai shee-mahs", "note": "Bring your passport.",
+          "replies": [
+            { "id": "menzei-r1", "text": "パスポートをお願いします。", "rom": "pasupōto o onegai shimasu", "en": "Your passport, please." }
+          ]
+        }
       ]
     },
     {
@@ -54,8 +95,19 @@
       "hours": [18, 5],
       "phrases": [
         { "id": "konbanwa", "en": "Good evening", "text": "こんばんは", "rom": "konbanwa", "ph": "kohn-bahn-wah" },
-        { "id": "yoyaku", "en": "I have a reservation under ...", "text": "... で予約しています", "say": "予約しています", "rom": "... de yoyaku shite imasu", "ph": "... deh yoh-yah-koo shee-teh ee-mahs", "note": "Your name goes first." },
-        { "id": "toriaezu-nama", "en": "A draught beer to start", "text": "とりあえず生で", "rom": "toriaezu nama de", "ph": "toh-ree-ah-eh-zoo nah-mah deh", "note": "The classic izakaya opener. A small paid starter (otōshi) may arrive unasked." },
+        {
+          "id": "yoyaku", "en": "I have a reservation under ...", "text": "... で予約しています", "say": "予約しています", "rom": "... de yoyaku shite imasu", "ph": "... deh yoh-yah-koo shee-teh ee-mahs", "note": "Your name goes first.",
+          "replies": [
+            { "id": "yoyaku-r1", "text": "お待ちしておりました。", "rom": "omachi shite orimashita", "en": "We've been expecting you." },
+            { "id": "yoyaku-r2", "text": "何名様ですか？", "rom": "nanmei-sama desu ka", "en": "How many people?" }
+          ]
+        },
+        {
+          "id": "toriaezu-nama", "en": "A draught beer to start", "text": "とりあえず生で", "rom": "toriaezu nama de", "ph": "toh-ree-ah-eh-zoo nah-mah deh", "note": "The classic izakaya opener. A small paid starter (otōshi) may arrive unasked.",
+          "replies": [
+            { "id": "toriaezu-nama-r1", "text": "中ジョッキでよろしいですか？", "rom": "chū jokki de yoroshii desu ka", "en": "Is a medium mug all right?" }
+          ]
+        },
         { "id": "kanpai", "en": "Cheers!", "text": "乾杯！", "rom": "kanpai", "ph": "kahn-pai" },
         { "id": "oishii", "en": "Delicious!", "text": "おいしいです", "rom": "oishii desu", "ph": "oy-shee des" },
         { "id": "gochisousama", "en": "Thank you for the meal (on leaving)", "text": "ごちそうさまでした", "rom": "gochisōsama deshita", "ph": "goh-chee-soh-sah-mah desh-tah" },
@@ -72,7 +124,13 @@
         { "id": "hai-iie", "en": "Yes / No", "text": "はい / いいえ", "say": "はい。いいえ。", "rom": "hai / iie", "ph": "hai / ee-eh" },
         { "id": "daijoubu", "en": "I'm fine / No, thanks", "text": "大丈夫です", "rom": "daijōbu desu", "ph": "dai-joh-boo des", "note": "The polite way to decline a bag, a straw or a receipt." },
         { "id": "nihongo", "en": "I don't speak Japanese", "text": "日本語は話せません", "rom": "nihongo wa hanasemasen", "ph": "nee-hohn-goh wah hah-nah-seh-mah-sen" },
-        { "id": "eigo", "en": "Do you speak English?", "text": "英語を話せますか？", "rom": "eigo o hanasemasu ka", "ph": "ay-goh oh hah-nah-seh-mahs kah" },
+        {
+          "id": "eigo", "en": "Do you speak English?", "text": "英語を話せますか？", "rom": "eigo o hanasemasu ka", "ph": "ay-goh oh hah-nah-seh-mahs kah",
+          "replies": [
+            { "id": "eigo-r1", "text": "少しだけ。", "rom": "sukoshi dake", "en": "Just a little." },
+            { "id": "eigo-r2", "text": "すみません、話せません。", "rom": "sumimasen, hanasemasen", "en": "Sorry, I can't." }
+          ]
+        },
         { "id": "wakarimasen", "en": "I don't understand", "text": "わかりません", "rom": "wakarimasen", "ph": "wah-kah-ree-mah-sen" },
         { "id": "yukkuri", "en": "More slowly, please", "text": "ゆっくりお願いします", "rom": "yukkuri onegai shimasu", "ph": "yook-koo-ree oh-neh-gai shee-mahs" },
         { "id": "sayounara", "en": "Goodbye", "text": "さようなら", "rom": "sayōnara", "ph": "sah-yoh-nah-rah", "note": "Leaving a shop, a nod and arigatō is enough." }
@@ -85,10 +143,27 @@
         { "id": "toire", "en": "Where is the toilet?", "text": "トイレはどこですか？", "rom": "toire wa doko desu ka", "ph": "toy-reh wah doh-koh des kah" },
         { "id": "eki", "en": "Where is the station?", "text": "駅はどこですか？", "rom": "eki wa doko desu ka", "ph": "eh-kee wah doh-koh des kah" },
         { "id": "tooi", "en": "Is it far?", "text": "遠いですか？", "rom": "tōi desu ka", "ph": "toh-ee des kah" },
-        { "id": "made", "en": "To ..., please (taxi)", "text": "... までお願いします", "say": "までお願いします", "rom": "... made onegai shimasu", "ph": "... mah-deh oh-neh-gai shee-mahs", "note": "Show the driver the address on your phone as you say it." },
+        {
+          "id": "made", "en": "To ..., please (taxi)", "text": "... までお願いします", "say": "までお願いします", "rom": "... made onegai shimasu", "ph": "... mah-deh oh-neh-gai shee-mahs", "note": "Show the driver the address on your phone as you say it.",
+          "replies": [
+            { "id": "made-r1", "text": "高速を使いますか？", "rom": "kōsoku o tsukaimasu ka", "en": "Shall I take the expressway?" }
+          ]
+        },
         { "id": "ikura", "en": "How much is it?", "text": "いくらですか？", "rom": "ikura desu ka", "ph": "ee-koo-rah des kah" },
-        { "id": "okaikei", "en": "The bill, please", "text": "お会計お願いします", "rom": "okaikei onegai shimasu", "ph": "oh-kai-kay oh-neh-gai shee-mahs", "note": "Usually you pay at the register by the door, not at the table." },
-        { "id": "kaado", "en": "Can I pay by card?", "text": "カードで払えますか？", "rom": "kādo de haraemasu ka", "ph": "kah-doh deh hah-rah-eh-mahs kah", "note": "Transit IC cards (Suica, Pasmo) also work at most konbini." }
+        {
+          "id": "okaikei", "en": "The bill, please", "text": "お会計お願いします", "rom": "okaikei onegai shimasu", "ph": "oh-kai-kay oh-neh-gai shee-mahs", "note": "Usually you pay at the register by the door, not at the table.",
+          "replies": [
+            { "id": "okaikei-r1", "text": "レジでお願いします。", "rom": "reji de onegai shimasu", "en": "Please pay at the register." },
+            { "id": "okaikei-r2", "text": "お会計はご一緒でよろしいですか？", "rom": "okaikei wa goissho de yoroshii desu ka", "en": "All on one bill?" }
+          ]
+        },
+        {
+          "id": "kaado", "en": "Can I pay by card?", "text": "カードで払えますか？", "rom": "kādo de haraemasu ka", "ph": "kah-doh deh hah-rah-eh-mahs kah", "note": "Transit IC cards (Suica, Pasmo) also work at most konbini.",
+          "replies": [
+            { "id": "kaado-r1", "text": "一括でよろしいですか？", "rom": "ikkatsu de yoroshii desu ka", "en": "In one payment?" },
+            { "id": "kaado-r2", "text": "現金のみです。", "rom": "genkin nomi desu", "en": "Cash only." }
+          ]
+        }
       ]
     }
   ]

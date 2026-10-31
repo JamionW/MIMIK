@@ -12,7 +12,13 @@
       "hours": [5, 12],
       "phrases": [
         { "id": "goedemorgen", "en": "Good morning", "text": "Goedemorgen", "ph": "khoo-duh-MOR-khun", "note": "The g is a throaty kh, as in Scottish loch." },
-        { "id": "koffie", "en": "A coffee, please", "text": "Een koffie, alstublieft", "ph": "un KOF-fee, ahl-stoo-BLEEFT" },
+        {
+          "id": "koffie", "en": "A coffee, please", "text": "Een koffie, alstublieft", "ph": "un KOF-fee, ahl-stoo-BLEEFT",
+          "replies": [
+            { "id": "koffie-r1", "text": "Voor hier of om mee te nemen?", "en": "For here or to take away?" },
+            { "id": "koffie-r2", "text": "Anders nog iets?", "en": "Anything else?" }
+          ]
+        },
         { "id": "koffie-verkeerd", "en": "A milky coffee", "text": "Een koffie verkeerd, alstublieft", "ph": "un KOF-fee fur-KAIRT, ahl-stoo-BLEEFT", "note": "Literally 'coffee the wrong way': more milk than coffee." },
         { "id": "jus-dorange", "en": "An orange juice", "text": "Een jus d'orange, alstublieft", "ph": "un ZHOO doh-RAHNZH, ahl-stoo-BLEEFT" },
         { "id": "broodje-kaas", "en": "A cheese roll", "text": "Een broodje kaas, alstublieft", "ph": "un BROHT-yuh KAHS, ahl-stoo-BLEEFT" },
@@ -25,7 +31,14 @@
       "hours": [12, 14],
       "phrases": [
         { "id": "goedemiddag-l", "en": "Good afternoon", "text": "Goedemiddag", "ph": "khoo-duh-MID-dakh" },
-        { "id": "tafel-voor-twee-l", "en": "A table for two", "text": "Een tafel voor twee", "ph": "un TAH-ful vor TVAY" },
+        {
+          "id": "tafel-voor-twee-l", "en": "A table for two", "text": "Een tafel voor twee", "ph": "un TAH-ful vor TVAY",
+          "replies": [
+            { "id": "tafel-voor-twee-l-r1", "text": "Heeft u gereserveerd?", "en": "Have you booked?" },
+            { "id": "tafel-voor-twee-l-r2", "text": "Binnen of op het terras?", "en": "Inside or on the terrace?" },
+            { "id": "tafel-voor-twee-l-r3", "text": "Loopt u maar mee.", "en": "Come with me." }
+          ]
+        },
         { "id": "de-kaart", "en": "The menu, please", "text": "De kaart, alstublieft", "ph": "duh KAHRT, ahl-stoo-BLEEFT" },
         { "id": "soep-van-de-dag", "en": "What is the soup of the day?", "text": "Wat is de soep van de dag?", "ph": "vat is duh SOOP fun duh DAKH" },
         { "id": "uitsmijter", "en": "An uitsmijter, please", "text": "Een uitsmijter, alstublieft", "ph": "un OUT-smy-tur, ahl-stoo-BLEEFT", "note": "Fried eggs on bread with ham or cheese: the classic lunch." },
@@ -40,11 +53,22 @@
       "hours": [14, 18],
       "phrases": [
         { "id": "goedemiddag", "en": "Good afternoon", "text": "Goedemiddag", "ph": "khoo-duh-MID-dakh" },
-        { "id": "biertje", "en": "A beer, please", "text": "Een biertje, alstublieft", "ph": "un BEER-tyuh, ahl-stoo-BLEEFT", "note": "You get a small glass of draught unless you ask otherwise." },
+        {
+          "id": "biertje", "en": "A beer, please", "text": "Een biertje, alstublieft", "ph": "un BEER-tyuh, ahl-stoo-BLEEFT", "note": "You get a small glass of draught unless you ask otherwise.",
+          "replies": [
+            { "id": "biertje-r1", "text": "Een fluitje of een vaasje?", "en": "A small glass or a regular one?" }
+          ]
+        },
         { "id": "appeltaart", "en": "Apple pie with whipped cream", "text": "Appeltaart met slagroom", "ph": "AH-pul-tahrt met SLAKH-rohm" },
         { "id": "twee-kaartjes", "en": "Two tickets, please", "text": "Twee kaartjes, alstublieft", "ph": "TVAY KAHRT-yus, ahl-stoo-BLEEFT" },
         { "id": "hoe-laat-dicht", "en": "What time does it close?", "text": "Hoe laat gaat het dicht?", "ph": "hoo LAHT khaht ut DIKHT" },
-        { "id": "foto", "en": "Can I take a photo?", "text": "Mag ik een foto maken?", "ph": "makh ik un FOH-toh MAH-kun" }
+        {
+          "id": "foto", "en": "Can I take a photo?", "text": "Mag ik een foto maken?", "ph": "makh ik un FOH-toh MAH-kun",
+          "replies": [
+            { "id": "foto-r1", "text": "Ja hoor.", "en": "Yes, sure." },
+            { "id": "foto-r2", "text": "Zonder flits, alstublieft.", "en": "No flash, please." }
+          ]
+        }
       ]
     },
     {
@@ -53,8 +77,21 @@
       "hours": [18, 5],
       "phrases": [
         { "id": "goedenavond", "en": "Good evening", "text": "Goedenavond", "ph": "khoo-dun-AH-vont" },
-        { "id": "heeft-u-een-tafel", "en": "Do you have a table for two?", "text": "Heeft u een tafel voor twee?", "ph": "HAYFT oo un TAH-ful vor TVAY" },
-        { "id": "reservering", "en": "I have a reservation under ...", "text": "Ik heb een reservering op naam van ...", "say": "Ik heb een reservering op naam van", "ph": "ik HEP un ray-zur-VAY-ring op NAHM fun" },
+        {
+          "id": "heeft-u-een-tafel", "en": "Do you have a table for two?", "text": "Heeft u een tafel voor twee?", "ph": "HAYFT oo un TAH-ful vor TVAY",
+          "replies": [
+            { "id": "heeft-u-een-tafel-r1", "text": "Heeft u gereserveerd?", "en": "Have you booked?" },
+            { "id": "heeft-u-een-tafel-r2", "text": "Binnen of op het terras?", "en": "Inside or on the terrace?" },
+            { "id": "heeft-u-een-tafel-r3", "text": "Loopt u maar mee.", "en": "Come with me." }
+          ]
+        },
+        {
+          "id": "reservering", "en": "I have a reservation under ...", "text": "Ik heb een reservering op naam van ...", "say": "Ik heb een reservering op naam van", "ph": "ik HEP un ray-zur-VAY-ring op NAHM fun",
+          "replies": [
+            { "id": "reservering-r1", "text": "Op welke naam?", "en": "Under what name?" },
+            { "id": "reservering-r2", "text": "Met hoeveel personen?", "en": "For how many people?" }
+          ]
+        },
         { "id": "wijn", "en": "A glass of red / white wine", "text": "Een glas rode / witte wijn", "say": "Een glas rode wijn. Een glas witte wijn.", "ph": "un KHLAHS ROH-duh / VIT-tuh VINE" },
         { "id": "bitterballen", "en": "Bitterballen, please", "text": "Bitterballen, alstublieft", "ph": "BIT-tur-bahl-lun, ahl-stoo-BLEEFT", "note": "Fried ragout balls with mustard: the bar snack." },
         { "id": "proost", "en": "Cheers!", "text": "Proost!", "ph": "PROHST" },
@@ -75,7 +112,13 @@
         { "id": "sorry", "en": "Sorry", "text": "Sorry", "ph": "SOR-ree" },
         { "id": "ja-nee", "en": "Yes / No", "text": "Ja / Nee", "say": "Ja. Nee.", "ph": "YAH / NAY" },
         { "id": "geen-nederlands", "en": "I don't speak Dutch", "text": "Ik spreek geen Nederlands", "ph": "ik SPRAYK khayn NAY-dur-lahnts" },
-        { "id": "spreekt-u-engels", "en": "Do you speak English?", "text": "Spreekt u Engels?", "ph": "SPRAYKT oo ENG-uls", "note": "Nearly everyone does; asking first is still polite." },
+        {
+          "id": "spreekt-u-engels", "en": "Do you speak English?", "text": "Spreekt u Engels?", "ph": "SPRAYKT oo ENG-uls", "note": "Nearly everyone does; asking first is still polite.",
+          "replies": [
+            { "id": "spreekt-u-engels-r1", "text": "Ja hoor, geen probleem.", "en": "Yes, no problem." },
+            { "id": "spreekt-u-engels-r2", "text": "Een beetje.", "en": "A little." }
+          ]
+        },
         { "id": "begrijp-niet", "en": "I don't understand", "text": "Ik begrijp het niet", "ph": "ik buh-KHRAIP ut NEET" },
         { "id": "langzamer", "en": "More slowly, please", "text": "Langzamer, alstublieft", "ph": "LAHNG-zah-mur, ahl-stoo-BLEEFT" },
         { "id": "dag", "en": "Goodbye", "text": "Dag", "ph": "DAKH", "note": "Also: doei (DOO-ee), or tot ziens (tot ZEENS)." }
@@ -87,11 +130,34 @@
       "phrases": [
         { "id": "toilet", "en": "Where is the toilet?", "text": "Waar is het toilet?", "ph": "VAHR is ut twah-LET" },
         { "id": "station", "en": "Where is the station?", "text": "Waar is het station?", "ph": "VAHR is ut stah-SYON" },
-        { "id": "is-het-ver", "en": "Is it far?", "text": "Is het ver?", "ph": "is ut FAIR" },
-        { "id": "kaartje-naar", "en": "A ticket to ...", "text": "Een kaartje naar ...", "say": "Een kaartje naar", "ph": "un KAHRT-yuh nahr", "note": "Trains and trams take a contactless bank card: tap in and tap out." },
+        {
+          "id": "is-het-ver", "en": "Is it far?", "text": "Is het ver?", "ph": "is ut FAIR",
+          "replies": [
+            { "id": "is-het-ver-r1", "text": "Nee, het is vlakbij.", "en": "No, it's nearby." },
+            { "id": "is-het-ver-r2", "text": "Ja, neem maar de tram.", "en": "Yes, best take the tram." }
+          ]
+        },
+        {
+          "id": "kaartje-naar", "en": "A ticket to ...", "text": "Een kaartje naar ...", "say": "Een kaartje naar", "ph": "un KAHRT-yuh nahr", "note": "Trains and trams take a contactless bank card: tap in and tap out.",
+          "replies": [
+            { "id": "kaartje-naar-r1", "text": "Enkele reis of retour?", "en": "One way or return?" }
+          ]
+        },
         { "id": "hoeveel-kost-het", "en": "How much is it?", "text": "Hoeveel kost het?", "ph": "hoo-VAYL KOST ut" },
-        { "id": "de-rekening", "en": "The bill, please", "text": "De rekening, alstublieft", "ph": "duh RAY-kuh-ning, ahl-stoo-BLEEFT" },
-        { "id": "pinnen", "en": "Can I pay by card?", "text": "Kan ik pinnen?", "ph": "kahn ik PIN-nun", "note": "Many places are card-only; cash is what gets refused." }
+        {
+          "id": "de-rekening", "en": "The bill, please", "text": "De rekening, alstublieft", "ph": "duh RAY-kuh-ning, ahl-stoo-BLEEFT",
+          "replies": [
+            { "id": "de-rekening-r1", "text": "Samen of apart?", "en": "Together or separately?" },
+            { "id": "de-rekening-r2", "text": "Pinnen of contant?", "en": "Card or cash?" }
+          ]
+        },
+        {
+          "id": "pinnen", "en": "Can I pay by card?", "text": "Kan ik pinnen?", "ph": "kahn ik PIN-nun", "note": "Many places are card-only; cash is what gets refused.",
+          "replies": [
+            { "id": "pinnen-r1", "text": "Ja hoor.", "en": "Yes, sure." },
+            { "id": "pinnen-r2", "text": "Alleen contant, sorry.", "en": "Cash only, sorry." }
+          ]
+        }
       ]
     }
   ]

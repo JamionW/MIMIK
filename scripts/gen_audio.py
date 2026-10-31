@@ -2,6 +2,7 @@
 
 Masculine clips go to site/<code>/audio/<id>.mp3, feminine to site/<code>/audio/f/<id>.mp3;
 a phrase's "f" object overrides its text for the feminine voice.
+Replies (a phrase's "replies" list) get clips in both voices like any phrase.
 
 Usage: python scripts/gen_audio.py [--dry-run] [--force] [code ...]
 With language codes (pt es ...) only those languages are generated.
@@ -21,6 +22,8 @@ def items(data):
         for p in sec["phrases"]:
             yield p
             yield from p.get("alt", [])
+            # Replies are rendered in both voices too; the app plays the one opposite the user's.
+            yield from p.get("replies", [])
 
 
 async def generate(out, voice, item, force, gender):

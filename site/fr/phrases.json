@@ -12,9 +12,20 @@
       "hours": [5, 12],
       "phrases": [
         { "id": "bonjour", "en": "Good morning / Hello", "text": "Bonjour", "ph": "bohn-ZHOOR", "note": "Say it on entering any shop. Skipping it reads as rude." },
-        { "id": "un-cafe", "en": "A coffee (espresso), please", "text": "Un café, s'il vous plaît", "ph": "uhn kah-FAY, seel voo PLEH" },
+        {
+          "id": "un-cafe", "en": "A coffee (espresso), please", "text": "Un café, s'il vous plaît", "ph": "uhn kah-FAY, seel voo PLEH",
+          "replies": [
+            { "id": "un-cafe-r1", "text": "Sur place ou à emporter ?", "en": "For here or to take away?" }
+          ]
+        },
         { "id": "cafe-creme", "en": "A coffee with milk", "text": "Un café crème, s'il vous plaît", "ph": "uhn kah-FAY KREHM, seel voo PLEH", "note": "Café au lait is mostly a home drink; cafés serve a crème." },
-        { "id": "croissant", "en": "A croissant, please", "text": "Un croissant, s'il vous plaît", "ph": "uhn krwah-SAHN, seel voo PLEH" },
+        {
+          "id": "croissant", "en": "A croissant, please", "text": "Un croissant, s'il vous plaît", "ph": "uhn krwah-SAHN, seel voo PLEH",
+          "replies": [
+            { "id": "croissant-r1", "text": "Et avec ceci ?", "en": "Anything else?" },
+            { "id": "croissant-r2", "text": "Ce sera tout ?", "en": "Will that be all?" }
+          ]
+        },
         {
           "id": "pain-au-chocolat", "en": "A chocolate pastry", "text": "Un pain au chocolat", "ph": "uhn PAN oh shoh-koh-LAH",
           "alt": [
@@ -30,7 +41,14 @@
       "title": "Lunch",
       "hours": [12, 15],
       "phrases": [
-        { "id": "table-pour-deux-l", "en": "A table for two", "text": "Une table pour deux", "ph": "ewn TAH-bluh poor DUH" },
+        {
+          "id": "table-pour-deux-l", "en": "A table for two", "text": "Une table pour deux", "ph": "ewn TAH-bluh poor DUH",
+          "replies": [
+            { "id": "table-pour-deux-l-r1", "text": "Vous avez réservé ?", "en": "Have you booked?" },
+            { "id": "table-pour-deux-l-r2", "text": "En terrasse ou à l'intérieur ?", "en": "On the terrace or inside?" },
+            { "id": "table-pour-deux-l-r3", "text": "Suivez-moi.", "en": "Follow me." }
+          ]
+        },
         { "id": "la-carte", "en": "The menu, please", "text": "La carte, s'il vous plaît", "ph": "lah KART, seel voo PLEH", "note": "Le menu means the fixed-price set meal." },
         { "id": "formule", "en": "What is the lunch set?", "text": "Quelle est la formule du midi ?", "ph": "kel EH lah for-MEWL dew mee-DEE", "note": "Two or three courses at a set price, lunch only." },
         { "id": "je-voudrais", "en": "I'd like this, please", "text": "Je voudrais ça, s'il vous plaît", "ph": "zhuh voo-DREH SAH, seel voo PLEH" },
@@ -44,10 +62,27 @@
       "hours": [15, 19],
       "phrases": [
         { "id": "un-demi", "en": "A small draught beer", "text": "Un demi, s'il vous plaît", "ph": "uhn duh-MEE, seel voo PLEH", "note": "About 25 cl. Une pression is draught of any size." },
-        { "id": "une-boule", "en": "One scoop (ice cream), please", "text": "Une boule, s'il vous plaît", "ph": "ewn BOOL, seel voo PLEH", "note": "Cornet is a cone, pot a cup." },
-        { "id": "deux-billets", "en": "Two tickets, please", "text": "Deux billets, s'il vous plaît", "ph": "DUH bee-YAY, seel voo PLEH" },
+        {
+          "id": "une-boule", "en": "One scoop (ice cream), please", "text": "Une boule, s'il vous plaît", "ph": "ewn BOOL, seel voo PLEH", "note": "Cornet is a cone, pot a cup.",
+          "replies": [
+            { "id": "une-boule-r1", "text": "Cornet ou pot ?", "en": "Cone or cup?" },
+            { "id": "une-boule-r2", "text": "Quel parfum ?", "en": "Which flavour?" }
+          ]
+        },
+        {
+          "id": "deux-billets", "en": "Two tickets, please", "text": "Deux billets, s'il vous plaît", "ph": "DUH bee-YAY, seel voo PLEH",
+          "replies": [
+            { "id": "deux-billets-r1", "text": "Plein tarif ?", "en": "Full price?" }
+          ]
+        },
         { "id": "ca-ferme", "en": "What time does it close?", "text": "À quelle heure ça ferme ?", "ph": "ah kel UHR sah FEHRM" },
-        { "id": "photo", "en": "Can I take a photo?", "text": "Je peux prendre une photo ?", "ph": "zhuh PUH PRAHN-druh ewn foh-TOH" }
+        {
+          "id": "photo", "en": "Can I take a photo?", "text": "Je peux prendre une photo ?", "ph": "zhuh PUH PRAHN-druh ewn foh-TOH",
+          "replies": [
+            { "id": "photo-r1", "text": "Oui, allez-y.", "en": "Yes, go ahead." },
+            { "id": "photo-r2", "text": "Sans flash, s'il vous plaît.", "en": "No flash, please." }
+          ]
+        }
       ]
     },
     {
@@ -56,8 +91,21 @@
       "hours": [19, 5],
       "phrases": [
         { "id": "bonsoir", "en": "Good evening", "text": "Bonsoir", "ph": "bohn-SWAHR", "note": "Bonne nuit is only for bedtime." },
-        { "id": "une-table", "en": "Do you have a table for two?", "text": "Vous avez une table pour deux ?", "ph": "voo-zah-VAY ewn TAH-bluh poor DUH" },
-        { "id": "reservation", "en": "I have a reservation under ...", "text": "J'ai une réservation au nom de ...", "say": "J'ai une réservation au nom de", "ph": "zhay ewn ray-zehr-vah-SYOHN oh NOHN duh" },
+        {
+          "id": "une-table", "en": "Do you have a table for two?", "text": "Vous avez une table pour deux ?", "ph": "voo-zah-VAY ewn TAH-bluh poor DUH",
+          "replies": [
+            { "id": "une-table-r1", "text": "Vous avez réservé ?", "en": "Have you booked?" },
+            { "id": "une-table-r2", "text": "En terrasse ou à l'intérieur ?", "en": "On the terrace or inside?" },
+            { "id": "une-table-r3", "text": "Suivez-moi.", "en": "Follow me." }
+          ]
+        },
+        {
+          "id": "reservation", "en": "I have a reservation under ...", "text": "J'ai une réservation au nom de ...", "say": "J'ai une réservation au nom de", "ph": "zhay ewn ray-zehr-vah-SYOHN oh NOHN duh",
+          "replies": [
+            { "id": "reservation-r1", "text": "À quel nom ?", "en": "Under what name?" },
+            { "id": "reservation-r2", "text": "Pour combien de personnes ?", "en": "For how many people?" }
+          ]
+        },
         { "id": "vin", "en": "A glass of red / white wine", "text": "Un verre de vin rouge / blanc", "say": "Un verre de vin rouge. Un verre de vin blanc.", "ph": "uhn VEHR duh van ROOZH / BLAHN" },
         { "id": "sante", "en": "Cheers!", "text": "Santé !", "say": "Santé !", "ph": "sahn-TAY", "note": "Also: à la vôtre (ah lah VOH-truh)." },
         { "id": "delicieux", "en": "It was delicious", "text": "C'était délicieux", "ph": "say-TEH day-lee-SYUH" },
@@ -78,7 +126,13 @@
         { "id": "desole", "en": "I'm sorry", "text": "Désolé", "ph": "day-zoh-LAY", "f": { "text": "Désolée" } },
         { "id": "oui-non", "en": "Yes / No", "text": "Oui / Non", "say": "Oui. Non.", "ph": "WEE / NOHN" },
         { "id": "je-ne-parle-pas", "en": "I don't speak French", "text": "Je ne parle pas français", "ph": "zhuh nuh PARL pah frahn-SEH" },
-        { "id": "vous-parlez-anglais", "en": "Do you speak English?", "text": "Vous parlez anglais ?", "ph": "voo par-LAY ahn-GLEH" },
+        {
+          "id": "vous-parlez-anglais", "en": "Do you speak English?", "text": "Vous parlez anglais ?", "ph": "voo par-LAY ahn-GLEH",
+          "replies": [
+            { "id": "vous-parlez-anglais-r1", "text": "Un peu.", "en": "A little." },
+            { "id": "vous-parlez-anglais-r2", "text": "Non, pas vraiment.", "en": "No, not really." }
+          ]
+        },
         { "id": "je-ne-comprends-pas", "en": "I don't understand", "text": "Je ne comprends pas", "ph": "zhuh nuh kohn-PRAHN PAH" },
         { "id": "plus-lentement", "en": "More slowly, please", "text": "Plus lentement, s'il vous plaît", "ph": "plew lahnt-MAHN, seel voo PLEH" },
         { "id": "au-revoir", "en": "Goodbye", "text": "Au revoir", "ph": "oh ruh-VWAHR", "note": "Casual: salut (sah-LEW)." }
@@ -90,11 +144,34 @@
       "phrases": [
         { "id": "toilettes", "en": "Where are the toilets?", "text": "Où sont les toilettes ?", "ph": "OO sohn lay twah-LET" },
         { "id": "metro", "en": "Where is the metro?", "text": "Où est le métro ?", "ph": "OO eh luh may-TROH" },
-        { "id": "cest-loin", "en": "Is it far?", "text": "C'est loin ?", "ph": "seh LWAN" },
-        { "id": "billet-pour", "en": "A ticket to ...", "text": "Un billet pour ...", "say": "Un billet pour", "ph": "uhn bee-YAY poor" },
+        {
+          "id": "cest-loin", "en": "Is it far?", "text": "C'est loin ?", "ph": "seh LWAN",
+          "replies": [
+            { "id": "cest-loin-r1", "text": "Non, c'est tout près.", "en": "No, it's very close." },
+            { "id": "cest-loin-r2", "text": "C'est un peu loin, prenez le métro.", "en": "It's a bit far, take the metro." }
+          ]
+        },
+        {
+          "id": "billet-pour", "en": "A ticket to ...", "text": "Un billet pour ...", "say": "Un billet pour", "ph": "uhn bee-YAY poor",
+          "replies": [
+            { "id": "billet-pour-r1", "text": "Aller simple ou aller-retour ?", "en": "One way or return?" }
+          ]
+        },
         { "id": "cest-combien", "en": "How much is it?", "text": "C'est combien ?", "ph": "seh kohn-BYAN" },
-        { "id": "laddition", "en": "The bill, please", "text": "L'addition, s'il vous plaît", "ph": "lah-dee-SYOHN, seel voo PLEH", "note": "It won't come until you ask. Service is included." },
-        { "id": "par-carte", "en": "Can I pay by card?", "text": "Je peux payer par carte ?", "ph": "zhuh PUH peh-YAY par KART" }
+        {
+          "id": "laddition", "en": "The bill, please", "text": "L'addition, s'il vous plaît", "ph": "lah-dee-SYOHN, seel voo PLEH", "note": "It won't come until you ask. Service is included.",
+          "replies": [
+            { "id": "laddition-r1", "text": "Ensemble ou séparément ?", "en": "Together or separately?" },
+            { "id": "laddition-r2", "text": "Vous payez par carte ?", "en": "Are you paying by card?" }
+          ]
+        },
+        {
+          "id": "par-carte", "en": "Can I pay by card?", "text": "Je peux payer par carte ?", "ph": "zhuh PUH peh-YAY par KART",
+          "replies": [
+            { "id": "par-carte-r1", "text": "Oui, bien sûr.", "en": "Yes, of course." },
+            { "id": "par-carte-r2", "text": "Pas en dessous de dix euros.", "en": "Not under ten euros." }
+          ]
+        }
       ]
     }
   ]
