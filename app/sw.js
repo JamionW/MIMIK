@@ -25,7 +25,7 @@ async function clipPaths(c) {
   const res = (await c.match('phrases.json')) || (await fetch('phrases.json').catch(() => null));
   if (!res || !res.ok) return [];
   const data = await res.json();
-  const ids = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])])).map(p => p.id);
+  const ids = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || []), ...(p.replies || [])])).map(p => p.id);
   return ids.flatMap(id => [`audio/${id}.mp3`, `audio/f/${id}.mp3`]);
 }
 

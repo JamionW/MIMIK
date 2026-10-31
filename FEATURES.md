@@ -9,7 +9,7 @@ Status values: `planned`, `in progress`, `done`, `dropped`.
 | 1 | Offline-ready indicator | done (branch `claude/stoic-cori-vgqowh`) |
 | 2 | Show mode | done (branch `claude/stoic-cori-vgqowh`) |
 | 3 | Lock-screen and earbud controls | done (branch `claude/stoic-cori-vgqowh`) |
-| 4 | "What you'll hear" replies | planned |
+| 4 | "What you'll hear" replies | done (branch `claude/stoic-cori-vgqowh`) |
 | 5 | Search across sections | planned |
 | 6 | Phrase linter in CI | planned |
 | 7 | Human recordings override TTS | planned |

@@ -12,7 +12,13 @@
       "hours": [5, 13],
       "phrases": [
         { "id": "buenos-dias", "en": "Good morning", "text": "Buenos días", "ph": "BWEH-nohs DEE-ahs" },
-        { "id": "un-cafe", "en": "A coffee, please", "text": "Un café americano, por favor", "ph": "oon kah-FEH ah-meh-ree-KAH-noh, por fah-VOR", "note": "Café de olla is the traditional one, brewed with cinnamon and piloncillo." },
+        {
+          "id": "un-cafe", "en": "A coffee, please", "text": "Un café americano, por favor", "ph": "oon kah-FEH ah-meh-ree-KAH-noh, por fah-VOR", "note": "Café de olla is the traditional one, brewed with cinnamon and piloncillo.",
+          "replies": [
+            { "id": "un-cafe-r1", "text": "¿Para aquí o para llevar?", "en": "For here or to go?" },
+            { "id": "un-cafe-r2", "text": "¿Algo más?", "en": "Anything else?" }
+          ]
+        },
         { "id": "cafe-con-leche", "en": "A coffee with milk", "text": "Un café con leche, por favor", "ph": "oon kah-FEH kohn LEH-cheh, por fah-VOR" },
         { "id": "jugo-naranja", "en": "An orange juice", "text": "Un jugo de naranja, por favor", "ph": "oon HOO-goh deh nah-RAHN-hah, por fah-VOR" },
         { "id": "chilaquiles", "en": "Chilaquiles, please", "text": "Unos chilaquiles, por favor", "ph": "OO-nohs chee-lah-KEE-lehs, por fah-VOR", "note": "They will ask verdes o rojos: green or red salsa." },
@@ -26,11 +32,23 @@
       "hours": [13, 17],
       "phrases": [
         { "id": "buenas-tardes-l", "en": "Good afternoon (from noon)", "text": "Buenas tardes", "ph": "BWEH-nahs TAR-dehs" },
-        { "id": "mesa-para-dos-l", "en": "A table for two", "text": "Una mesa para dos", "ph": "OO-nah MEH-sah PAH-rah DOHS" },
+        {
+          "id": "mesa-para-dos-l", "en": "A table for two", "text": "Una mesa para dos", "ph": "OO-nah MEH-sah PAH-rah DOHS",
+          "replies": [
+            { "id": "mesa-para-dos-l-r1", "text": "¿Tienen reservación?", "en": "Do you have a reservation?" },
+            { "id": "mesa-para-dos-l-r2", "text": "¿Adentro o afuera?", "en": "Inside or outside?" },
+            { "id": "mesa-para-dos-l-r3", "text": "Pásenle, por aquí.", "en": "Come in, this way." }
+          ]
+        },
         { "id": "el-menu", "en": "The menu, please", "text": "El menú, por favor", "ph": "el meh-NOO, por fah-VOR" },
         { "id": "comida-corrida", "en": "What's on the set lunch?", "text": "¿Qué hay de comida corrida?", "ph": "keh EYE deh koh-MEE-dah koh-REE-dah", "note": "The cheap fixed lunch: soup, rice, a main, a drink." },
         { "id": "me-da-esto", "en": "I'd like this, please", "text": "Me da esto, por favor", "ph": "meh DAH EHS-toh, por fah-VOR" },
-        { "id": "agua", "en": "Still / sparkling water", "text": "Agua natural / mineral", "say": "Agua natural. Agua mineral.", "ph": "AH-gwah nah-too-RAHL / mee-neh-RAHL", "note": "Agua mineral means sparkling. Drink bottled, not tap." },
+        {
+          "id": "agua", "en": "Still / sparkling water", "text": "Agua natural / mineral", "say": "Agua natural. Agua mineral.", "ph": "AH-gwah nah-too-RAHL / mee-neh-RAHL", "note": "Agua mineral means sparkling. Drink bottled, not tap.",
+          "replies": [
+            { "id": "agua-r1", "text": "¿Al tiempo o fría?", "en": "Room temperature or cold?" }
+          ]
+        },
         { "id": "sin-picante", "en": "Not spicy, please", "text": "Sin picante, por favor", "ph": "seen pee-KAHN-teh, por fah-VOR", "note": "A waiter's no pica can still mean a little." },
         { "id": "no-gracias", "en": "No, thank you", "text": "No, gracias", "ph": "NOH, GRAH-syahs" }
       ]
@@ -41,11 +59,23 @@
       "hours": [17, 20],
       "phrases": [
         { "id": "buenas-tardes", "en": "Good afternoon", "text": "Buenas tardes", "ph": "BWEH-nahs TAR-dehs" },
-        { "id": "una-cerveza", "en": "A beer, please", "text": "Una cerveza, por favor", "ph": "OO-nah sehr-VEH-sah, por fah-VOR", "note": "Una chela is the casual word." },
+        {
+          "id": "una-cerveza", "en": "A beer, please", "text": "Una cerveza, por favor", "ph": "OO-nah sehr-VEH-sah, por fah-VOR", "note": "Una chela is the casual word.",
+          "replies": [
+            { "id": "una-cerveza-r1", "text": "¿Clara u oscura?", "en": "Lager or dark?" },
+            { "id": "una-cerveza-r2", "text": "¿De barril o de botella?", "en": "Draught or bottled?" }
+          ]
+        },
         { "id": "michelada", "en": "A michelada, please", "text": "Una michelada, por favor", "ph": "OO-nah mee-cheh-LAH-dah, por fah-VOR", "note": "Beer with lime, salt and chili sauce. A chelada is just lime and salt." },
         { "id": "dos-boletos", "en": "Two tickets, please", "text": "Dos boletos, por favor", "ph": "DOHS boh-LEH-tohs, por fah-VOR" },
         { "id": "a-que-hora-cierra", "en": "What time does it close?", "text": "¿A qué hora cierra?", "ph": "ah keh OH-rah SYEH-rah" },
-        { "id": "tomar-foto", "en": "Can I take a photo?", "text": "¿Puedo tomar una foto?", "ph": "PWEH-doh toh-MAR OO-nah FOH-toh" }
+        {
+          "id": "tomar-foto", "en": "Can I take a photo?", "text": "¿Puedo tomar una foto?", "ph": "PWEH-doh toh-MAR OO-nah FOH-toh",
+          "replies": [
+            { "id": "tomar-foto-r1", "text": "Sí, adelante.", "en": "Yes, go ahead." },
+            { "id": "tomar-foto-r2", "text": "Sin flash, por favor.", "en": "No flash, please." }
+          ]
+        }
       ]
     },
     {
@@ -54,9 +84,28 @@
       "hours": [20, 5],
       "phrases": [
         { "id": "buenas-noches", "en": "Good evening / Good night", "text": "Buenas noches", "ph": "BWEH-nahs NOH-chehs" },
-        { "id": "tiene-mesa", "en": "Do you have a table for two?", "text": "¿Tiene mesa para dos?", "ph": "TYEH-neh MEH-sah PAH-rah DOHS" },
-        { "id": "reservacion", "en": "I have a reservation under ...", "text": "Tengo una reservación a nombre de ...", "say": "Tengo una reservación a nombre de", "ph": "TEHN-goh OO-nah reh-sehr-vah-SYOHN ah NOHM-breh deh" },
-        { "id": "tacos-al-pastor", "en": "Three tacos al pastor, please", "text": "Tres tacos al pastor, por favor", "ph": "TREHS TAH-kohs ahl pahs-TOR, por fah-VOR", "note": "Con todo gets onion, cilantro and pineapple." },
+        {
+          "id": "tiene-mesa", "en": "Do you have a table for two?", "text": "¿Tiene mesa para dos?", "ph": "TYEH-neh MEH-sah PAH-rah DOHS",
+          "replies": [
+            { "id": "tiene-mesa-r1", "text": "¿Tienen reservación?", "en": "Do you have a reservation?" },
+            { "id": "tiene-mesa-r2", "text": "¿Adentro o afuera?", "en": "Inside or outside?" },
+            { "id": "tiene-mesa-r3", "text": "Pásenle, por aquí.", "en": "Come in, this way." }
+          ]
+        },
+        {
+          "id": "reservacion", "en": "I have a reservation under ...", "text": "Tengo una reservación a nombre de ...", "say": "Tengo una reservación a nombre de", "ph": "TEHN-goh OO-nah reh-sehr-vah-SYOHN ah NOHM-breh deh",
+          "replies": [
+            { "id": "reservacion-r1", "text": "¿A nombre de quién?", "en": "Under whose name?" },
+            { "id": "reservacion-r2", "text": "¿Para cuántas personas?", "en": "For how many people?" }
+          ]
+        },
+        {
+          "id": "tacos-al-pastor", "en": "Three tacos al pastor, please", "text": "Tres tacos al pastor, por favor", "ph": "TREHS TAH-kohs ahl pahs-TOR, por fah-VOR", "note": "Con todo gets onion, cilantro and pineapple.",
+          "replies": [
+            { "id": "tacos-al-pastor-r1", "text": "¿Con todo?", "en": "With everything (onion and coriander)?" },
+            { "id": "tacos-al-pastor-r2", "text": "¿Con piña?", "en": "With pineapple?" }
+          ]
+        },
         { "id": "vino", "en": "A glass of red / white wine", "text": "Una copa de vino tinto / blanco", "say": "Una copa de vino tinto. Una copa de vino blanco.", "ph": "OO-nah KOH-pah deh VEE-noh TEEN-toh / BLAHN-koh" },
         { "id": "mezcal", "en": "A mezcal, please", "text": "Un mezcal, por favor", "ph": "oon mehs-KAHL, por fah-VOR", "note": "Sip it; it comes with orange slices and chili salt." },
         { "id": "salud", "en": "Cheers!", "text": "¡Salud!", "ph": "sah-LOOD" },
@@ -79,7 +128,13 @@
         { "id": "perdon", "en": "Sorry", "text": "Perdón", "ph": "pehr-DOHN" },
         { "id": "si-no", "en": "Yes / No", "text": "Sí / No", "say": "Sí. No.", "ph": "SEE / NOH" },
         { "id": "no-hablo", "en": "I don't speak Spanish", "text": "No hablo español", "ph": "noh AH-bloh ehs-pah-NYOHL" },
-        { "id": "habla-ingles", "en": "Do you speak English?", "text": "¿Habla inglés?", "ph": "AH-blah een-GLEHS" },
+        {
+          "id": "habla-ingles", "en": "Do you speak English?", "text": "¿Habla inglés?", "ph": "AH-blah een-GLEHS",
+          "replies": [
+            { "id": "habla-ingles-r1", "text": "Un poco.", "en": "A little." },
+            { "id": "habla-ingles-r2", "text": "No, perdón.", "en": "No, sorry." }
+          ]
+        },
         { "id": "no-entiendo", "en": "I don't understand", "text": "No entiendo", "ph": "noh ehn-TYEHN-doh" },
         { "id": "mas-despacio", "en": "More slowly, please", "text": "Más despacio, por favor", "ph": "MAHS dehs-PAH-syoh, por fah-VOR" },
         { "id": "adios", "en": "Goodbye", "text": "Adiós", "ph": "ah-DYOHS", "note": "Casual: hasta luego (AHS-tah LWEH-goh)." }
@@ -91,11 +146,33 @@
       "phrases": [
         { "id": "bano", "en": "Where is the bathroom?", "text": "¿Dónde está el baño?", "ph": "DOHN-deh ehs-TAH el BAH-nyoh" },
         { "id": "metro", "en": "Where is the metro?", "text": "¿Dónde está el metro?", "ph": "DOHN-deh ehs-TAH el MEH-troh" },
-        { "id": "esta-lejos", "en": "Is it far?", "text": "¿Está lejos?", "ph": "ehs-TAH LEH-hohs" },
-        { "id": "boleto-a", "en": "A ticket to ...", "text": "Un boleto a ...", "say": "Un boleto a", "ph": "oon boh-LEH-toh ah" },
+        {
+          "id": "esta-lejos", "en": "Is it far?", "text": "¿Está lejos?", "ph": "ehs-TAH LEH-hohs",
+          "replies": [
+            { "id": "esta-lejos-r1", "text": "No, está cerca.", "en": "No, it's close." },
+            { "id": "esta-lejos-r2", "text": "Sí, mejor tome un taxi.", "en": "Yes, better take a taxi." }
+          ]
+        },
+        {
+          "id": "boleto-a", "en": "A ticket to ...", "text": "Un boleto a ...", "say": "Un boleto a", "ph": "oon boh-LEH-toh ah",
+          "replies": [
+            { "id": "boleto-a-r1", "text": "¿Sencillo o redondo?", "en": "One way or return?" }
+          ]
+        },
         { "id": "cuanto-cuesta", "en": "How much is it?", "text": "¿Cuánto cuesta?", "ph": "KWAHN-toh KWEHS-tah" },
-        { "id": "la-cuenta", "en": "The bill, please", "text": "La cuenta, por favor", "ph": "lah KWEHN-tah, por fah-VOR", "note": "Tip about 10 to 15 percent; say it before they run the card." },
-        { "id": "con-tarjeta", "en": "Can I pay by card?", "text": "¿Puedo pagar con tarjeta?", "ph": "PWEH-doh pah-GAR kohn tar-HEH-tah", "note": "Carry pesos for markets, taco stands and tips." }
+        {
+          "id": "la-cuenta", "en": "The bill, please", "text": "La cuenta, por favor", "ph": "lah KWEHN-tah, por fah-VOR", "note": "Tip about 10 to 15 percent; say it before they run the card.",
+          "replies": [
+            { "id": "la-cuenta-r1", "text": "¿Tarjeta o efectivo?", "en": "Card or cash?" }
+          ]
+        },
+        {
+          "id": "con-tarjeta", "en": "Can I pay by card?", "text": "¿Puedo pagar con tarjeta?", "ph": "PWEH-doh pah-GAR kohn tar-HEH-tah", "note": "Carry pesos for markets, taco stands and tips.",
+          "replies": [
+            { "id": "con-tarjeta-r1", "text": "Sí, claro.", "en": "Yes, of course." },
+            { "id": "con-tarjeta-r2", "text": "Solo efectivo.", "en": "Cash only." }
+          ]
+        }
       ]
     }
   ]

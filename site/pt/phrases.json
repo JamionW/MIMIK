@@ -18,11 +18,20 @@
           "alt": [
             { "id": "uma-bica", "tag": "Lisbon", "text": "Uma bica, por favor", "ph": "OO-muh BEE-kuh, poor fuh-VOR" },
             { "id": "um-cimbalino", "tag": "Porto", "text": "Um cimbalino, por favor", "ph": "oom seem-buh-LEE-noo, poor fuh-VOR" }
+          ],
+          "replies": [
+            { "id": "um-cafe-r1", "text": "É para aqui ou para levar?", "en": "For here or to take away?" },
+            { "id": "um-cafe-r2", "text": "Mais alguma coisa?", "en": "Anything else?" }
           ]
         },
         { "id": "dois-cafes", "en": "Two coffees, please", "text": "Dois cafés, por favor", "ph": "DOYSH kuh-FESH, poor fuh-VOR" },
         { "id": "um-galao", "en": "A milky coffee (in a glass)", "text": "Um galão, por favor", "ph": "oom guh-LOWNG, poor fuh-VOR", "note": "Meia de leite is the same idea, served in a cup." },
-        { "id": "pastel-de-nata", "en": "A custard tart", "text": "Um pastel de nata", "ph": "oom push-TEL duh NAH-tuh" },
+        {
+          "id": "pastel-de-nata", "en": "A custard tart", "text": "Um pastel de nata", "ph": "oom push-TEL duh NAH-tuh",
+          "replies": [
+            { "id": "pastel-de-nata-r1", "text": "Quer canela?", "en": "Do you want cinnamon on it?" }
+          ]
+        },
         { "id": "dois-pasteis", "en": "Two custard tarts", "text": "Dois pastéis de nata", "ph": "DOYSH push-TAYSH duh NAH-tuh" },
         { "id": "para-levar", "en": "To take away", "text": "Para levar", "ph": "PAH-ruh luh-VAR" }
       ]
@@ -33,11 +42,23 @@
       "hours": [12, 15],
       "phrases": [
         { "id": "boa-tarde-l", "en": "Good afternoon (from noon)", "text": "Boa tarde", "ph": "BOH-uh TARD" },
-        { "id": "mesa-dois-l", "en": "A table for two", "text": "Uma mesa para dois", "ph": "OO-muh MAY-zuh PAH-ruh DOYSH" },
+        {
+          "id": "mesa-dois-l", "en": "A table for two", "text": "Uma mesa para dois", "ph": "OO-muh MAY-zuh PAH-ruh DOYSH",
+          "replies": [
+            { "id": "mesa-dois-l-r1", "text": "Têm reserva?", "en": "Do you have a reservation?" },
+            { "id": "mesa-dois-l-r2", "text": "Dentro ou na esplanada?", "en": "Inside or on the terrace?" },
+            { "id": "mesa-dois-l-r3", "text": "Neste momento estamos cheios.", "en": "We're full at the moment." }
+          ]
+        },
         { "id": "ementa", "en": "The menu, please", "text": "A ementa, por favor", "ph": "uh ee-MEN-tuh, poor fuh-VOR" },
         { "id": "prato-do-dia", "en": "What is the dish of the day?", "text": "Qual é o prato do dia?", "ph": "KWAHL EH oo PRAH-too doo DEE-uh" },
         { "id": "queria-isto", "en": "I'd like this, please", "text": "Queria isto, por favor", "ph": "kuh-REE-uh EESH-too, poor fuh-VOR" },
-        { "id": "agua", "en": "Still / sparkling water", "text": "Água sem gás / com gás", "say": "Água sem gás. Água com gás.", "ph": "AH-gwuh sayng GAHSH / kohng GAHSH" },
+        {
+          "id": "agua", "en": "Still / sparkling water", "text": "Água sem gás / com gás", "say": "Água sem gás. Água com gás.", "ph": "AH-gwuh sayng GAHSH / kohng GAHSH",
+          "replies": [
+            { "id": "agua-r1", "text": "Fresca ou natural?", "en": "Cold or room temperature?" }
+          ]
+        },
         { "id": "nao-obrigado", "en": "No, thank you", "text": "Não, obrigado", "ph": "NOWNG, oh-bree-GAH-doo", "f": { "text": "Não, obrigada", "ph": "NOWNG, oh-bree-GAH-duh" }, "note": "Bread and olives put on the table are charged if eaten. Decline with this." }
       ]
     },
@@ -53,11 +74,26 @@
           "alt": [
             { "id": "imperial", "tag": "Lisbon", "text": "Uma imperial, por favor", "ph": "OO-muh eem-puh-ree-AHL, poor fuh-VOR" },
             { "id": "fino", "tag": "Porto", "text": "Um fino, por favor", "ph": "oom FEE-noo, poor fuh-VOR" }
+          ],
+          "replies": [
+            { "id": "cerveja-r1", "text": "Pequena ou grande?", "en": "Small or large?" },
+            { "id": "cerveja-r2", "text": "De pressão ou de garrafa?", "en": "Draught or bottled?" }
           ]
         },
-        { "id": "dois-bilhetes", "en": "Two tickets, please", "text": "Dois bilhetes, por favor", "ph": "DOYSH beel-YETSH, poor fuh-VOR" },
+        {
+          "id": "dois-bilhetes", "en": "Two tickets, please", "text": "Dois bilhetes, por favor", "ph": "DOYSH beel-YETSH, poor fuh-VOR",
+          "replies": [
+            { "id": "dois-bilhetes-r1", "text": "São dois adultos?", "en": "Two adults?" }
+          ]
+        },
         { "id": "a-que-horas-fecha", "en": "What time does it close?", "text": "A que horas fecha?", "ph": "uh kuh OR-ush FAY-shuh" },
-        { "id": "tirar-foto", "en": "Can I take a photo?", "text": "Posso tirar uma foto?", "ph": "POH-soo tee-RAR OO-muh FOH-too" }
+        {
+          "id": "tirar-foto", "en": "Can I take a photo?", "text": "Posso tirar uma foto?", "ph": "POH-soo tee-RAR OO-muh FOH-too",
+          "replies": [
+            { "id": "tirar-foto-r1", "text": "Sim, à vontade.", "en": "Yes, go ahead." },
+            { "id": "tirar-foto-r2", "text": "Sem flash, por favor.", "en": "No flash, please." }
+          ]
+        }
       ]
     },
     {
@@ -66,8 +102,21 @@
       "hours": [19, 5],
       "phrases": [
         { "id": "boa-noite", "en": "Good evening / Good night", "text": "Boa noite", "ph": "BOH-uh NOYT" },
-        { "id": "tem-mesa", "en": "Do you have a table for two?", "text": "Tem mesa para dois?", "ph": "tayng MAY-zuh PAH-ruh DOYSH" },
-        { "id": "reserva", "en": "I have a reservation under ...", "text": "Tenho uma reserva em nome de ...", "say": "Tenho uma reserva em nome de", "ph": "TAYN-yoo OO-muh ruh-ZAIR-vuh ayng NOHM duh" },
+        {
+          "id": "tem-mesa", "en": "Do you have a table for two?", "text": "Tem mesa para dois?", "ph": "tayng MAY-zuh PAH-ruh DOYSH",
+          "replies": [
+            { "id": "tem-mesa-r1", "text": "Têm reserva?", "en": "Do you have a reservation?" },
+            { "id": "tem-mesa-r2", "text": "Dentro ou na esplanada?", "en": "Inside or on the terrace?" },
+            { "id": "tem-mesa-r3", "text": "Neste momento estamos cheios.", "en": "We're full at the moment." }
+          ]
+        },
+        {
+          "id": "reserva", "en": "I have a reservation under ...", "text": "Tenho uma reserva em nome de ...", "say": "Tenho uma reserva em nome de", "ph": "TAYN-yoo OO-muh ruh-ZAIR-vuh ayng NOHM duh",
+          "replies": [
+            { "id": "reserva-r1", "text": "Em que nome?", "en": "Under what name?" },
+            { "id": "reserva-r2", "text": "Para quantas pessoas?", "en": "For how many people?" }
+          ]
+        },
         { "id": "vinho", "en": "A glass of red / white wine", "text": "Um copo de vinho tinto / branco", "say": "Um copo de vinho tinto. Um copo de vinho branco.", "ph": "oom KOH-poo duh VEEN-yoo TEEN-too / BRAHN-koo" },
         { "id": "saude", "en": "Cheers!", "text": "Saúde!", "ph": "suh-OOD" },
         { "id": "delicioso", "en": "It was delicious", "text": "Estava delicioso", "ph": "ish-TAH-vuh duh-lee-see-OH-zoo" },
@@ -87,7 +136,13 @@
         { "id": "desculpe", "en": "Sorry", "text": "Desculpe", "ph": "dish-KOOLP" },
         { "id": "sim-nao", "en": "Yes / No", "text": "Sim / Não", "say": "Sim. Não.", "ph": "SEENG / NOWNG" },
         { "id": "nao-falo", "en": "I don't speak Portuguese", "text": "Não falo português", "ph": "NOWNG FAH-loo poor-too-GAYSH" },
-        { "id": "fala-ingles", "en": "Do you speak English?", "text": "Fala inglês?", "ph": "FAH-luh eeng-GLAYSH" },
+        {
+          "id": "fala-ingles", "en": "Do you speak English?", "text": "Fala inglês?", "ph": "FAH-luh eeng-GLAYSH",
+          "replies": [
+            { "id": "fala-ingles-r1", "text": "Um pouco.", "en": "A little." },
+            { "id": "fala-ingles-r2", "text": "Sim, falo.", "en": "Yes, I do." }
+          ]
+        },
         { "id": "nao-percebo", "en": "I don't understand", "text": "Não percebo", "ph": "NOWNG pur-SAY-boo" },
         { "id": "devagar", "en": "More slowly, please", "text": "Mais devagar, por favor", "ph": "mysh duh-vuh-GAR, poor fuh-VOR" },
         { "id": "adeus", "en": "Goodbye", "text": "Adeus", "ph": "uh-DAY-oosh", "note": "Casual: tchau (CHOW)." }
@@ -99,11 +154,34 @@
       "phrases": [
         { "id": "casa-de-banho", "en": "Where is the bathroom?", "text": "Onde é a casa de banho?", "ph": "OHND EH uh KAH-zuh duh BAHN-yoo" },
         { "id": "onde-metro", "en": "Where is the metro?", "text": "Onde é o metro?", "ph": "OHND EH oo MEH-troo" },
-        { "id": "fica-longe", "en": "Is it far?", "text": "Fica longe?", "ph": "FEE-kuh LOHNZH" },
-        { "id": "bilhete-para", "en": "A ticket to ...", "text": "Um bilhete para ...", "say": "Um bilhete para", "ph": "oom beel-YET PAH-ruh" },
+        {
+          "id": "fica-longe", "en": "Is it far?", "text": "Fica longe?", "ph": "FEE-kuh LOHNZH",
+          "replies": [
+            { "id": "fica-longe-r1", "text": "Não, fica perto.", "en": "No, it's close." },
+            { "id": "fica-longe-r2", "text": "É melhor apanhar o metro.", "en": "Better to take the metro." }
+          ]
+        },
+        {
+          "id": "bilhete-para", "en": "A ticket to ...", "text": "Um bilhete para ...", "say": "Um bilhete para", "ph": "oom beel-YET PAH-ruh",
+          "replies": [
+            { "id": "bilhete-para-r1", "text": "Só ida ou ida e volta?", "en": "One way or return?" }
+          ]
+        },
         { "id": "quanto-custa", "en": "How much is it?", "text": "Quanto custa?", "ph": "KWAN-too KOOSH-tuh" },
-        { "id": "a-conta", "en": "The bill, please", "text": "A conta, por favor", "ph": "uh KOHN-tuh, poor fuh-VOR" },
-        { "id": "cartao", "en": "Can I pay by card?", "text": "Posso pagar com cartão?", "ph": "POH-soo puh-GAR kohng kur-TOWNG" }
+        {
+          "id": "a-conta", "en": "The bill, please", "text": "A conta, por favor", "ph": "uh KOHN-tuh, poor fuh-VOR",
+          "replies": [
+            { "id": "a-conta-r1", "text": "Quer número de contribuinte na fatura?", "en": "Do you want your tax number on the receipt? (You can say no.)" },
+            { "id": "a-conta-r2", "text": "Cartão ou dinheiro?", "en": "Card or cash?" }
+          ]
+        },
+        {
+          "id": "cartao", "en": "Can I pay by card?", "text": "Posso pagar com cartão?", "ph": "POH-soo puh-GAR kohng kur-TOWNG",
+          "replies": [
+            { "id": "cartao-r1", "text": "Sim, claro.", "en": "Yes, of course." },
+            { "id": "cartao-r2", "text": "Só aceitamos dinheiro.", "en": "We only take cash." }
+          ]
+        }
       ]
     }
   ]
