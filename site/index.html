@@ -90,6 +90,7 @@
     const a = document.createElement('a');
     a.className = 'lang';
     a.href = `${l.code}/`;
+    a.style.borderLeft = `6px solid ${l.color}`;
     const b = document.createElement('b');
     b.textContent = l.native;
     b.lang = l.code;

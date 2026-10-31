@@ -7,14 +7,14 @@ Live at https://jamionw.github.io/MIMIK/
 | Folder | Language | Voices | Icon |
 | --- | --- | --- | --- |
 | `bs/` | Bosnian | Goran / Vesna | gold |
-| `de/` | German | Conrad / Katja | black |
-| `es/` | Spanish (Mexico) | Jorge / Dalia | pink |
+| `de/` | German | Conrad / Katja | petrol |
+| `es/` | Spanish (Mexico) | Jorge / Dalia | purple |
 | `fr/` | French (France) | Henri / Denise | navy |
 | `ja/` | Japanese | Keita / Nanami | red |
 | `nl/` | Dutch | Maarten / Fenna | orange |
 | `pt/` | Portuguese (Portugal) | Duarte / Raquel | green |
 
-Each language has the same tilde mark on its own colour, so several installs are easy to tell apart on the home screen. The root picker keeps the original blue.
+Each language has its own colour: the tilde icon sits on it, and the page's buttons, phonetics and tags take it on, so it is obvious which language is open. The build derives the light- and dark-mode shades from the one `color` in `phrases.json`, darkening or lightening it where needed to keep text readable. The root picker keeps the original blue and shows each language's colour as a stripe.
 
 The root page is a picker. It forwards to the last language used unless opened as `?pick`, and the language name in each page's header links back to it.
 

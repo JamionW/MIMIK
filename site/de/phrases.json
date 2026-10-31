@@ -1,7 +1,7 @@
 {
   "name": "German",
   "native": "Deutsch",
-  "color": "#1f1f1f",
+  "color": "#00687a",
   "lang": "de-DE",
   "voices": { "m": "de-DE-ConradNeural", "f": "de-DE-KatjaNeural" },
   "deviceVoice": "Anna",
