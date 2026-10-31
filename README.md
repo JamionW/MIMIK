@@ -24,6 +24,8 @@ The clock picks one of four sections (Morning, Lunch, Afternoon, Evening, with h
 
 Each card carries the English, the phrase, a romanization where the script needs one (Japanese), a phonetic respelling (stressed syllable in capitals; Japanese has no stress, so it stays lowercase), a play button, and a slow button at 0.7x speed. Where regions differ (Lisbon and Porto, Bavaria and Berlin), the regional forms appear as tagged rows with their own audio.
 
+Tapping the text of a card (or of a regional row) opens show mode: the phrase alone, as large as fits the screen, with the screen kept awake, for turning the phone toward a waiter or clerk when pronunciation fails. A tap or swipe closes it.
+
 The He / She toggle switches gendered forms (obrigado, obrigada) and the voice. The choice persists on the device and carries across languages.
 
 ## Installing on an iPhone
