@@ -161,7 +161,7 @@
   const audio = new Audio();
   audio.preload = 'auto';
   const clips = new Map();      // "gender/id" -> object URL, or null when the clip is missing
-  let data, lang, timed, chosen = null, lastAuto = null, activeBtn = null;
+  let data, lang, timed, chosen = null, lastAuto = null, activeBtn = null, last = null;
   let gender = 'm';
   try { if (localStorage.getItem('gender') === 'f') gender = 'f'; } catch {}
 
@@ -210,13 +210,15 @@
     activeBtn = null;
   }
 
+  // btn is the button to highlight while playing; replays from the lock screen pass none.
   function play(item, slow, btn) {
     audio.pause();
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     clearActive();
-    activeBtn = btn;
-    btn.classList.add('on');
+    if (btn) { activeBtn = btn; btn.classList.add('on'); }
+    last = item;
     item = form(item);
+    nowPlaying(item);
     const key = clipKey(item.id);
     const text = item.say || item.text;
     const cached = clips.get(key);
@@ -230,6 +232,37 @@
     audio.play().catch(err => {
       if (err.name !== 'AbortError') { clips.set(key, null); speak(text, slow); }
     });
+  }
+
+  // Lock screen and earbuds: play replays the last phrase, next track replays it slowly,
+  // previous track replays it at normal speed. iOS shows these only for <audio> playback,
+  // so phrases spoken by the device voice get no lock-screen entry.
+  const media = 'mediaSession' in navigator ? navigator.mediaSession : null;
+
+  function nowPlaying(item) {
+    if (!media || !('MediaMetadata' in window)) return;
+    media.metadata = new MediaMetadata({
+      title: item.text,
+      artist: item.en || '',
+      album: `Mimik ${data.name}`,
+      artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }],
+    });
+  }
+
+  function setupMedia() {
+    if (!media) return;
+    const replay = slow => () => { if (last) play(last, slow); };
+    const actions = {
+      play: replay(false),
+      pause: () => audio.pause(),
+      previoustrack: replay(false),
+      nexttrack: replay(true),
+    };
+    for (const [a, fn] of Object.entries(actions)) {
+      try { media.setActionHandler(a, fn); } catch {}
+    }
+    audio.addEventListener('play', () => { media.playbackState = 'playing'; });
+    for (const ev of ['pause', 'ended']) audio.addEventListener(ev, () => { media.playbackState = 'paused'; });
   }
 
   function controls(item) {
@@ -338,8 +371,9 @@
       const at = el('div', 'txt');
       at.append(el('span', 'tag', a.tag));
       lines(at, a);
-      showable(at, a, `${item.en} (${a.tag})`);
-      r.append(at, controls(a));
+      const en = `${item.en} (${a.tag})`;
+      showable(at, a, en);
+      r.append(at, controls({ en, ...a }));
       c.append(r);
     }
     return c;
@@ -465,6 +499,7 @@
     // The root picker forwards here on the next launch.
     try { localStorage.setItem('lang', location.pathname.split('/').filter(Boolean).pop()); } catch {}
     for (const b of document.querySelectorAll('.who button')) b.onclick = () => setGender(b.dataset.g);
+    setupMedia();
     setGender(gender);
     tick();
     setInterval(tick, 20000);
