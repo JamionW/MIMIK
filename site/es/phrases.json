@@ -1,7 +1,7 @@
 {
   "name": "Spanish",
   "native": "Español",
-  "color": "#c2185b",
+  "color": "#7b1fa2",
   "lang": "es-MX",
   "voices": { "m": "es-MX-JorgeNeural", "f": "es-MX-DaliaNeural" },
   "deviceVoice": "Paulina",
