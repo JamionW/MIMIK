@@ -293,8 +293,10 @@
   }
 
   // Header badge: the newest worker reports how many of this language's clips it holds.
-  // Polls quickly while a fill runs; otherwise the 20 s tick and coming online recheck it.
-  let regReady = null, offlineTimer = null;
+  // It appears only while clips are being saved or are missing, says "Offline ready!" once
+  // they are all in, then hides. Polls quickly while a fill runs; otherwise the 20 s tick
+  // and coming online recheck it.
+  let regReady = null, offlineTimer = null, hideTimer = null;
   function askWorker(w, refill) {
     return new Promise(resolve => {
       const ch = new MessageChannel();
@@ -314,11 +316,20 @@
     const badge = document.getElementById('offline');
     if (!st) { badge.hidden = true; return; }
     const ready = st.shell && st.cached === st.total;
+    if (ready && !st.filling) {
+      if (!badge.hidden && !hideTimer) {
+        badge.textContent = 'Offline ready!';
+        badge.classList.remove('warn');
+        hideTimer = setTimeout(() => { badge.hidden = true; hideTimer = null; }, 3000);
+      }
+      return;
+    }
+    clearTimeout(hideTimer);
+    hideTimer = null;
     const count = `${st.cached}/${st.total}`;
     badge.textContent = st.filling ? `Saving for offline: ${count}`
-      : !ready ? `Offline: ${count} saved. Open while online to refill.`
-      : st.total ? `Offline ready: ${count}` : 'Offline ready (device voice only)';
-    badge.classList.toggle('warn', !st.filling && !ready);
+      : `Offline: ${count} saved. Open while online to refill.`;
+    badge.classList.toggle('warn', !st.filling);
     badge.hidden = false;
     if (st.filling) offlineTimer = setTimeout(checkOffline, 1000);
   }
