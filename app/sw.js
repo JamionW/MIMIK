@@ -8,16 +8,87 @@ const PREFIX = `mimik-${LANG}-`;
 const CACHE = PREFIX + VERSION;
 const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
 
+// Clips the server answered 404 for at the last fill. They are left out of the offline
+// count, since a clip that failed to generate can never be cached.
+const ABSENT = 'offline-absent.json';
+// Refills triggered by the page are spaced out so a flaky connection is not hammered.
+const REFILL_GAP = 30000;
+let filling = null, lastFill = 0;
+
+const abs = p => new URL(p, location).pathname;
+
+async function cachedPaths(c) {
+  return new Set((await c.keys()).map(r => new URL(r.url).pathname));
+}
+
+async function clipPaths(c) {
+  const res = (await c.match('phrases.json')) || (await fetch('phrases.json').catch(() => null));
+  if (!res || !res.ok) return [];
+  const data = await res.json();
+  const ids = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])])).map(p => p.id);
+  return ids.flatMap(id => [`audio/${id}.mp3`, `audio/f/${id}.mp3`]);
+}
+
+// Fetches whatever this version's cache is missing. A missing shell file throws; missing
+// clips are tolerated, and the page falls back to the device voice for them.
+async function fill() {
+  const c = await caches.open(CACHE);
+  const have = await cachedPaths(c);
+  const shell = SHELL.filter(p => !have.has(abs(p)));
+  if (shell.length) await c.addAll(shell);
+  const absent = [];
+  const want = (await clipPaths(c)).filter(p => !have.has(abs(p)));
+  await Promise.all(want.map(async p => {
+    try {
+      const r = await fetch(p);
+      if (r.ok) await c.put(p, r);
+      else if (r.status === 404) absent.push(p);
+    } catch {}
+  }));
+  // Every clip not already cached was retried above, so this list replaces the old one.
+  await c.put(ABSENT, new Response(JSON.stringify(absent), { headers: { 'Content-Type': 'application/json' } }));
+}
+
+function startFill() {
+  lastFill = Date.now();
+  filling ||= fill().finally(() => { filling = null; });
+  return filling;
+}
+
+async function status() {
+  const c = await caches.open(CACHE);
+  const have = await cachedPaths(c);
+  const a = await c.match(ABSENT);
+  const absent = new Set(a ? await a.json() : []);
+  const clips = (await clipPaths(c)).filter(p => !absent.has(p));
+  return {
+    cached: clips.filter(p => have.has(abs(p))).length,
+    total: clips.length,
+    shell: SHELL.every(p => have.has(abs(p))),
+    filling: !!filling,
+  };
+}
+
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
-    const c = await caches.open(CACHE);
-    await c.addAll(SHELL);
-    const data = await (await c.match('phrases.json')).json();
-    const ids = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || [])])).map(p => p.id);
-    // Missing clips are tolerated; the page falls back to the device voice.
-    const paths = ids.flatMap(id => [`audio/${id}.mp3`, `audio/f/${id}.mp3`]);
-    await Promise.all(paths.map(p => c.add(p).catch(() => {})));
+    await startFill();
     await self.skipWaiting();
+  })());
+});
+
+// The page asks { type: 'offline-status', refill } over a MessageChannel. With refill set,
+// an incomplete cache (iOS evicts storage of unused web apps) is topped up from the network.
+self.addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'offline-status' || !e.ports[0]) return;
+  e.waitUntil((async () => {
+    const st = await status();
+    let job = filling && filling.catch(() => {});
+    if (!job && e.data.refill && (st.cached < st.total || !st.shell) && Date.now() - lastFill > REFILL_GAP) {
+      job = startFill().catch(() => {});
+      st.filling = true;
+    }
+    e.ports[0].postMessage(st);
+    await job;
   })());
 });
 

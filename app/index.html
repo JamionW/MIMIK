@@ -64,6 +64,8 @@
   .who button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
   .left { display: flex; align-items: center; gap: 12px; }
   .lang { color: var(--muted); font-size: 14px; text-decoration: none; padding: 6px 0; }
+  .offline { margin: 6px 0 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .offline.warn { color: var(--text); font-weight: 600; }
   nav { display: flex; gap: 6px; margin-top: 10px; }
   nav button {
     flex: 1; min-height: 40px;
@@ -113,6 +115,23 @@
     font: inherit; font-size: 13px; padding: 4px 6px; min-height: 28px;
   }
   .slow.on { color: var(--accent); }
+  .txt[role="button"] { cursor: pointer; }
+
+  /* Show mode: one phrase full screen, to turn the phone toward someone. */
+  .show {
+    position: fixed; inset: 0; z-index: 2;
+    display: flex; flex-direction: column;
+    background: var(--card); color: var(--text);
+    padding: calc(env(safe-area-inset-top) + 16px) calc(env(safe-area-inset-right) + 20px)
+      calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 20px);
+    touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .show[hidden] { display: none; }
+  .show-en { margin: 0; color: var(--muted); font-size: 15px; text-align: center; }
+  .show-fit { flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+  .show-text { max-width: 100%; margin: 0; font-weight: 700; line-height: 1.15; text-align: center; overflow-wrap: normal; }
+  .show-hint { margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
+  body.showing { overflow: hidden; }
   button { cursor: pointer; }
   button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
@@ -123,11 +142,17 @@
 <main>
   <header>
     <div class="clock"><div class="left"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><a id="lang" class="lang" href="../?pick" aria-label="Change language"></a></div><b id="time">--:--</b></div>
+    <p id="offline" class="offline" role="status" hidden></p>
     <nav id="tabs"></nav>
   </header>
   <section id="now"></section>
   <section id="always"></section>
 </main>
+<div id="show" class="show" role="dialog" aria-modal="true" hidden>
+  <p class="show-en"></p>
+  <div class="show-fit"><p class="show-text"></p></div>
+  <p class="show-hint">Tap to close</p>
+</div>
 
 <script>
 (() => {
@@ -230,6 +255,73 @@
     box.append(el('p', 'ph', nb(item.ph)));
   }
 
+  // Show mode: the phrase as large as fits, with the screen kept awake while it is open.
+  // Wake locks drop when the page is hidden, so it is retaken on return.
+  const showEl = document.getElementById('show');
+  let wake = null, swipeFrom = null;
+
+  async function holdWake() {
+    if (!('wakeLock' in navigator) || wake) return;
+    try {
+      const w = await navigator.wakeLock.request('screen');
+      if (showEl.hidden) w.release(); else { wake = w; w.onrelease = () => { if (wake === w) wake = null; }; }
+    } catch {}
+  }
+
+  // Largest font size at which the text fits the screen without splitting a word.
+  function fitShow() {
+    const area = showEl.querySelector('.show-fit');
+    const t = showEl.querySelector('.show-text');
+    let lo = 16, hi = Math.min(area.clientHeight, 320);
+    while (hi - lo > 1) {
+      const mid = (lo + hi) / 2;
+      t.style.fontSize = mid + 'px';
+      if (t.scrollWidth <= area.clientWidth && t.scrollHeight <= area.clientHeight) lo = mid; else hi = mid;
+    }
+    t.style.fontSize = lo + 'px';
+  }
+
+  function openShow(item) {
+    showEl.querySelector('.show-en').textContent = item.en || '';
+    const t = showEl.querySelector('.show-text');
+    t.textContent = item.text;
+    t.lang = lang;
+    showEl.hidden = false;
+    document.body.classList.add('showing');
+    fitShow();
+    showEl.focus();
+    holdWake();
+  }
+
+  function closeShow() {
+    if (showEl.hidden) return;
+    showEl.hidden = true;
+    document.body.classList.remove('showing');
+    if (wake) { wake.release(); wake = null; }
+  }
+
+  showEl.tabIndex = -1;
+  showEl.addEventListener('click', closeShow);
+  // A swipe never produces a click, so it is caught here.
+  showEl.addEventListener('pointerdown', e => { swipeFrom = [e.clientX, e.clientY]; });
+  showEl.addEventListener('pointerup', e => {
+    if (swipeFrom && Math.hypot(e.clientX - swipeFrom[0], e.clientY - swipeFrom[1]) > 30) closeShow();
+    swipeFrom = null;
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeShow(); });
+  window.addEventListener('resize', () => { if (!showEl.hidden) fitShow(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !showEl.hidden) holdWake(); });
+
+  // The text side of a card row opens show mode; the play buttons sit beside it.
+  function showable(box, item, en) {
+    box.setAttribute('role', 'button');
+    box.tabIndex = 0;
+    box.setAttribute('aria-label', `Show full screen: ${item.text}`);
+    const open = () => openShow({ en, text: item.text });
+    box.onclick = open;
+    box.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } };
+  }
+
   function card(item) {
     item = form(item);
     const c = el('article', 'card');
@@ -238,6 +330,7 @@
     t.append(el('p', 'en', item.en));
     lines(t, item);
     if (item.note) t.append(el('p', 'note', item.note));
+    showable(t, item, item.en);
     row.append(t, controls(item));
     c.append(row);
     for (const a of item.alt || []) {
@@ -245,6 +338,7 @@
       const at = el('div', 'txt');
       at.append(el('span', 'tag', a.tag));
       lines(at, a);
+      showable(at, a, `${item.en} (${a.tag})`);
       r.append(at, controls(a));
       c.append(r);
     }
@@ -286,6 +380,49 @@
     document.getElementById('time').textContent =
       d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     if (currentId() !== lastAuto) render();
+    checkOffline();
+  }
+
+  // Header badge: the newest worker reports how many of this language's clips it holds.
+  // It appears only while clips are being saved or are missing, says "Offline ready!" once
+  // they are all in, then hides. Polls quickly while a fill runs; otherwise the 20 s tick
+  // and coming online recheck it.
+  let regReady = null, offlineTimer = null, hideTimer = null;
+  function askWorker(w, refill) {
+    return new Promise(resolve => {
+      const ch = new MessageChannel();
+      ch.port1.onmessage = e => resolve(e.data);
+      // A worker from before this feature never answers.
+      setTimeout(() => resolve(null), 3000);
+      w.postMessage({ type: 'offline-status', refill }, [ch.port2]);
+    });
+  }
+
+  async function checkOffline() {
+    if (!regReady) return;
+    clearTimeout(offlineTimer);
+    const reg = await regReady.catch(() => null);
+    const w = reg && (reg.installing || reg.waiting || reg.active);
+    const st = w && await askWorker(w, navigator.onLine);
+    const badge = document.getElementById('offline');
+    if (!st) { badge.hidden = true; return; }
+    const ready = st.shell && st.cached === st.total;
+    if (ready && !st.filling) {
+      if (!badge.hidden && !hideTimer) {
+        badge.textContent = 'Offline ready!';
+        badge.classList.remove('warn');
+        hideTimer = setTimeout(() => { badge.hidden = true; hideTimer = null; }, 3000);
+      }
+      return;
+    }
+    clearTimeout(hideTimer);
+    hideTimer = null;
+    const count = `${st.cached}/${st.total}`;
+    badge.textContent = st.filling ? `Saving for offline: ${count}`
+      : `Offline: ${count} saved. Open while online to refill.`;
+    badge.classList.toggle('warn', !st.filling);
+    badge.hidden = false;
+    if (st.filling) offlineTimer = setTimeout(checkOffline, 1000);
   }
 
   // Preload clips as blobs: avoids Safari's range-request issues and lets play() run synchronously.
@@ -332,11 +469,12 @@
     tick();
     setInterval(tick, 20000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+    window.addEventListener('online', checkOffline);
     if ('speechSynthesis' in window) speechSynthesis.getVoices();
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
+    regReady = navigator.serviceWorker.register('sw.js');
     // Reload once when an updated worker takes over, but not on the very first install,
     // including when the root worker controlled this page before ours claimed it.
     const ctl = navigator.serviceWorker.controller;
