@@ -6,7 +6,7 @@ Status values: `planned`, `in progress`, `done`, `dropped`.
 
 | # | Feature | Status |
 | --- | --- | --- |
-| 1 | Offline-ready indicator | planned |
+| 1 | Offline-ready indicator | done (branch `claude/stoic-cori-vgqowh`) |
 | 2 | Show mode | planned |
 | 3 | Lock-screen and earbud controls | planned |
 | 4 | "What you'll hear" replies | planned |

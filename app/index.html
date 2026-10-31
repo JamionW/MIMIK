@@ -64,6 +64,8 @@
   .who button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
   .left { display: flex; align-items: center; gap: 12px; }
   .lang { color: var(--muted); font-size: 14px; text-decoration: none; padding: 6px 0; }
+  .offline { margin: 6px 0 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .offline.warn { color: var(--text); font-weight: 600; }
   nav { display: flex; gap: 6px; margin-top: 10px; }
   nav button {
     flex: 1; min-height: 40px;
@@ -123,6 +125,7 @@
 <main>
   <header>
     <div class="clock"><div class="left"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><a id="lang" class="lang" href="../?pick" aria-label="Change language"></a></div><b id="time">--:--</b></div>
+    <p id="offline" class="offline" role="status" hidden></p>
     <nav id="tabs"></nav>
   </header>
   <section id="now"></section>
@@ -286,6 +289,38 @@
     document.getElementById('time').textContent =
       d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     if (currentId() !== lastAuto) render();
+    checkOffline();
+  }
+
+  // Header badge: the newest worker reports how many of this language's clips it holds.
+  // Polls quickly while a fill runs; otherwise the 20 s tick and coming online recheck it.
+  let regReady = null, offlineTimer = null;
+  function askWorker(w, refill) {
+    return new Promise(resolve => {
+      const ch = new MessageChannel();
+      ch.port1.onmessage = e => resolve(e.data);
+      // A worker from before this feature never answers.
+      setTimeout(() => resolve(null), 3000);
+      w.postMessage({ type: 'offline-status', refill }, [ch.port2]);
+    });
+  }
+
+  async function checkOffline() {
+    if (!regReady) return;
+    clearTimeout(offlineTimer);
+    const reg = await regReady.catch(() => null);
+    const w = reg && (reg.installing || reg.waiting || reg.active);
+    const st = w && await askWorker(w, navigator.onLine);
+    const badge = document.getElementById('offline');
+    if (!st) { badge.hidden = true; return; }
+    const ready = st.shell && st.cached === st.total;
+    const count = `${st.cached}/${st.total}`;
+    badge.textContent = st.filling ? `Saving for offline: ${count}`
+      : !ready ? `Offline: ${count} saved. Open while online to refill.`
+      : st.total ? `Offline ready: ${count}` : 'Offline ready (device voice only)';
+    badge.classList.toggle('warn', !st.filling && !ready);
+    badge.hidden = false;
+    if (st.filling) offlineTimer = setTimeout(checkOffline, 1000);
   }
 
   // Preload clips as blobs: avoids Safari's range-request issues and lets play() run synchronously.
@@ -332,11 +367,12 @@
     tick();
     setInterval(tick, 20000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+    window.addEventListener('online', checkOffline);
     if ('speechSynthesis' in window) speechSynthesis.getVoices();
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
+    regReady = navigator.serviceWorker.register('sw.js');
     // Reload once when an updated worker takes over, but not on the very first install,
     // including when the root worker controlled this page before ours claimed it.
     const ctl = navigator.serviceWorker.controller;
