@@ -10,10 +10,10 @@ Status values: `planned`, `in progress`, `done`, `dropped`.
 | 2 | Show mode | done (branch `claude/stoic-cori-vgqowh`) |
 | 3 | Lock-screen and earbud controls | done (branch `claude/stoic-cori-vgqowh`) |
 | 4 | "What you'll hear" replies | done (branch `claude/stoic-cori-vgqowh`) |
-| 5 | Search across sections | planned |
-| 6 | Phrase linter in CI | planned |
-| 7 | Human recordings override TTS | planned |
-| 8 | Numbers and prices | planned |
+| 5 | Search across sections | done (branch `claude/stoic-cori-vgqowh`) |
+| 6 | Phrase linter in CI | done (branch `claude/stoic-cori-vgqowh`) |
+| 7 | Human recordings override TTS | done (branch `claude/stoic-cori-vgqowh`) |
+| 8 | Numbers and prices | dropped |
 | 9 | Live earbud interpreter (research spike) | planned |
 
 ## 1. Offline-ready indicator
@@ -61,6 +61,8 @@ Touches: `scripts/build.py` or `scripts/gen_audio.py` (copy or prefer human clip
 ## 8. Numbers and prices
 
 Render 0 to 100 plus currency words ("euros", "cents", "e") as clips and concatenate them at runtime to speak any price. Add a listening drill: the app speaks a random price and the user types what they heard. Hearing totals at the till is a common failure point.
+
+Dropped from the plan.
 
 Touches: a numbers block per language in `phrases.json` (number grammar differs per language; Japanese and German need care), `scripts/gen_audio.py`, `app/index.html`.
 
