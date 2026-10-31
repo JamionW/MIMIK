@@ -28,6 +28,8 @@ Tapping the text of a card (or of a regional row) opens show mode: the phrase al
 
 The last phrase played can be replayed without taking the phone out. On the lock screen and in Control Centre, play replays it, the forward button replays it slowly, and the back button replays it at normal speed; on AirPods the same mapping applies to a single press, a double press and a triple press. The lock screen shows the phrase and its English. iOS shows these controls only for the voice clips, not for phrases spoken by the device voice, and drops them a short while after the screen locks.
 
+The magnifier beside the language name searches every section at once, matching English, the phrase in either gender, romanization, regional rows and replies. Accents and Japanese macrons are optional (`cafe` finds café, `kado` or `kaado` finds kādo). Cancel returns to the clock.
+
 The He / She toggle switches gendered forms (obrigado, obrigada) and the voice. The choice persists on the device and carries across languages.
 
 ## Installing on an iPhone
@@ -76,7 +78,9 @@ and a phrase looks like this:
 
 `replies` lists what the other person is likely to say back, shown collapsed under the card as "What you'll hear". They are for recognising, not saying, so they carry no phonetics. Each is rendered in both voices, and the app plays the one opposite the He / She setting so the exchange sounds like two people. Reply ids follow the pattern `<phrase id>-r1`, `-r2`, and so on; add replies only where the response is predictable.
 
-Ids, reply ids included, must be unique within a language, since they name the audio clips; the generator refuses to run on duplicates. A section with `hours: [start, end]` is time-bound, and a range like `[19, 5]` wraps past midnight. A section without `hours` always shows.
+Ids, reply ids included, must be unique within a language, since they name the audio clips; the generator refuses to run on duplicates.
+
+`python3 scripts/lint_phrases.py` (optionally with language codes) checks the files before anything is generated, and runs on every pull request that touches them and again before each deploy. It fails on duplicate ids, missing fields, phonetics with no stressed capital (or with capitals, in Japanese), a `/` or ellipsis in `text` with no `say`, a feminine form that changes `text` but inherits a masculine `say`, `alt` rows without a `tag`, reply ids out of the `-rN` pattern or replies with `ph`, missing `rom` in Japanese, and time sections whose `hours` are malformed, leave an hour uncovered, or overlap. It warns, without failing, when a word gendered in one phrase (obrigado, obrigada) appears in another that has no `f` form, and when a human recording matches no phrase. A section with `hours: [start, end]` is time-bound, and a range like `[19, 5]` wraps past midnight. A section without `hours` always shows.
 
 Open the app once online after a deploy so it picks up the new version.
 
@@ -91,6 +95,8 @@ Each language folder has its own service worker scoped to that folder, so a phon
 ## How the audio works
 
 `scripts/gen_audio.py` renders every phrase in both voices through edge-tts, writing `site/<code>/audio/<id>.mp3` and `site/<code>/audio/f/<id>.mp3`. The clips are build output and stay out of git. A clip that fails to generate produces a warning in the Actions log without failing the build, and the app covers the gap with the phone's built-in voice, which sounds noticeably more robotic.
+
+A native speaker's recording can replace any clip. Put it at `site/<code>/audio-human/<id>.m4a` for the He voice or `site/<code>/audio-human/f/<id>.m4a` for the She voice; each replaces only its own voice. Unlike the TTS clips, these are source files and are committed. The build lists them in `human.json`, the generator skips TTS for them, and the app and worker play and cache them in place of the TTS clip. Record the most used phrases first, and those where the TTS sounds worst.
 
 Each language's worker caches its page and every clip at install, and it answers Safari's range requests for audio so playback works offline. The page asks its worker for a count of cached clips to drive the header's offline badge; when the count is short and the phone is online, the worker refetches what is missing. The deploy stamps the commit SHA into the workers, which is what triggers a refresh on the next online launch.
 

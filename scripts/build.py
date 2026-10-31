@@ -1,8 +1,9 @@
 """Assemble each language folder in site/ from the shared app shell in app/.
 
 Every folder site/<code>/ holding a phrases.json is a language. Into each one this writes
-index.html and sw.js from app/, plus a manifest.webmanifest naming the language, and it
-writes site/languages.json for the root picker. All of these are build output.
+index.html and sw.js from app/, plus a manifest.webmanifest naming the language and a
+human.json listing which clips have human recordings in audio-human/, and it writes
+site/languages.json for the root picker. All of these are build output.
 
 Usage: python scripts/build.py [--version SHA]
 --version stamps the service workers (the root one in place) so installs pick up a deploy.
@@ -104,6 +105,9 @@ def main():
             ],
         }
         (folder / "manifest.webmanifest").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+        # Ids with a human recording, per voice; the app and worker use these in place of the TTS clip.
+        human = {g: sorted(p.stem for p in (folder / "audio-human" / sub).glob("*.m4a")) for g, sub in (("m", ""), ("f", "f"))}
+        (folder / "human.json").write_text(json.dumps(human, ensure_ascii=False) + "\n")
         listing.append({"code": code, "name": data["name"], "native": data["native"], "color": data["color"]})
 
     listing.sort(key=lambda l: l["name"])

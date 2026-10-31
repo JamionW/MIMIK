@@ -22,6 +22,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Lint phrases
+        run: python scripts/lint_phrases.py
       - run: pip install --upgrade edge-tts
       - name: Build language folders and stamp service worker versions
         run: python scripts/build.py --version "${GITHUB_SHA::12}"

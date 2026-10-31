@@ -6,7 +6,7 @@ const VERSION = 'dev';
 // and only ever clears its own.
 const PREFIX = `mimik-${LANG}-`;
 const CACHE = PREFIX + VERSION;
-const SHELL = ['./', 'index.html', 'phrases.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
+const SHELL = ['./', 'index.html', 'phrases.json', 'human.json', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon.svg'];
 
 // Clips the server answered 404 for at the last fill. They are left out of the offline
 // count, since a clip that failed to generate can never be cached.
@@ -21,12 +21,22 @@ async function cachedPaths(c) {
   return new Set((await c.keys()).map(r => new URL(r.url).pathname));
 }
 
+async function cachedJson(c, path) {
+  const res = (await c.match(path)) || (await fetch(path).catch(() => null));
+  return res && res.ok ? res.json() : null;
+}
+
 async function clipPaths(c) {
-  const res = (await c.match('phrases.json')) || (await fetch('phrases.json').catch(() => null));
-  if (!res || !res.ok) return [];
-  const data = await res.json();
+  const data = await cachedJson(c, 'phrases.json');
+  if (!data) return [];
+  // Human recordings (human.json, written by the build) replace the TTS clip for their voice.
+  const human = (await cachedJson(c, 'human.json')) || {};
+  const m = new Set(human.m || []), f = new Set(human.f || []);
   const ids = data.sections.flatMap(s => s.phrases.flatMap(p => [p, ...(p.alt || []), ...(p.replies || [])])).map(p => p.id);
-  return ids.flatMap(id => [`audio/${id}.mp3`, `audio/f/${id}.mp3`]);
+  return ids.flatMap(id => [
+    m.has(id) ? `audio-human/${id}.m4a` : `audio/${id}.mp3`,
+    f.has(id) ? `audio-human/f/${id}.m4a` : `audio/f/${id}.mp3`,
+  ]);
 }
 
 // Fetches whatever this version's cache is missing. A missing shell file throws; missing

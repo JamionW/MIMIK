@@ -64,6 +64,18 @@
   .who button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
   .left { display: flex; align-items: center; gap: 12px; }
   .lang { color: var(--muted); font-size: 14px; text-decoration: none; padding: 6px 0; }
+  .find { border: 0; background: none; color: var(--muted); width: 36px; height: 36px; padding: 8px; margin-left: -8px; }
+  .find svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+  .search { display: flex; gap: 8px; margin-top: 10px; }
+  .search[hidden], nav[hidden] { display: none; }
+  .search input {
+    flex: 1; min-width: 0; min-height: 40px; padding: 0 12px;
+    border: 1px solid var(--line); border-radius: 10px;
+    background: var(--card); color: var(--text); font: inherit; font-size: 17px;
+  }
+  .search input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .search button { border: 0; background: none; color: var(--accent); font: inherit; font-size: 15px; padding: 0 4px; }
+  .empty { color: var(--muted); margin: 26px 0; }
   .offline { margin: 6px 0 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
   .offline.warn { color: var(--text); font-weight: 600; }
   nav { display: flex; gap: 6px; margin-top: 10px; }
@@ -147,9 +159,10 @@
 <body>
 <main>
   <header>
-    <div class="clock"><div class="left"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><a id="lang" class="lang" href="../?pick" aria-label="Change language"></a></div><b id="time">--:--</b></div>
+    <div class="clock"><div class="left"><div class="who" role="group" aria-label="Speaker"><button data-g="m">He</button><button data-g="f">She</button></div><a id="lang" class="lang" href="../?pick" aria-label="Change language"></a><button id="find" class="find" aria-label="Search phrases"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button></div><b id="time">--:--</b></div>
     <p id="offline" class="offline" role="status" hidden></p>
     <nav id="tabs"></nav>
+    <div id="search" class="search" role="search" hidden><input id="q" type="search" placeholder="Search all phrases" aria-label="Search all phrases" autocomplete="off" autocorrect="off" spellcheck="false"><button id="search-close">Cancel</button></div>
   </header>
   <section id="now"></section>
   <section id="always"></section>
@@ -177,7 +190,11 @@
   // Replies are the other person speaking, so they take the voice opposite the user's.
   const other = g => g === 'f' ? 'm' : 'f';
   const voiceOf = (item, g = gender) => item.reply ? other(g) : g;
-  const clipPath = (id, g = gender) => g === 'f' ? `audio/f/${id}.mp3` : `audio/${id}.mp3`;
+  // Human recordings, where the build found any, replace the TTS clip for their voice.
+  const human = { m: new Set(), f: new Set() };
+  const clipPath = (id, g = gender) => human[g].has(id)
+    ? (g === 'f' ? `audio-human/f/${id}.m4a` : `audio-human/${id}.m4a`)
+    : (g === 'f' ? `audio/f/${id}.mp3` : `audio/${id}.mp3`);
 
   // Non-breaking hyphens keep each phonetic word on one line.
   const nb = s => s.replace(/-/g, '\u2011');
@@ -411,6 +428,49 @@
     for (const p of sec.phrases) target.append(card(p));
   }
 
+  // Search: matches English, native text (both genders) and romanization across every
+  // section, including regional rows and replies, and shows the whole card. Accents and
+  // macrons on Latin letters are ignored (Japanese voicing marks are kept) and doubled vowels
+  // collapsed, so "cafe" finds café and both "kado"
+  // and "kaado" find kādo.
+  let query = '';
+  const fold = s => (s || '').normalize('NFD').replace(/(\p{Script=Latin})\p{M}+/gu, '$1').toLowerCase().replace(/([aeiou])\1+/g, '$1');
+
+  function haystack(p) {
+    const parts = [p.en, p.text, p.rom, p.f && p.f.text];
+    for (const a of p.alt || []) parts.push(a.tag, a.text, a.rom);
+    for (const r of p.replies || []) parts.push(r.en, r.text, r.rom);
+    return fold(parts.filter(Boolean).join(' \n '));
+  }
+
+  function renderResults(target) {
+    const terms = fold(query).split(/\s+/).filter(Boolean);
+    let n = 0;
+    for (const sec of data.sections) {
+      const hits = sec.phrases.filter(p => { const h = haystack(p); return terms.every(t => h.includes(t)); });
+      if (!hits.length) continue;
+      n += hits.length;
+      target.append(el('h2', null, sec.title));
+      for (const p of hits) target.append(card(p));
+    }
+    if (!n) target.append(el('p', 'empty', `Nothing matches \u201c${query.trim()}\u201d.`));
+  }
+
+  function openSearch() {
+    document.getElementById('tabs').hidden = true;
+    document.getElementById('search').hidden = false;
+    document.getElementById('q').focus();
+  }
+
+  function closeSearch() {
+    const q = document.getElementById('q');
+    q.value = query = '';
+    q.blur();
+    document.getElementById('search').hidden = true;
+    document.getElementById('tabs').hidden = false;
+    render();
+  }
+
   function currentId() {
     const h = new Date().getHours();
     return (timed.find(s => inBucket(h, s.hours)) || timed[0]).id;
@@ -433,7 +493,9 @@
 
     const now = document.getElementById('now');
     now.replaceChildren();
-    renderSection(now, timed.find(s => s.id === show));
+    document.getElementById('always').hidden = !!query.trim();
+    if (query.trim()) renderResults(now);
+    else renderSection(now, timed.find(s => s.id === show));
   }
 
   function tick() {
@@ -522,12 +584,21 @@
 
   async function init() {
     data = await (await fetch('phrases.json')).json();
+    try {
+      const h = await (await fetch('human.json')).json();
+      for (const g of ['m', 'f']) human[g] = new Set(h[g] || []);
+    } catch {}
     lang = data.lang;
     timed = data.sections.filter(s => s.hours);
     document.getElementById('lang').textContent = data.native;
     // The root picker forwards here on the next launch.
     try { localStorage.setItem('lang', location.pathname.split('/').filter(Boolean).pop()); } catch {}
     for (const b of document.querySelectorAll('.who button')) b.onclick = () => setGender(b.dataset.g);
+    document.getElementById('find').onclick = () => document.getElementById('search').hidden ? openSearch() : closeSearch();
+    document.getElementById('search-close').onclick = closeSearch;
+    const q = document.getElementById('q');
+    q.oninput = () => { query = q.value; render(); window.scrollTo(0, 0); };
+    q.onkeydown = e => { if (e.key === 'Escape') closeSearch(); else if (e.key === 'Enter') q.blur(); };
     setupMedia();
     setGender(gender);
     tick();

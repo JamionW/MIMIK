@@ -6,7 +6,8 @@ Replies (a phrase's "replies" list) get clips in both voices like any phrase.
 
 Usage: python scripts/gen_audio.py [--dry-run] [--force] [code ...]
 With language codes (pt es ...) only those languages are generated.
-Existing clips are skipped unless --force. Failures are reported but not fatal:
+Existing clips are skipped unless --force, as are clips with a human recording in
+site/<code>/audio-human/ (or audio-human/f/ for the feminine voice). Failures are reported but not fatal:
 the app falls back to the device voice for any missing clip.
 """
 import asyncio
@@ -32,6 +33,10 @@ async def generate(out, voice, item, force, gender):
     if gender == "f":
         item = {**item, **item.get("f", {})}
     dest = (out / "f" if gender == "f" else out) / f"{item['id']}.mp3"
+    # A human recording replaces the TTS clip for that voice, so there is nothing to render.
+    human = out.parent / "audio-human" / ("f" if gender == "f" else "") / f"{item['id']}.m4a"
+    if human.exists():
+        return True
     if dest.exists() and dest.stat().st_size and not force:
         return True
     text = item.get("say") or item["text"]

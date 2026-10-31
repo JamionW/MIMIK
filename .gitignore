@@ -3,5 +3,6 @@ site/*/audio/
 site/*/index.html
 site/*/sw.js
 site/*/manifest.webmanifest
+site/*/human.json
 site/languages.json
 __pycache__/
