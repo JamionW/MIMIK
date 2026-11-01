@@ -191,6 +191,8 @@
   .replies .text { font-size: 20px; }
   .replies .en { font-size: 15px; }
   .replies .play { width: 40px; height: 40px; }
+  .tip { margin: 28px 0 0; text-align: center; color: var(--muted); font-size: 15px; }
+  .tip a { color: var(--accent); white-space: nowrap; }
   button { cursor: pointer; }
   button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
@@ -207,6 +209,7 @@
   </header>
   <section id="now"></section>
   <section id="always"></section>
+  <p class="tip" hidden>Mimik is free. If it got you through a meal, <a href="https://ko-fi.com/jamionw" target="_blank" rel="noopener">buy me one</a>.</p>
 </main>
 <button id="listen-fab" class="listen-fab" aria-label="Listen to a reply" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Listen</button>
 <div id="listen" class="listen" role="dialog" aria-label="Listen to a reply" hidden>
@@ -1304,6 +1307,12 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
     window.addEventListener('online', checkOffline);
     if ('speechSynthesis' in window) speechSynthesis.getVoices();
+    // The tip link needs the network, so it only shows while online.
+    const tip = document.querySelector('.tip');
+    const showTip = () => { tip.hidden = !navigator.onLine; };
+    showTip();
+    addEventListener('online', showTip);
+    addEventListener('offline', showTip);
   }
 
   if (!LAB && 'serviceWorker' in navigator) {
