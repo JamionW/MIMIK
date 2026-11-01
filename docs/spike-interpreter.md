@@ -112,16 +112,32 @@ Safari reports 4 cores to the page and the page was not cross-origin isolated (p
 
 Caveats: the clips are clean synthetic voices; matching only knows the lines in the app, so anything else must come back as "not sure", which is untested; and the cutoff was tuned on the same 56 clips it is scored on.
 
-### Third run
+### Third run, one thread (page version 3, 1 November 2026)
 
-Pending. Page version 3 runs each configuration in a fresh page (so base-wasm gets a fair run), drops WebGPU from Run all, caps each call at 64 tokens (the runaway loop), scores reply matching for every clip, and makes the live test show the matched reply or "not sure". Wanted from it: base-wasm complete, threaded mode, the live test with real voices including lines that are not in the app, and the battery soak.
+Each configuration ran in a fresh page. Reply matching at the 0.5 cutoff; "top match" counts the closest reply whether or not it cleared the cutoff.
+
+| Config | Download | Transcribe median / p90 (max) | Transcript error rate, median | Reply match: right / wrong / not sure | Top match right |
+| --- | --- | --- | --- | --- | --- |
+| tiny-wasm | 44 MB | 1.23 / 1.36 s (1.42) | 11% | 51 / 1 / 4 | 52 of 56 |
+| base-wasm | 80 MB | 3.05 / 3.19 s (4.72) | 8% | 54 / 0 / 2 | 56 of 56 |
+| small-wasm | 252 MB | | | crashed at model setup, in a fresh page | |
+
+- **base-wasm runs in a fresh page,** confirming the run 2 crash was memory left by the previous model. small-wasm crashing in a fresh page confirms it does not fit.
+- **base is the more accurate recogniser**: every clip's top match was right, no wrong answer was shown, and its two "not sure" were right but low-scoring ("Loopt u maar mee." heard as "Lope to my me."). tiny gave one confident wrong answer ("Quer canela?" heard as "quer que não é", shown as "Em que nome?"); base heard "Quer que nela?" and matched it.
+- **base misses the speed bar on one thread, narrowly**: 3.05 s median against a 3 s bar, for 2-second clips. tiny is well inside it.
+- **Whisper's own translation is better in base but still far from the bar**: roughly 20 of 56 usable ("Do you have reservation?", "In or out?", "2 adults"), against about 8 for tiny. It confirms the no-go for open interpretation.
+- The 64-token cap held: no runaway loops (worst clip 4.7 s, the first one after warm-up).
+
+### Third run, threaded
+
+Pending: whether two threads (Safari reports 4 cores; ONNX Runtime uses half) bring base under 3 s. Then the live test and the battery soak.
 
 ## Decision
 
 Provisional:
 
 - **Open interpreter (translate anything said): no-go.** The only models that run on the phone, tiny and, probably, base on WebAssembly, translate too poorly to act on, and the models that might translate well enough do not fit.
-- **Reply recognition (tell the user which expected reply they just heard, with its English): likely go**, pending the third run. It reuses the "What you'll hear" data, needs one 44 MB model for all languages, answers in about 1.5 s on one thread, and can say "not sure" instead of guessing.
+- **Reply recognition (tell the user which expected reply they just heard, with its English): likely go**, pending the live test. It reuses the "What you'll hear" data, needs one model for all languages, and can say "not sure" instead of guessing. On synthetic clips, tiny (44 MB) answers in about 1.2 s with 51 of 56 right and 1 wrong; base (80 MB) answers in about 3 s on one thread with 54 right and none wrong. If threads bring base under 3 s it is the choice; otherwise tiny, with a stricter cutoff.
 
 Whatever the outcome, any go is conditional on push-to-listen (never always-on listening), audio processed on the phone and discarded once transcribed, and nothing stored or sent, which addresses most of the bystander concern and also limits battery use.
 
