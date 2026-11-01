@@ -1,6 +1,6 @@
 # Spike: live interpreter (Feature 9)
 
-Status: **measuring.** The benchmark page is built; results and the decision are pending a run on the target phone.
+Status: **measuring, with a provisional answer.** Open interpretation is a no-go on this phone today. A narrower feature, recognising which of the app's known replies was said, looks like a go and is being confirmed (third run).
 
 ## Question
 
@@ -80,12 +80,49 @@ All three WebGPU configurations killed the tab; version 1 recorded nothing befor
 
 The single-threaded WebAssembly result is the first real signal: transcription accuracy is good (8% character error rate on the median clip), and the median nearly meets the 3 s bar, but the p90 does not, for clips of only 1 to 3 seconds. Threads are the obvious lever, hence threaded mode.
 
-### Second run
+### Second run (page version 2, 1 November 2026)
 
-Pending.
+Safari reports 4 cores to the page and the page was not cross-origin isolated (plain mode only; threaded mode was not run).
+
+| Config | Download | Load | Result |
+| --- | --- | --- | --- |
+| tiny-wasm (one thread) | 44 MB | 2.7 s (+2.5 s warm-up) | 56 of 56 clips |
+| base-wasm | | | crashed during download, straight after tiny-wasm in the same page |
+| small-wasm | 252 MB | 10.0 s | crashed at the first inference |
+| tiny-webgpu-fp32 | 154 MB | | crashed at model setup |
+| tiny-webgpu | 122 MB | | crashed at model setup |
+| base-webgpu | 209 MB | | crashed at model setup |
+| small-webgpu | 765 MB | | crashed during download |
+
+**WebGPU is out, for this engine on iOS 26.6.** Every WebGPU configuration killed the tab at model setup, including the fp32-only one, so the cause is the backend, not the 4-bit kernels. Not worth more time unless ONNX Runtime Web or Safari changes.
+
+**base-wasm's crash is probably memory left over, not base itself.** It ran 18 clips in a fresh tab in the first run, and crashed here only when started in the same page after tiny-wasm; WebAssembly memory does not shrink within a page. small-wasm crashing at its first inference in a fresh page looks like a real memory limit.
+
+**tiny-wasm, one thread:**
+
+| Measure | Result | Bar |
+| --- | --- | --- |
+| Transcribe | about 1.2 to 1.4 s per 2 s clip (one outlier: 5.9 s, a runaway "gegege..." loop on a Dutch clip) | under 3 s: **pass** |
+| Translate | about 1.2 to 1.4 s | **pass** |
+| Download | 44 MB, shared by all languages | under 150 MB: **pass** |
+| Transcript error rate (median) | 11% overall; Spanish and German near 0, French about 24% | |
+| Whisper's own translation | about 8 of 56 a listener could act on ("Inside or outside.", "Big or small?"); most are wrong ("Fresca ou natural?" became "Friska Natural.", "Pequena ou grande?" "Who is the great one?") | 80%: **fail, badly** |
+
+**The finding that changes the plan:** the transcripts are much better than the translations, and the replies the app already holds give a closed list to match against. Matching each tiny-wasm transcript to the nearest known reply in its language (20 to 23 candidates, comparing letters after dropping case, accents and punctuation) picks the right reply for **52 of 56** clips, every language at 6 of 8 or better (Spanish, German, Dutch and Japanese 8 of 8). The reply's stored English is then correct by construction. With a similarity cutoff of 0.5, 51 answers are shown, 50 of them right, and 5 come back as "not sure" rather than a wrong answer; the one confident miss was "Quer canela?" heard as "Quer que não é?" and matched to "Em que nome?".
+
+Caveats: the clips are clean synthetic voices; matching only knows the lines in the app, so anything else must come back as "not sure", which is untested; and the cutoff was tuned on the same 56 clips it is scored on.
+
+### Third run
+
+Pending. Page version 3 runs each configuration in a fresh page (so base-wasm gets a fair run), drops WebGPU from Run all, caps each call at 64 tokens (the runaway loop), scores reply matching for every clip, and makes the live test show the matched reply or "not sure". Wanted from it: base-wasm complete, threaded mode, the live test with real voices including lines that are not in the app, and the battery soak.
 
 ## Decision
 
-Pending. Whatever the outcome, any go is conditional on push-to-listen (never always-on listening), audio processed on the phone and discarded once transcribed, and nothing stored or sent, which addresses most of the bystander concern and also limits battery use.
+Provisional:
 
-Card suggestion (matching the English gist to a card to play back) is left out of the measurements: once there is an English gist it is text matching over the English the phrase files already hold, and gets a paragraph here if the answer is go.
+- **Open interpreter (translate anything said): no-go.** The only models that run on the phone, tiny and, probably, base on WebAssembly, translate too poorly to act on, and the models that might translate well enough do not fit.
+- **Reply recognition (tell the user which expected reply they just heard, with its English): likely go**, pending the third run. It reuses the "What you'll hear" data, needs one 44 MB model for all languages, answers in about 1.5 s on one thread, and can say "not sure" instead of guessing.
+
+Whatever the outcome, any go is conditional on push-to-listen (never always-on listening), audio processed on the phone and discarded once transcribed, and nothing stored or sent, which addresses most of the bystander concern and also limits battery use.
+
+Card suggestion follows from reply recognition: a recognised reply belongs to a known card, so the app knows which exchange is under way and can surface the natural next card. That is a product decision on top of the measurement, not something to benchmark.

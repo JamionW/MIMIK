@@ -44,7 +44,7 @@
 
 <h2>1. Benchmark suite</h2>
 <section>
-  <p>Each configuration downloads its model, then transcribes and translates 8 recorded replies per language (56 clips). If the tab reloads mid-run, that configuration crashed: it is marked with the step it reached, and Run all remaining moves on to the next. Finished and crashed configurations are skipped unless you tick redo.</p>
+  <p>Each configuration downloads its model, then transcribes and translates 8 recorded replies per language (56 clips), and matches each transcript against the language's known replies. Run all reloads the page between configurations, since a model's memory is not given back otherwise, and carries on by itself, also after a crash (marked with the step it reached). Finished and crashed configurations are skipped unless you tick redo. The WebGPU ones crashed on iOS 26 and only run from their own buttons.</p>
   <p id="mt-note"></p>
   <div id="configs"></div>
   <div class="row"><button id="run-all">Run all remaining</button><label><input type="checkbox" id="redo"> redo finished ones</label></div>
@@ -54,7 +54,7 @@
 
 <h2>2. Live microphone</h2>
 <section>
-  <p>Have someone say a line in the chosen language, or play one from a video. Hold the button while they speak and release when they stop. The time shown runs from release to the English appearing.</p>
+  <p>Have someone say a line in the chosen language, or play one from a video. Hold the button while they speak and release when they stop. The page shows the known reply it matches, with its English, or "not sure"; the time runs from release to that answer. Try lines from the app's replies and lines that are not in it: the second kind should come back as "not sure".</p>
   <div class="row">
     <select id="live-config"></select>
     <select id="live-lang"></select>
@@ -67,7 +67,7 @@
 
 <h2>3. Battery soak (10 minutes)</h2>
 <section>
-  <p>Unplug the phone and note the battery percentage. This translates clips back to back for 10 minutes, far more than real use, so it is the worst case. Enter the percentage before and after.</p>
+  <p>Unplug the phone and note the battery percentage. This transcribes clips back to back for 10 minutes, far more than real use, so it is the worst case. Enter the percentage before and after.</p>
   <div class="row">
     <select id="soak-config"></select>
     <label>Before <input type="number" id="bat-before" min="0" max="100" style="width:5em">%</label>
@@ -117,13 +117,19 @@ const CONFIGS = [
   { id: 'tiny-wasm', model: 'onnx-community/whisper-tiny', device: 'wasm', dtype: 'q8' },
   { id: 'base-wasm', model: 'onnx-community/whisper-base', device: 'wasm', dtype: 'q8' },
   { id: 'small-wasm', model: 'onnx-community/whisper-small', device: 'wasm', dtype: 'q8' },
-  { id: 'tiny-webgpu-fp32', model: 'onnx-community/whisper-tiny', device: 'webgpu', dtype: 'fp32' },
-  { id: 'tiny-webgpu', model: 'onnx-community/whisper-tiny', device: 'webgpu', dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' } },
-  { id: 'base-webgpu', model: 'onnx-community/whisper-base', device: 'webgpu', dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' } },
-  { id: 'small-webgpu', model: 'onnx-community/whisper-small', device: 'webgpu', dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' } },
+  // All four crashed the tab at model setup on iOS 26.6 (second run), so Run all skips them.
+  { id: 'tiny-webgpu-fp32', model: 'onnx-community/whisper-tiny', device: 'webgpu', dtype: 'fp32', manual: true },
+  { id: 'tiny-webgpu', model: 'onnx-community/whisper-tiny', device: 'webgpu', dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' }, manual: true },
+  { id: 'base-webgpu', model: 'onnx-community/whisper-base', device: 'webgpu', dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' }, manual: true },
+  { id: 'small-webgpu', model: 'onnx-community/whisper-small', device: 'webgpu', dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' }, manual: true },
 ].map(c => ({ ...c, id: MT && c.device === 'wasm' ? `${c.id}-mt` : c.id }));
 const LANGS = { pt: 'portuguese', es: 'spanish', fr: 'french', de: 'german', nl: 'dutch', bs: 'bosnian', ja: 'japanese' };
 const PER_LANG = 8;
+// Caps each call: Whisper sometimes loops on one syllable until the token limit (5.9 s in run 2).
+const MAX_TOKENS = 64;
+// Below this similarity a reply match is withheld as "not sure" (tuned on run 2's transcripts).
+const MATCH_MIN = 0.5;
+const opts = (code, task) => ({ language: LANGS[code], task, max_new_tokens: MAX_TOKENS });
 const SOAK_MS = 10 * 60 * 1000;
 const KEY = 'mimik-lab-v1';
 
@@ -182,6 +188,38 @@ async function decode(buf) {
   return out;
 }
 
+// Reply matching: the transcript is compared with every known reply in the language and the
+// closest is shown with its stored English. Comparison drops case, accents, punctuation and
+// spaces, and squashes runaway repeats; similarity is 1 - edit distance / longer length.
+const fold = s => (s || '').toLowerCase().normalize('NFD').replace(/[\p{M}\p{P}\p{S}\s]/gu, '').replace(/(.)\1{3,}/gu, '$1');
+function lev(a, b) {
+  a = [...a]; b = [...b];
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+const candidates = {};
+async function loadCandidates(code) {
+  if (candidates[code]) return candidates[code];
+  const data = await (await fetch(`../${code}/phrases.json`)).json();
+  const seen = new Map();
+  for (const r of data.sections.flatMap(s => s.phrases.flatMap(p => p.replies || []))) if (!seen.has(fold(r.text))) seen.set(fold(r.text), r);
+  return (candidates[code] = [...seen.entries()].map(([key, r]) => ({ key, id: r.id, text: r.text, en: r.en })));
+}
+function match(code, transcript) {
+  const t = fold(transcript);
+  let best = null;
+  for (const c of candidates[code]) {
+    const score = t || c.key ? 1 - lev(t, c.key) / Math.max([...t].length, [...c.key].length) : 1;
+    if (!best || score > best.score) best = { ...c, score };
+  }
+  return { ...best, score: +best.score.toFixed(3), shown: best.score >= MATCH_MIN };
+}
+
 // Test set: the first replies in each language, alternating voices. These are lines a
 // waiter or clerk actually says, with the text and English already known.
 let testSet = null;
@@ -190,6 +228,7 @@ async function loadTestSet() {
   testSet = [];
   for (const code of Object.keys(LANGS)) {
     const data = await (await fetch(`../${code}/phrases.json`)).json();
+    await loadCandidates(code);
     const reps = data.sections.flatMap(s => s.phrases.flatMap(p => p.replies || [])).slice(0, PER_LANG);
     for (const [i, r] of reps.entries()) {
       const path = `../${code}/audio/${i % 2 ? 'f/' : ''}${r.id}.mp3`;
@@ -244,7 +283,7 @@ async function load(cfg, onStatus, rec) {
 
 async function run(asr, item, task) {
   const t0 = now();
-  const out = await asr(item.audio, { language: LANGS[item.code], task });
+  const out = await asr(item.audio, opts(item.code, task));
   return { text: (out.text || '').trim(), ms: round(now() - t0) };
 }
 
@@ -263,7 +302,7 @@ async function runConfig(cfg) {
     save();
     // The first call compiles shaders; time it separately so it does not skew the rest.
     let t0 = now();
-    await asr(set[0].audio, { language: LANGS[set[0].code], task: 'transcribe' });
+    await asr(set[0].audio, opts(set[0].code, 'transcribe'));
     r.warmupMs = round(now() - t0);
     save();
     for (const [i, item] of set.entries()) {
@@ -271,7 +310,9 @@ async function runConfig(cfg) {
       r.stage = `clip ${i + 1} (${item.code})`;
       const tr = await run(asr, item, 'transcribe');
       const tl = await run(asr, item, 'translate');
-      r.clips.push({ code: item.code, id: item.id, seconds: +item.seconds.toFixed(2), ref: item.text, refEn: item.en, transcript: tr.text, transcribeMs: tr.ms, cer: +cer(item.text, tr.text).toFixed(3), english: tl.text, translateMs: tl.ms });
+      const m = match(item.code, tr.text);
+      r.clips.push({ code: item.code, id: item.id, seconds: +item.seconds.toFixed(2), ref: item.text, refEn: item.en, transcript: tr.text, transcribeMs: tr.ms, cer: +cer(item.text, tr.text).toFixed(3),
+        match: m.text, matchScore: m.score, matchShown: m.shown, matchRight: m.key === fold(item.text), english: tl.text, translateMs: tl.ms });
       save();
     }
     await asr.dispose?.();
@@ -290,14 +331,16 @@ function stats(r) {
   if (!c.length) return null;
   const med = xs => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
   const p90 = xs => { const s = [...xs].sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.floor(s.length * 0.9))]; };
-  return { n: c.length, tlMed: med(c.map(x => x.translateMs)), tlP90: p90(c.map(x => x.translateMs)), cerMed: med(c.map(x => x.cer)) };
+  const m = c.filter(x => 'matchShown' in x);
+  return { n: c.length, trMed: med(c.map(x => x.transcribeMs)), trP90: p90(c.map(x => x.transcribeMs)), cerMed: med(c.map(x => x.cer)),
+    match: m.length ? { right: m.filter(x => x.matchShown && x.matchRight).length, wrong: m.filter(x => x.matchShown && !x.matchRight).length, unsure: m.filter(x => !x.matchShown).length } : null };
 }
 
 function renderSummary() {
   const t = $('summary');
   t.replaceChildren();
   const head = el('tr');
-  for (const h of ['Config', 'MB', 'Load s', 'Clips', 'Translate ms (median / p90)', 'Error rate (median)']) head.append(el('th', h));
+  for (const h of ['Config', 'MB', 'Load s', 'Clips', 'Transcribe ms (median / p90)', 'Reply match (right / wrong / not sure)', 'Error rate (median)']) head.append(el('th', h));
   t.append(head);
   for (const cfg of CONFIGS) {
     const r = results.runs[cfg.id];
@@ -305,7 +348,8 @@ function renderSummary() {
     const s = stats(r);
     const tr = el('tr');
     tr.append(el('td', cfg.id), el('td', r.downloadMB ?? '-'), el('td', r.loadMs ? (r.loadMs / 1000).toFixed(1) : '-'), el('td', s ? `${s.n}${r.finished ? '' : '…'}` : '-'),
-      el('td', s ? `${s.tlMed} / ${s.tlP90}` : '-'), el('td', r.error ? r.error : s ? `${Math.round(s.cerMed * 100)}%` : '-', r.error ? 'err' : null));
+      el('td', s ? `${s.trMed} / ${s.trP90}` : '-'), el('td', s && s.match ? `${s.match.right} / ${s.match.wrong} / ${s.match.unsure}` : '-'),
+      el('td', r.error ? r.error : s ? `${Math.round(s.cerMed * 100)}%` : '-', r.error ? 'err' : null));
     t.append(tr);
   }
 }
@@ -328,17 +372,27 @@ for (const cfg of CONFIGS) {
   const row = el('div', null, 'row');
   const b = el('button', `Run ${cfg.id}`, 'ghost');
   b.onclick = () => guarded(() => runConfig(cfg));
-  row.append(b, el('span', `${cfg.model.split('/')[1]} on ${cfg.device}`));
+  row.append(b, el('span', `${cfg.model.split('/')[1]} on ${cfg.device}${cfg.manual ? ' (not in Run all)' : ''}`));
   $('configs').append(row);
   for (const sel of ['live-config', 'soak-config']) $(sel).append(new Option(cfg.id, cfg.id));
 }
-$('run-all').onclick = () => guarded(async () => {
-  for (const cfg of CONFIGS) {
-    const r = results.runs[cfg.id];
-    if (r && (r.finished || r.error) && !$('redo').checked) continue;
-    await runConfig(cfg);
-  }
-});
+// Run all does one configuration per page load: WebAssembly memory only grows within a page,
+// so a model run after another can crash where it would run fresh. The flag in sessionStorage
+// carries the run across reloads, including the reload that follows a crash.
+const RUN_ALL = 'lab-run-all';
+const pending = () => CONFIGS.find(c => !c.manual && !(results.runs[c.id] && (results.runs[c.id].finished || results.runs[c.id].error)));
+async function runAllStep() {
+  const cfg = pending();
+  if (!cfg) { sessionStorage.removeItem(RUN_ALL); $('suite-status').textContent = 'All configurations done.'; return; }
+  sessionStorage.setItem(RUN_ALL, '1');
+  await runConfig(cfg);
+  if (pending()) { $('suite-status').textContent += ' Reloading for the next...'; location.reload(); }
+  else { sessionStorage.removeItem(RUN_ALL); $('suite-status').textContent = 'All configurations done.'; }
+}
+$('run-all').onclick = () => {
+  if ($('redo').checked) for (const c of CONFIGS) if (!c.manual) delete results.runs[c.id];
+  guarded(runAllStep);
+};
 for (const [code, name] of Object.entries(LANGS)) $('live-lang').append(new Option(name, code));
 
 // Live microphone: hold to record, release to transcribe and translate.
@@ -380,19 +434,20 @@ async function endTalk(e) {
   await stopped;
   const code = $('live-lang').value;
   try {
+    await loadCandidates(code);
     const audio = await decode(await new Blob(chunks, { type: r.mimeType }).arrayBuffer());
     const decodedMs = round(now() - released);
-    const t0 = now();
-    const en = await live.asr(audio, { language: LANGS[code], task: 'translate' });
-    const toEnglishMs = round(now() - released);
-    const translateMs = round(now() - t0);
-    const tr = await live.asr(audio, { language: LANGS[code], task: 'transcribe' });
-    const entry = { config: live.cfg.id, code, seconds: +(audio.length / 16000).toFixed(2), decodedMs, translateMs, toEnglishMs, english: en.text.trim(), transcript: tr.text.trim() };
-    results.live.push(entry);
-    save();
+    const tr = await live.asr(audio, opts(code, 'transcribe'));
+    const m = match(code, tr.text);
+    const toAnswerMs = round(now() - released);
     const box = el('div');
-    box.append(el('p', `${entry.english}`, 'out'), el('p', `${entry.transcript} · ${entry.seconds}s audio · English after ${toEnglishMs} ms`));
+    box.append(el('p', m.shown ? `${m.en}  (${m.text})` : 'Not sure', 'out'), el('p', `Heard: ${tr.text.trim()} · match ${m.score} · ${(audio.length / 16000).toFixed(1)}s audio · answer after ${toAnswerMs} ms`));
     $('live-out').prepend(box);
+    $('live-status').textContent = 'Translating for comparison...';
+    const en = await live.asr(audio, opts(code, 'translate'));
+    box.append(el('p', `Whisper's own translation: ${en.text.trim()}`));
+    results.live.push({ config: live.cfg.id, code, seconds: +(audio.length / 16000).toFixed(2), decodedMs, toAnswerMs, transcript: tr.text.trim(), match: m.text, matchEn: m.en, matchScore: m.score, matchShown: m.shown, english: en.text.trim() });
+    save();
     $('live-status').textContent = '';
   } catch (err) { $('live-status').textContent = `Failed: ${err.message || err}`; }
 }
@@ -413,7 +468,7 @@ $('soak-run').onclick = () => guarded(async () => {
     let i = 0;
     while (now() < end) {
       const item = set[i++ % set.length];
-      await asr(item.audio, { language: LANGS[item.code], task: 'translate' });
+      await asr(item.audio, opts(item.code, 'transcribe'));
       s.runs++;
       s.audioSeconds = +(s.audioSeconds + item.seconds).toFixed(1);
       $('soak-status').textContent = `${cfg.id}: ${s.runs} clips, ${Math.ceil((end - now()) / 60000)} min left`;
@@ -461,6 +516,7 @@ if (!MT) {
 }
 $('talk').disabled = true;
 save();
+if (sessionStorage.getItem(RUN_ALL)) setTimeout(() => guarded(runAllStep), 1500);
 deviceInfo();
 </script>
 </body>
