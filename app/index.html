@@ -661,6 +661,11 @@
   let labPhoneMic = true;
   try { if (LAB && localStorage.getItem('lab-input') === 'system') labPhoneMic = false; } catch {}
   const BUILT_IN = /iphone|ipad|built-?in|internal/i;
+  // Capture. 'recorder' is MediaRecorder (AAC on iOS), decoded afterwards. 'webaudio' takes the raw
+  // samples from the audio graph instead. With headphones connected, MediaRecorder recordings on
+  // iOS stopped at about 0.53 s (25 AAC frames) whatever the input; the lab compares the two.
+  let labCapture = 'recorder';
+  try { if (LAB && localStorage.getItem('lab-capture') === 'webaudio') labCapture = 'webaudio'; } catch {}
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
   const listenEl = document.getElementById('listen');
@@ -819,7 +824,9 @@
         }
       }
     }
+    for (const t of stream.getAudioTracks()) for (const ev of ['mute', 'unmute']) t.addEventListener(ev, () => mark(`track ${ev}`));
     for (const t of stream.getAudioTracks()) t.addEventListener('ended', () => {
+      mark('track ended');
       labEntry({ outcome: 'microphone ended', track: { label: t.label } });
       if (mic === stream && !recorder) releaseMic();
     });
@@ -871,37 +878,101 @@
     pressed = true;
     pressedAt = performance.now();
     if (!asr || recorder || hearing) return;
+    // Feedback at once, even if the microphone still has to open.
+    holdBtn.classList.add('on');
+    holdBtn.querySelector('span').textContent = 'Listening... let go when they stop';
+    timeline = [];
+    // An AudioContext has to be created inside the press for iOS to let it run.
+    const ctx = labCapture === 'webaudio' ? new AudioContext() : null;
     if (!micLive()) {
       releaseMic();
       try { mic = await openMic(); }
       catch (err) {
         labEntry({ outcome: 'error', stage: 'open microphone', error: String(err && err.message || err) });
         listenMsg('Could not open the microphone. If you just connected or disconnected headphones, try again; otherwise allow it in Settings.');
+        resetHoldButton();
+        if (ctx) ctx.close();
         return;
       }
+      mark('microphone opened');
       // Released while the microphone was reopening: nothing to record.
-      if (!pressed) return;
+      if (!pressed) { resetHoldButton(); if (ctx) ctx.close(); return; }
     }
     // Keeps the release on this button even if the finger or pointer drifts off it.
     try { holdBtn.setPointerCapture(e.pointerId); } catch {}
     audio.pause();
     recChunks = [];
     try {
-      recorder = new MediaRecorder(mic);
-      recorder.ondataavailable = ev => { if (ev.data.size) recChunks.push(ev.data); };
-      recorder.onerror = ev => labEntry({ outcome: 'error', stage: 'recording', error: String(ev.error && ev.error.message || ev.error || 'recorder error'), track: micState() });
-      recorder.start();
+      if (ctx) {
+        recorder = await startGraphCapture(ctx);
+      } else {
+        recorder = new MediaRecorder(mic);
+        recorder.ondataavailable = ev => { mark(`data ${ev.data.size} bytes`); if (ev.data.size) recChunks.push(ev.data); };
+        recorder.onerror = ev => labEntry({ outcome: 'error', stage: 'recording', error: String(ev.error && ev.error.message || ev.error || 'recorder error'), track: micState() });
+        for (const ev of ['pause', 'resume', 'stop']) recorder.addEventListener(ev, () => mark(`recorder ${ev}`));
+        recorder.start();
+      }
+      recorder.startedAt = performance.now();
+      mark('recording started');
     } catch (err) {
       recorder = null;
       releaseMic();
+      if (ctx) ctx.close();
       labEntry({ outcome: 'error', stage: 'start recording', error: String(err && err.message || err), track: micState() });
       listenMsg('Could not start recording. Try again.');
+      resetHoldButton();
       return;
     }
+    // Released while recording was starting.
+    if (!pressed) return stopHearing({ type: 'released while starting', preventDefault() {} });
     clearTimeout(holdTimer);
     holdTimer = setTimeout(() => stopHearing({ type: 'timeout', preventDefault() {} }), MAX_HOLD_MS);
-    holdBtn.classList.add('on');
-    holdBtn.querySelector('span').textContent = 'Listening... let go when they stop';
+  }
+
+  function resetHoldButton() {
+    holdBtn.classList.remove('on');
+    holdBtn.querySelector('span').textContent = 'Hold while they speak';
+  }
+
+  // Lab timeline of one hold: what the microphone and recorder did, in ms from the press.
+  let timeline = [];
+  const mark = what => { if (LAB && timeline.length < 40) timeline.push([Math.round(performance.now() - pressedAt), what]); };
+
+  // Raw capture from the audio graph: the microphone feeds a ScriptProcessorNode that copies
+  // each block of samples. Returns an object shaped enough like a MediaRecorder for stopHearing.
+  async function startGraphCapture(ctx) {
+    if (ctx.state !== 'running') await ctx.resume();
+    const src = ctx.createMediaStreamSource(mic);
+    const node = ctx.createScriptProcessor(4096, 1, 1);
+    const blocks = [];
+    node.onaudioprocess = ev => {
+      if (!blocks.length) mark('first samples');
+      blocks.push(new Float32Array(ev.inputBuffer.getChannelData(0)));
+    };
+    src.connect(node);
+    node.connect(ctx.destination);
+    ctx.onstatechange = () => mark(`audio context ${ctx.state}`);
+    return {
+      graph: true, state: 'recording', mimeType: `pcm/${ctx.sampleRate}`,
+      async finish() {
+        this.state = 'inactive';
+        src.disconnect();
+        node.disconnect();
+        const n = blocks.reduce((a, b) => a + b.length, 0);
+        const rate = ctx.sampleRate;
+        await ctx.close();
+        if (!n) return new Float32Array(0);
+        const buf = new AudioBuffer({ length: n, numberOfChannels: 1, sampleRate: rate });
+        let o = 0;
+        for (const b of blocks) { buf.copyToChannel(b, 0, o); o += b.length; }
+        const off = new OfflineAudioContext(1, Math.ceil(n * 16000 / rate), 16000);
+        const s = off.createBufferSource();
+        s.buffer = buf;
+        s.connect(off.destination);
+        s.start();
+        return (await off.startRendering()).getChannelData(0);
+      },
+    };
   }
 
   async function decode16k(buf) {
@@ -919,29 +990,38 @@
     clearTimeout(holdTimer);
     const heldMs = performance.now() - pressedAt;
     const r = recorder;
-    if (!r) return;
+    if (!r) {
+      // Released before recording began (the microphone was still opening); startHearing tidies up.
+      return;
+    }
     recorder = null;
-    holdBtn.classList.remove('on');
-    holdBtn.querySelector('span').textContent = 'Hold while they speak';
+    resetHoldButton();
     const released = performance.now();
+    mark(`released (${e.type})`);
     // iOS ends the microphone's track when the audio route changes (headphones connecting, say),
     // and the recorder stops by itself; stop() on it would throw.
-    const stoppedEarly = r.state === 'inactive';
-    if (!stoppedEarly) await new Promise(res => { r.onstop = res; r.stop(); });
-    const blob = new Blob(recChunks, { type: r.mimeType || 'audio/mp4' });
-    const capture = { mime: r.mimeType, bytes: blob.size, chunks: recChunks.length, track: micState(), endedBy: e.type, heldMs: Math.round(heldMs), stoppedEarly };
+    const stoppedEarly = !r.graph && r.state === 'inactive';
+    let graphPcm = null;
+    if (r.graph) graphPcm = await r.finish();
+    else if (!stoppedEarly) await new Promise(res => { r.onstop = res; r.stop(); });
+    const blob = r.graph ? null : new Blob(recChunks, { type: r.mimeType || 'audio/mp4' });
+    const capture = {
+      method: r.graph ? 'webaudio' : 'recorder', mime: r.mimeType, bytes: r.graph ? graphPcm.length * 4 : blob.size, chunks: recChunks.length,
+      track: micState(), endedBy: e.type, heldMs: Math.round(heldMs), startDelayMs: Math.round(r.startedAt - pressedAt), recordedMs: Math.round(released - r.startedAt), stoppedEarly,
+      timeline: LAB ? timeline : undefined,
+    };
     recChunks = [];
     hearing = true;
     holdBtn.disabled = true;
     listenMsg('Working...');
     try {
-      if (!blob.size) {
+      if (!capture.bytes) {
         labEntry({ outcome: 'empty', capture });
         releaseMic();
         listenMsg('Nothing was recorded. If headphones just connected, try again.');
         return;
       }
-      const pcm = await decode16k(await blob.arrayBuffer());
+      const pcm = r.graph ? graphPcm : await decode16k(await blob.arrayBuffer());
       const decoded = performance.now();
       capture.peak = 0;
       let sq = 0;
@@ -1036,7 +1116,7 @@
     if (!LAB) return null;
     const track = mic && mic.getAudioTracks()[0];
     const entry = {
-      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, voiceProcessing: labVoice, input: labPhoneMic ? 'phone' : 'system', mic: track ? track.label : null,
+      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, voiceProcessing: labVoice, input: labPhoneMic ? 'phone' : 'system', captureMode: labCapture, mic: track ? track.label : null,
       homeScreen: !!(navigator.standalone || matchMedia('(display-mode: standalone)').matches),
       ...fields, truth: null,
     };
@@ -1115,7 +1195,11 @@
     input.append(new Option('Input: phone microphone', 'phone'), new Option('Input: system choice', 'system'));
     input.value = labPhoneMic ? 'phone' : 'system';
     input.onchange = () => { try { localStorage.setItem('lab-input', input.value); } catch {} location.reload(); };
-    bar.append(copy, share, clear, hear, model, voice, input);
+    const cap = el('select');
+    cap.append(new Option('Capture: recorder', 'recorder'), new Option('Capture: Web Audio', 'webaudio'));
+    cap.value = labCapture;
+    cap.onchange = () => { try { localStorage.setItem('lab-capture', cap.value); } catch {} location.reload(); };
+    bar.append(copy, share, clear, hear, model, voice, input, cap);
   }
 
   async function init() {
@@ -1158,7 +1242,10 @@
           try { inputs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput').map(d => d.label); } catch {}
           labEntry({ outcome: 'device change', inputs, track: micState() });
         }
-        if (!recorder) releaseMic();
+        if (recorder) return;
+        releaseMic();
+        // Reopen now, so the next press does not wait for the new route.
+        if (!listenEl.hidden && asr) { try { mic = await openMic(); } catch {} }
       });
       // The microphone is released whenever the app goes to the background.
       document.addEventListener('visibilitychange', () => { if (document.hidden) closeListen(); });
