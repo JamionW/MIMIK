@@ -32,7 +32,7 @@ Engine: transformers.js 4.3.2 (ONNX Runtime Web), WebGPU with a WebAssembly fall
 
 ## Method
 
-`site/lab/index.html`, deployed at `/MIMIK/lab/`, separate from the app and not cached offline. On the phone it:
+`site/lab/index.html`, deployed at `/MIMIK/lab/`, separate from the app and not cached offline (removed once the spike and the real-world testing were done; it is in the git history). On the phone it:
 
 1. **Suite.** For each configuration, downloads the model (recording size and load time), runs one warm-up call (shader compilation, timed separately), then transcribes and translates 56 clips: the first 8 replies in each of the 7 languages, alternating voices. Replies are lines a waiter or clerk actually says, with the text and English already written, so each clip has a reference. Records time per call, the transcript with a character error rate, and the English.
 2. **Live.** Hold-to-listen recording from the microphone; times release to English, which includes decoding the recording.
@@ -178,7 +178,7 @@ Card suggestion follows from reply recognition: a recognised reply belongs to a 
 
 ## After the build: real-world testing (1 November 2026)
 
-Six sessions with the lab copy of the app (`/lab/<code>/`), Portuguese, iPhone 15 Pro, iOS 26.6:
+Six sessions with a lab copy of the app (`/lab/<code>/`, since removed with the rest of `/lab/`) that logged every attempt, Portuguese, iPhone 15 Pro, iOS 26.6:
 
 - **Phone microphone needs voice processing.** Raw, speech peaked around 0.01 (-40 dB) and Whisper heard "A"; with iOS voice processing (`echoCancellation: true`) it peaked around 0.4. With it on, 8 answers were shown, all right, none wrong.
 - **Holds must ignore iOS's long-press cancel**, and matching works sentence by sentence ("Boa noite! Bem-vindos! Tem reserva?" gives "Têm reserva?").

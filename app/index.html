@@ -180,11 +180,6 @@
   .heard-en { margin: 0; font-size: 22px; font-weight: 700; }
   .heard .text { font-size: 20px; }
   .heard .en { font-size: 14px; }
-  .lab-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; font-size: 14px; color: var(--muted); }
-  .lab-bar button, .lab-truth button { border: 1px solid var(--line); border-radius: 8px; background: none; color: var(--accent); font: inherit; font-size: 14px; padding: 4px 10px; }
-  .lab-bar select, .lab-truth select { font: inherit; font-size: 14px; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px; }
-  .lab-truth { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 13px; color: var(--muted); }
-  .lab-truth.done select { border-color: var(--accent); }
   .replies { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 8px; }
   .replies summary { color: var(--muted); font-size: 14px; padding: 4px 0; cursor: pointer; }
   .replies .row { margin-top: 10px; }
@@ -219,7 +214,6 @@
     <button id="listen-get" class="listen-hold" hidden></button>
     <button id="listen-hold" class="listen-hold" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg><span>Hold while they speak</span></button>
     <div id="listen-out"></div>
-    <div id="lab-bar" class="lab-bar" hidden></div>
   </div>
 </div>
 <div id="show" class="show" role="dialog" aria-modal="true" hidden>
@@ -641,35 +635,14 @@
   // the audio with Whisper and shows which of this language's replies it was, with its English,
   // or "not sure". Audio never leaves the phone and is dropped once transcribed. The model is an
   // optional 80 MB download, shared by every language. Choices are from docs/spike-interpreter.md.
-  // The /lab/<code>/ copy that build.py writes sets LAB: it logs every attempt for tuning
-  // (see labEntry below), offers a model switch, and does not register the worker.
-  const LAB = false;
-  const LAB_KEY = 'mimik-lab-listen';
   const ASR_LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2';
-  const ASR_MODELS = { base: ['onnx-community/whisper-base', 80], tiny: ['onnx-community/whisper-tiny', 44] };
-  let labModel = 'base';
-  try { if (LAB && ASR_MODELS[localStorage.getItem('lab-model')]) labModel = localStorage.getItem('lab-model'); } catch {}
-  const [ASR_MODEL, ASR_MB] = ASR_MODELS[labModel];
-  // Microphone processing. Off, iOS gives the raw signal with no automatic gain: real-world speech
-  // at arm's length peaked around 0.01 (-40 dB). On, it applies the voice processing used for
-  // calls, which includes gain: the same speech peaked around 0.4, and recognition improved. On is
-  // the default; the lab can still switch it off to compare.
-  let labVoice = true;
-  try { if (LAB && localStorage.getItem('lab-voice') === '0') labVoice = false; } catch {}
-  const micAudio = () => ({ echoCancellation: labVoice, noiseSuppression: true, autoGainControl: true });
-  // Input. Headphone microphones (AirPods) are tuned to the wearer's voice, and on iOS their
-  // recordings were cut at 0.53 s or empty; the person to be heard is across the table. So the
-  // phone's own microphone is used whenever it is listed, with headphones still playing audio.
-  // The lab can switch to the system's choice to compare.
-  let labPhoneMic = true;
-  try { if (LAB && localStorage.getItem('lab-input') === 'system') labPhoneMic = false; } catch {}
+  const ASR_MODEL = 'onnx-community/whisper-base';
+  const ASR_MB = 80;
+  // iOS voice processing (the echo cancellation used for calls) brings automatic gain: without it,
+  // real-world speech at arm's length peaked around 0.01 (-40 dB) and Whisper heard "A"; with it,
+  // around 0.4, and recognition held up.
+  const micAudio = () => ({ echoCancellation: true, noiseSuppression: true, autoGainControl: true });
   const BUILT_IN = /iphone|ipad|built-?in|internal/i;
-  // Capture. 'recorder' is MediaRecorder (AAC on iOS), decoded afterwards: proven on the phone's
-  // microphone with voice processing. 'webaudio' takes the raw samples from the audio graph; it
-  // did better with AirPods connected, which listening no longer supports (see headphonesIn),
-  // so it stays a lab option.
-  let labCapture = 'recorder';
-  try { if (LAB && localStorage.getItem('lab-capture') === 'webaudio') labCapture = 'webaudio'; } catch {}
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
   const listenEl = document.getElementById('listen');
@@ -801,8 +774,7 @@
   // from either microphone: cut at 0.53 s or empty with MediaRecorder, all zeros after a clip had
   // played with Web Audio, and the AirPods' own microphone hears the wearer, not the person across
   // the table. So listening is paused while any input other than the phone's own is listed (labels
-  // are only listed once the microphone has been allowed), and resumes when it goes. The lab
-  // keeps the button, with a warning, so the case stays testable.
+  // are only listed once the microphone has been allowed), and resumes when it goes.
   async function headphonesIn() {
     try {
       return (await navigator.mediaDevices.enumerateDevices())
@@ -814,10 +786,8 @@
     if (listenEl.hidden || !asr) return;
     const phones = await headphonesIn();
     if (phones) {
-      listenMsg(LAB
-        ? 'Headphones are connected: the app would pause listening here. The lab records anyway.'
-        : 'Listening does not work while headphones are connected: iOS gives the app no usable sound. Disconnect them, or turn Bluetooth off, and the button comes back.');
-      holdBtn.hidden = !LAB;
+      listenMsg('Listening does not work while headphones are connected: iOS gives the app no usable sound. Disconnect them, or turn Bluetooth off, and the button comes back.');
+      holdBtn.hidden = true;
     } else {
       listenMsg('Hold the button while they speak and let go when they stop. Audio stays on this phone and is discarded after.');
       holdBtn.hidden = false;
@@ -827,45 +797,11 @@
   // Opens the microphone and drops it when iOS ends its track (a route change), so the next
   // press opens it again on whatever input is now current.
   async function openMic() {
-    let audioOpts = micAudio();
-    if (labPhoneMic) {
-      // Labels are only listed once microphone permission has been granted; before that, or if
-      // no built-in input is found, the system's choice is used.
-      try {
-        const own = (await navigator.mediaDevices.enumerateDevices()).find(d => d.kind === 'audioinput' && BUILT_IN.test(d.label));
-        if (own && own.deviceId) audioOpts = { ...audioOpts, deviceId: { exact: own.deviceId } };
-      } catch {}
-    }
-    let stream;
-    try { stream = await navigator.mediaDevices.getUserMedia({ audio: audioOpts }); }
-    catch (err) {
-      if (!audioOpts.deviceId) throw err;
-      stream = await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
-    }
-    // The first opening has no labels to choose from; once it has them, reopen on the phone's own.
-    if (labPhoneMic && !audioOpts.deviceId) {
-      const t = stream.getAudioTracks()[0];
-      if (t && !BUILT_IN.test(t.label)) {
-        const own = (await navigator.mediaDevices.enumerateDevices()).find(d => d.kind === 'audioinput' && BUILT_IN.test(d.label));
-        if (own && own.deviceId) {
-          for (const x of stream.getTracks()) x.stop();
-          try { stream = await navigator.mediaDevices.getUserMedia({ audio: { ...micAudio(), deviceId: { exact: own.deviceId } } }); }
-          catch { stream = await navigator.mediaDevices.getUserMedia({ audio: micAudio() }); }
-        }
-      }
-    }
-    for (const t of stream.getAudioTracks()) for (const ev of ['mute', 'unmute']) t.addEventListener(ev, () => mark(`track ${ev}`));
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
     for (const t of stream.getAudioTracks()) t.addEventListener('ended', () => {
-      mark('track ended');
-      labEntry({ outcome: 'microphone ended', track: { label: t.label } });
       if (mic === stream && !recorder) releaseMic();
     });
     return stream;
-  }
-
-  function micState() {
-    const t = mic && mic.getAudioTracks()[0];
-    return t ? { label: t.label, state: t.readyState, muted: t.muted, enabled: t.enabled } : null;
   }
 
   function releaseMic() {
@@ -878,7 +814,6 @@
     matchers ||= buildMatchers();
     listenEl.hidden = false;
     document.getElementById('listen-fab').hidden = true;
-    labRender();
     if (asr || modelSaved()) prepareListening();
     else offerDownload(`To understand replies, this phone needs a one-time ${ASR_MB} MB download, shared by every language and kept for offline use. Use Wi-Fi.`);
   }
@@ -902,121 +837,57 @@
   // a touch's pointercancel is ignored, and the hold ends at the lift-off (pointerup or touchend),
   // a touchcancel, or after MAX_HOLD_MS as a safety net.
   const MAX_HOLD_MS = 30000;
-  let pressed = false, pressedAt = 0, holdTimer = null;
+  let pressed = false, holdTimer = null;
   async function startHearing(e) {
     e.preventDefault();
     pressed = true;
-    pressedAt = performance.now();
     if (!asr || recorder || hearing) return;
     // Feedback at once, even if the microphone still has to open.
     holdBtn.classList.add('on');
     holdBtn.querySelector('span').textContent = 'Listening... let go when they stop';
-    timeline = [];
-    mark(releasePlayback() ? 'playback released' : 'no playback to release');
-    // An AudioContext has to be created inside the press for iOS to let it run.
-    const ctx = labCapture === 'webaudio' ? new AudioContext() : null;
+    releasePlayback();
     if (!micLive()) {
       releaseMic();
       try { mic = await openMic(); }
-      catch (err) {
-        labEntry({ outcome: 'error', stage: 'open microphone', error: String(err && err.message || err) });
+      catch {
         listenMsg('Could not open the microphone. If you just connected or disconnected headphones, try again; otherwise allow it in Settings.');
         resetHoldButton();
-        if (ctx) ctx.close();
         return;
       }
-      mark('microphone opened');
       // Released while the microphone was reopening: nothing to record.
-      if (!pressed) { resetHoldButton(); if (ctx) ctx.close(); return; }
+      if (!pressed) { resetHoldButton(); return; }
     }
     // Keeps the release on this button even if the finger or pointer drifts off it.
     try { holdBtn.setPointerCapture(e.pointerId); } catch {}
     recChunks = [];
     try {
-      if (ctx) {
-        recorder = await startGraphCapture(ctx);
-      } else {
-        recorder = new MediaRecorder(mic);
-        recorder.ondataavailable = ev => { mark(`data ${ev.data.size} bytes`); if (ev.data.size) recChunks.push(ev.data); };
-        recorder.onerror = ev => labEntry({ outcome: 'error', stage: 'recording', error: String(ev.error && ev.error.message || ev.error || 'recorder error'), track: micState() });
-        for (const ev of ['pause', 'resume', 'stop']) recorder.addEventListener(ev, () => mark(`recorder ${ev}`));
-        recorder.start();
-      }
-      recorder.startedAt = performance.now();
-      mark('recording started');
-    } catch (err) {
+      recorder = new MediaRecorder(mic);
+      recorder.ondataavailable = ev => { if (ev.data.size) recChunks.push(ev.data); };
+      recorder.start();
+    } catch {
       recorder = null;
       releaseMic();
-      if (ctx) ctx.close();
-      labEntry({ outcome: 'error', stage: 'start recording', error: String(err && err.message || err), track: micState() });
       listenMsg('Could not start recording. Try again.');
       resetHoldButton();
       return;
     }
-    // Released while recording was starting.
-    if (!pressed) return stopHearing({ type: 'released while starting', preventDefault() {} });
     clearTimeout(holdTimer);
     holdTimer = setTimeout(() => stopHearing({ type: 'timeout', preventDefault() {} }), MAX_HOLD_MS);
   }
 
-  // With AirPods connected, recordings made after a clip had played were all zeros, even on a
-  // freshly opened microphone: iOS kept the page's audio in playback. So before recording, the
-  // player lets go of its clip, speech stops, and the lock-screen entry is cleared. Returns
-  // whether there was a clip loaded.
+  // Before recording, the player lets go of its clip, speech stops and the lock-screen entry is
+  // cleared, so iOS is not still treating the page as playing audio when the microphone starts.
   function releasePlayback() {
-    const had = !!audio.getAttribute('src');
     audio.pause();
-    if (had) { audio.removeAttribute('src'); audio.load(); }
+    if (audio.getAttribute('src')) { audio.removeAttribute('src'); audio.load(); }
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     if (media) { try { media.playbackState = 'none'; media.metadata = null; } catch {} }
     clearActive();
-    return had;
   }
 
   function resetHoldButton() {
     holdBtn.classList.remove('on');
     holdBtn.querySelector('span').textContent = 'Hold while they speak';
-  }
-
-  // Lab timeline of one hold: what the microphone and recorder did, in ms from the press.
-  let timeline = [];
-  const mark = what => { if (LAB && timeline.length < 40) timeline.push([Math.round(performance.now() - pressedAt), what]); };
-
-  // Raw capture from the audio graph: the microphone feeds a ScriptProcessorNode that copies
-  // each block of samples. Returns an object shaped enough like a MediaRecorder for stopHearing.
-  async function startGraphCapture(ctx) {
-    if (ctx.state !== 'running') await ctx.resume();
-    const src = ctx.createMediaStreamSource(mic);
-    const node = ctx.createScriptProcessor(4096, 1, 1);
-    const blocks = [];
-    node.onaudioprocess = ev => {
-      if (!blocks.length) mark('first samples');
-      blocks.push(new Float32Array(ev.inputBuffer.getChannelData(0)));
-    };
-    src.connect(node);
-    node.connect(ctx.destination);
-    ctx.onstatechange = () => mark(`audio context ${ctx.state}`);
-    return {
-      graph: true, state: 'recording', mimeType: `pcm/${ctx.sampleRate}`,
-      async finish() {
-        this.state = 'inactive';
-        src.disconnect();
-        node.disconnect();
-        const n = blocks.reduce((a, b) => a + b.length, 0);
-        const rate = ctx.sampleRate;
-        await ctx.close();
-        if (!n) return new Float32Array(0);
-        const buf = new AudioBuffer({ length: n, numberOfChannels: 1, sampleRate: rate });
-        let o = 0;
-        for (const b of blocks) { buf.copyToChannel(b, 0, o); o += b.length; }
-        const off = new OfflineAudioContext(1, Math.ceil(n * 16000 / rate), 16000);
-        const s = off.createBufferSource();
-        s.buffer = buf;
-        s.connect(off.destination);
-        s.start();
-        return (await off.startRendering()).getChannelData(0);
-      },
-    };
   }
 
   async function decode16k(buf) {
@@ -1032,7 +903,6 @@
     e.preventDefault();
     pressed = false;
     clearTimeout(holdTimer);
-    const heldMs = performance.now() - pressedAt;
     const r = recorder;
     if (!r) {
       // Released before recording began (the microphone was still opening); startHearing tidies up.
@@ -1040,76 +910,45 @@
     }
     recorder = null;
     resetHoldButton();
-    const released = performance.now();
-    mark(`released (${e.type})`);
     // iOS ends the microphone's track when the audio route changes (headphones connecting, say),
     // and the recorder stops by itself; stop() on it would throw.
-    const stoppedEarly = !r.graph && r.state === 'inactive';
-    let graphPcm = null;
-    if (r.graph) graphPcm = await r.finish();
-    else if (!stoppedEarly) await new Promise(res => { r.onstop = res; r.stop(); });
-    const blob = r.graph ? null : new Blob(recChunks, { type: r.mimeType || 'audio/mp4' });
-    const capture = {
-      method: r.graph ? 'webaudio' : 'recorder', mime: r.mimeType, bytes: r.graph ? graphPcm.length * 4 : blob.size, chunks: recChunks.length,
-      track: micState(), endedBy: e.type, heldMs: Math.round(heldMs), startDelayMs: Math.round(r.startedAt - pressedAt), recordedMs: Math.round(released - r.startedAt), stoppedEarly,
-      timeline: LAB ? timeline : undefined,
-    };
+    const stoppedEarly = r.state === 'inactive';
+    if (!stoppedEarly) await new Promise(res => { r.onstop = res; r.stop(); });
+    const blob = new Blob(recChunks, { type: r.mimeType || 'audio/mp4' });
     recChunks = [];
     hearing = true;
     holdBtn.disabled = true;
     listenMsg('Working...');
     try {
-      if (!capture.bytes) {
-        labEntry({ outcome: 'empty', capture });
+      if (!blob.size) {
         releaseMic();
         listenMsg('Nothing was recorded. If headphones just connected, try again.');
         return;
       }
-      const pcm = r.graph ? graphPcm : await decode16k(await blob.arrayBuffer());
-      const decoded = performance.now();
-      capture.peak = 0;
-      let sq = 0;
-      for (const v of pcm) { const a = Math.abs(v); if (a > capture.peak) capture.peak = a; sq += v * v; }
-      capture.rms = Math.sqrt(sq / Math.max(pcm.length, 1));
-      capture.peak = +capture.peak.toFixed(4);
-      capture.rms = +capture.rms.toFixed(5);
-      if (LAB) labLast = pcm;
+      const pcm = await decode16k(await blob.arrayBuffer());
+      let peak = 0;
+      for (const v of pcm) { const a = Math.abs(v); if (a > peak) peak = a; }
       if (pcm.length < 16000 * 0.4) {
-        labEntry({ outcome: 'too short', seconds: pcm.length / 16000, capture });
         listenMsg('Too short. Hold the button for as long as they speak.');
         return;
       }
       // Below this a recording held no speech; Whisper would invent a word. Real-world silent
       // attempts peaked at 0.004 or less, quiet speech on the phone microphone at 0.007 and up.
-      if (capture.peak < 0.005) {
-        // Exactly zero is not a quiet room: iOS handed over silence (seen after playback).
-        const zeros = capture.peak === 0;
-        labEntry({ outcome: zeros ? 'zeros' : 'silent', seconds: pcm.length / 16000, capture });
+      if (peak < 0.005) {
         releaseMic();
-        listenMsg(zeros
-          ? 'The phone gave the microphone no sound, which can happen just after audio played. Try again.'
-          : 'The microphone recorded silence. Try again; if it keeps happening, close Listen and reopen it.');
+        listenMsg('The microphone recorded silence. Try again; if it keeps happening, close Listen and reopen it.');
         return;
       }
-      // Whisper's input features depend on level, and the phone microphone records quietly, so
-      // the recording is brought up to a peak of 0.5, with the boost capped at 40 times.
-      const boost = Math.min(40, 0.5 / capture.peak);
-      capture.gain = boost > 1.2 ? +boost.toFixed(1) : 1;
-      if (capture.gain > 1) for (let i = 0; i < pcm.length; i++) pcm[i] *= capture.gain;
+      // Whisper's input features depend on level, so a quiet recording is brought up to a peak of
+      // 0.5, with the boost capped at 40 times.
+      const gain = Math.min(40, 0.5 / peak);
+      if (gain > 1.2) for (let i = 0; i < pcm.length; i++) pcm[i] *= gain;
       const out = await asr(pcm, { language: lang.split('-')[0].toLowerCase(), task: 'transcribe', max_new_tokens: 64 });
       const transcript = (out.text || '').trim();
-      const { match, phrase, ranked } = matchReply(transcript);
-      const done = performance.now();
-      const entry = labEntry({
-        outcome: match ? 'reply' : phrase ? 'own phrase' : 'not sure', seconds: pcm.length / 16000,
-        decodeMs: decoded - released, transcribeMs: done - decoded, totalMs: done - released,
-        transcript, shown: match ? match.reply.text : phrase ? phrase.text : null, score: ranked[0] ? ranked[0].score : null, capture,
-        top: ranked.slice(0, 3).map(c => ({ text: c.mine ? c.text : c.reply.text, mine: !!c.mine, score: +c.score.toFixed(3) })),
-      });
-      showHeard(transcript, match || phrase, entry);
+      const { match, phrase } = matchReply(transcript);
+      showHeard(transcript, match || phrase);
       listenMsg(stoppedEarly ? 'The microphone changed during that recording (headphones?), so it may be cut short. Try again if the answer looks wrong.' : '');
     } catch (err) {
-      labEntry({ outcome: 'error', stage: 'process', error: String(err && err.message || err), capture });
       releaseMic();
       listenMsg(`Could not process that (${err.message || err}). Try again.`);
     } finally {
@@ -1119,7 +958,7 @@
   }
 
   // Newest result on top; the last three are kept so a quick exchange can be read back.
-  function showHeard(transcript, m, entry) {
+  function showHeard(transcript, m) {
     const box = el('div', 'heard');
     if (m && m.mine) {
       const row = el('div', 'row');
@@ -1146,108 +985,9 @@
       box.append(el('p', 'heard-en', 'Not sure'));
       box.append(el('p', 'en', transcript ? `Heard: ${transcript}` : 'Nothing was heard.'));
     }
-    if (entry) box.append(labTruth(entry, m));
     const out = document.getElementById('listen-out');
     out.prepend(box);
     while (out.children.length > 3) out.lastChild.remove();
-  }
-
-  // Lab log: one entry per attempt, kept in localStorage and exported as JSON. Transcripts only,
-  // never audio. "truth" is what the tester says was actually said, set from each result.
-  let labLog = [], labLast = null;
-  try { if (LAB) labLog = JSON.parse(localStorage.getItem(LAB_KEY)) || []; } catch {}
-  function labSave() {
-    try { localStorage.setItem(LAB_KEY, JSON.stringify(labLog)); } catch {}
-    labRender();
-  }
-  function labEntry(fields) {
-    if (!LAB) return null;
-    const track = mic && mic.getAudioTracks()[0];
-    const entry = {
-      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, voiceProcessing: labVoice, input: labPhoneMic ? 'phone' : 'system', captureMode: labCapture, mic: track ? track.label : null,
-      homeScreen: !!(navigator.standalone || matchMedia('(display-mode: standalone)').matches),
-      ...fields, truth: null,
-    };
-    for (const k of ['seconds', 'decodeMs', 'transcribeMs', 'totalMs', 'score']) if (typeof entry[k] === 'number') entry[k] = +entry[k].toFixed(k === 'score' || k === 'seconds' ? 3 : 0);
-    labLog.push(entry);
-    labSave();
-    return entry;
-  }
-
-  function labTruth(entry, m) {
-    const box = el('div', 'lab-truth');
-    const sel = el('select');
-    sel.append(new Option('They actually said...', ''));
-    const seen = new Set();
-    for (const c of matchers) if (!c.mine && !seen.has(c.reply.text)) { seen.add(c.reply.text); sel.append(new Option(`${c.reply.text} (${c.reply.en})`, c.reply.text)); }
-    sel.append(new Option('One of my own phrases', 'mine'), new Option('Something not in the app', 'other'), new Option('Nothing / noise', 'nothing'));
-    const set = v => { entry.truth = v || null; sel.value = v; box.classList.toggle('done', !!v); labSave(); };
-    sel.onchange = () => set(sel.value);
-    if (m) {
-      const right = el('button', null, 'Right');
-      right.onclick = () => set(m.mine ? 'mine' : m.reply.text);
-      box.append(right);
-    }
-    box.append(sel);
-    const note = el('button', null, 'Note');
-    note.onclick = () => { const n = prompt('Note for this attempt (accent, noise, distance...)', entry.note || ''); if (n != null) { entry.note = n; labSave(); } };
-    box.append(note);
-    return box;
-  }
-
-  function labRender() {
-    if (!LAB) return;
-    const bar = document.getElementById('lab-bar');
-    bar.hidden = false;
-    bar.replaceChildren();
-    const marked = labLog.filter(e => e.truth).length;
-    bar.append(el('span', null, `Lab log: ${labLog.length} attempts, ${marked} marked.`));
-    const copy = el('button', null, 'Copy');
-    copy.onclick = async () => {
-      const text = JSON.stringify({ app: 'mimik-lab-listen', exported: new Date().toISOString(), ua: navigator.userAgent, entries: labLog }, null, 1);
-      try { await navigator.clipboard.writeText(text); copy.textContent = 'Copied'; } catch { prompt('Copy this:', text); }
-      setTimeout(() => { copy.textContent = 'Copy'; }, 1500);
-    };
-    const share = el('button', null, 'Share');
-    share.onclick = () => {
-      const text = JSON.stringify({ app: 'mimik-lab-listen', exported: new Date().toISOString(), ua: navigator.userAgent, entries: labLog }, null, 1);
-      const file = new File([text], 'mimik-lab-listen.json', { type: 'application/json' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file] }).catch(() => {});
-      else if (navigator.share) navigator.share({ text }).catch(() => {});
-    };
-    const clear = el('button', null, 'Clear');
-    clear.onclick = () => { if (confirm('Delete the lab log on this phone?')) { labLog = []; labSave(); } };
-    const model = el('select');
-    for (const k of Object.keys(ASR_MODELS)) model.append(new Option(`whisper-${k}`, k));
-    model.value = labModel;
-    // WebAssembly memory is not given back, so a model switch needs a fresh page.
-    model.onchange = () => { try { localStorage.setItem('lab-model', model.value); } catch {} location.reload(); };
-    // Plays the last recording from memory, to hear whether the microphone caught the speech.
-    const hear = el('button', null, 'Play last recording');
-    hear.onclick = () => {
-      if (!labLast) return;
-      const ctx = new AudioContext();
-      const buf = ctx.createBuffer(1, labLast.length, 16000);
-      buf.copyToChannel(labLast, 0);
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      src.connect(ctx.destination);
-      src.onended = () => ctx.close();
-      src.start();
-    };
-    const voice = el('select');
-    voice.append(new Option('Mic: raw', '0'), new Option('Mic: voice processing', '1'));
-    voice.value = labVoice ? '1' : '0';
-    voice.onchange = () => { try { localStorage.setItem('lab-voice', voice.value); } catch {} location.reload(); };
-    const input = el('select');
-    input.append(new Option('Input: phone microphone', 'phone'), new Option('Input: system choice', 'system'));
-    input.value = labPhoneMic ? 'phone' : 'system';
-    input.onchange = () => { try { localStorage.setItem('lab-input', input.value); } catch {} location.reload(); };
-    const cap = el('select');
-    cap.append(new Option('Capture: recorder', 'recorder'), new Option('Capture: Web Audio', 'webaudio'));
-    cap.value = labCapture;
-    cap.onchange = () => { try { localStorage.setItem('lab-capture', cap.value); } catch {} location.reload(); };
-    bar.append(copy, share, clear, hear, model, voice, input, cap);
   }
 
   async function init() {
@@ -1285,11 +1025,6 @@
       // Headphones connecting or disconnecting change the input: the open microphone is dropped so
       // the next press opens the new one, unless a recording is under way.
       navigator.mediaDevices.addEventListener('devicechange', async () => {
-        if (LAB) {
-          let inputs = [];
-          try { inputs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput').map(d => d.label); } catch {}
-          labEntry({ outcome: 'device change', inputs, track: micState() });
-        }
         if (recorder) return;
         releaseMic();
         // Reopen now, so the next press does not wait for the new route.
@@ -1315,8 +1050,12 @@
     addEventListener('offline', showTip);
   }
 
-  if (!LAB && 'serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator) {
     regReady = navigator.serviceWorker.register('sw.js');
+    // The /lab/ pages are gone; their worker may still be registered on phones that opened them.
+    navigator.serviceWorker.getRegistrations()
+      .then(rs => rs.filter(r => new URL(r.scope).pathname.endsWith('/lab/')).forEach(r => r.unregister()))
+      .catch(() => {});
     // Reload once when an updated worker takes over, but not on the very first install,
     // including when the root worker controlled this page before ours claimed it.
     const ctl = navigator.serviceWorker.controller;

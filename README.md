@@ -90,7 +90,7 @@ To add a language, create `site/<code>/phrases.json` (any edge-tts locale works;
 
 ## How the build works
 
-The app shell is shared: `app/index.html` and `app/sw.js`. `scripts/build.py` copies them into every `site/<code>/` folder and writes that folder's `manifest.webmanifest`, plus `site/languages.json` for the picker. All of these are build output and stay out of git. `site/lab/` is the exception: a standalone benchmark page for the interpreter spike (`docs/spike-interpreter.md`), committed as is and not part of the app. The build also writes `site/lab/<code>/`, a copy of each language's page with lab mode on: listening logs every attempt (timings, transcript, top matches, microphone, capture levels) with a picker for what was actually said, for tuning from real-world tests. It reads the language folder's files through a `<base>` URL and registers no worker.
+The app shell is shared: `app/index.html` and `app/sw.js`. `scripts/build.py` copies them into every `site/<code>/` folder and writes that folder's `manifest.webmanifest`, plus `site/languages.json` for the picker. All of these are build output and stay out of git.
 
 Each language folder has its own service worker scoped to that folder, so a phone that installs Spanish downloads only Spanish. The root has a small worker of its own that keeps the picker available offline. Cache Storage is shared across the whole site, so every worker names its caches `mimik-<code>-<version>` and only ever deletes its own; updating one language never touches another's audio.
 
