@@ -95,7 +95,16 @@
         { "id": "wijn", "en": "A glass of red / white wine", "text": "Een glas rode / witte wijn", "say": "Een glas rode wijn. Een glas witte wijn.", "ph": "un KHLAHS ROH-duh / VIT-tuh VINE" },
         { "id": "bitterballen", "en": "Bitterballen, please", "text": "Bitterballen, alstublieft", "ph": "BIT-tur-bahl-lun, ahl-stoo-BLEEFT", "note": "Fried ragout balls with mustard: the bar snack." },
         { "id": "proost", "en": "Cheers!", "text": "Proost!", "ph": "PROHST" },
-        { "id": "heerlijk", "en": "It was delicious", "text": "Het was heerlijk", "ph": "ut vas HAIR-luk", "note": "Lekker works for anything good." },
+        {
+          "id": "heerlijk", "en": "It was delicious", "text": "Het was heerlijk", "ph": "ut vas HAIR-luk", "note": "Lekker works for anything good.",
+          "replies": [
+            { "id": "heerlijk-r1", "text": "Was alles naar wens?", "en": "Was everything to your liking?" },
+            { "id": "heerlijk-r2", "text": "Heeft het gesmaakt?", "en": "Did you enjoy it?" },
+            { "id": "heerlijk-r3", "text": "Nog een toetje?", "en": "Any dessert?" },
+            { "id": "heerlijk-r4", "text": "Nog een kopje koffie?", "en": "Another coffee?" },
+            { "id": "heerlijk-r5", "text": "Fijn om te horen!", "en": "Glad to hear it!" }
+          ]
+        },
         { "id": "taxi", "en": "Can you call a taxi?", "text": "Kunt u een taxi bellen?", "ph": "KUNT oo un TAHK-see BEL-lun" }
       ]
     },
@@ -128,8 +137,25 @@
       "id": "around",
       "title": "Getting around",
       "phrases": [
-        { "id": "toilet", "en": "Where is the toilet?", "text": "Waar is het toilet?", "ph": "VAHR is ut twah-LET" },
-        { "id": "station", "en": "Where is the station?", "text": "Waar is het station?", "ph": "VAHR is ut stah-SYON" },
+        {
+          "id": "toilet", "en": "Where is the toilet?", "text": "Waar is het toilet?", "ph": "VAHR is ut twah-LET",
+          "replies": [
+            { "id": "toilet-r1", "text": "Rechts.", "en": "On the right." },
+            { "id": "toilet-r2", "text": "Links.", "en": "On the left." },
+            { "id": "toilet-r3", "text": "Achterin.", "en": "At the back." },
+            { "id": "toilet-r4", "text": "Beneden.", "en": "Downstairs." },
+            { "id": "toilet-r5", "text": "Boven.", "en": "Upstairs." }
+          ]
+        },
+        {
+          "id": "station", "en": "Where is the station?", "text": "Waar is het station?", "ph": "VAHR is ut stah-SYON",
+          "replies": [
+            { "id": "station-r1", "text": "Rechtdoor.", "en": "Straight ahead." },
+            { "id": "station-r2", "text": "Rechts.", "en": "On the right." },
+            { "id": "station-r3", "text": "Links.", "en": "On the left." },
+            { "id": "station-r4", "text": "Hier om de hoek.", "en": "Just round the corner." }
+          ]
+        },
         {
           "id": "is-het-ver", "en": "Is it far?", "text": "Is het ver?", "ph": "is ut FAIR",
           "replies": [

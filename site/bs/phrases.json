@@ -110,7 +110,16 @@
         },
         { "id": "vino", "en": "A glass of red / white wine", "text": "Čašu crnog / bijelog vina", "say": "Čašu crnog vina. Čašu bijelog vina.", "ph": "CHAH-shoo TSR-nog / BYEH-log VEE-nah", "note": "Red wine is crno, 'black'. Try a Žilavka (white) or Blatina (red) from Herzegovina." },
         { "id": "zivjeli", "en": "Cheers!", "text": "Živjeli!", "ph": "ZHEE-vyeh-lee" },
-        { "id": "ukusno", "en": "It was delicious", "text": "Bilo je jako ukusno", "ph": "BEE-loh yeh YAH-koh OO-koos-noh" },
+        {
+          "id": "ukusno", "en": "It was delicious", "text": "Bilo je jako ukusno", "ph": "BEE-loh yeh YAH-koh OO-koos-noh",
+          "replies": [
+            { "id": "ukusno-r1", "text": "Je li sve bilo u redu?", "en": "Was everything all right?" },
+            { "id": "ukusno-r2", "text": "Je li vam se svidjelo?", "en": "Did you enjoy it?" },
+            { "id": "ukusno-r3", "text": "Hoćete li desert?", "en": "Would you like dessert?" },
+            { "id": "ukusno-r4", "text": "Hoćete li kafu?", "en": "Would you like coffee?" },
+            { "id": "ukusno-r5", "text": "Drago mi je!", "en": "Glad to hear it!" }
+          ]
+        },
         { "id": "taksi", "en": "Can you call a taxi?", "text": "Možete li pozvati taksi?", "ph": "MOH-zheh-teh lee POHZ-vah-tee TAHK-see" }
       ]
     },
@@ -142,8 +151,25 @@
       "id": "around",
       "title": "Getting around",
       "phrases": [
-        { "id": "toalet", "en": "Where is the toilet?", "text": "Gdje je toalet?", "ph": "GDYEH yeh toh-AH-let" },
-        { "id": "tramvaj", "en": "Where is the tram stop?", "text": "Gdje je tramvajska stanica?", "ph": "GDYEH yeh TRAHM-vai-skah STAH-nee-tsah" },
+        {
+          "id": "toalet", "en": "Where is the toilet?", "text": "Gdje je toalet?", "ph": "GDYEH yeh toh-AH-let",
+          "replies": [
+            { "id": "toalet-r1", "text": "Desno.", "en": "On the right." },
+            { "id": "toalet-r2", "text": "Lijevo.", "en": "On the left." },
+            { "id": "toalet-r3", "text": "Na kraju hodnika.", "en": "At the end of the corridor." },
+            { "id": "toalet-r4", "text": "Dolje.", "en": "Downstairs." },
+            { "id": "toalet-r5", "text": "Gore.", "en": "Upstairs." }
+          ]
+        },
+        {
+          "id": "tramvaj", "en": "Where is the tram stop?", "text": "Gdje je tramvajska stanica?", "ph": "GDYEH yeh TRAHM-vai-skah STAH-nee-tsah",
+          "replies": [
+            { "id": "tramvaj-r1", "text": "Pravo.", "en": "Straight ahead." },
+            { "id": "tramvaj-r2", "text": "Desno.", "en": "On the right." },
+            { "id": "tramvaj-r3", "text": "Lijevo.", "en": "On the left." },
+            { "id": "tramvaj-r4", "text": "Odmah iza ugla.", "en": "Just round the corner." }
+          ]
+        },
         {
           "id": "daleko", "en": "Is it far?", "text": "Je li daleko?", "ph": "YEH lee DAH-leh-koh",
           "replies": [

@@ -165,8 +165,7 @@
   .listen-inner { max-width: 640px; margin: 0 auto; }
   .listen-top { display: flex; justify-content: space-between; align-items: center; }
   .listen-top b { font-size: 17px; }
-  .listen-top button, .listen-get { border: 0; background: none; color: var(--accent); font: inherit; font-size: 15px; padding: 6px 0; }
-  .listen-get { font-weight: 600; }
+  .listen-top button { border: 0; background: none; color: var(--accent); font: inherit; font-size: 15px; padding: 6px 0; }
   .listen-msg { color: var(--muted); font-size: 15px; margin: 8px 0; }
   .listen-hold {
     width: 100%; min-height: 72px; margin: 6px 0 4px; border: 0; border-radius: 14px;
@@ -174,6 +173,7 @@
     display: flex; align-items: center; justify-content: center; gap: 10px;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   }
+  .listen-hold[hidden] { display: none; }
   .listen-hold.on { opacity: .7; }
   .listen-hold:disabled { opacity: .45; }
   .heard { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
@@ -213,7 +213,7 @@
   <div class="listen-inner">
     <div class="listen-top"><b>What did they say?</b><button id="listen-close">Close</button></div>
     <p id="listen-msg" class="listen-msg"></p>
-    <button id="listen-get" class="listen-get" hidden></button>
+    <button id="listen-get" class="listen-hold" hidden></button>
     <button id="listen-hold" class="listen-hold" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg><span>Hold while they speak</span></button>
     <div id="listen-out"></div>
     <div id="lab-bar" class="lab-bar" hidden></div>
@@ -721,36 +721,48 @@
   const listenMsg = t => { document.getElementById('listen-msg').textContent = t; };
   const modelSaved = () => { try { return localStorage.getItem(READY_KEY) === '1'; } catch { return false; } };
 
-  function offerDownload(msg) {
-    listenMsg(msg);
+  // One big button takes the place of the hold button until listening can start: it offers the
+  // download, shows progress while disabled, and gives way to "Hold while they speak" when ready.
+  function stepButton(label, enabled) {
     holdBtn.hidden = true;
     getBtn.hidden = false;
-    getBtn.textContent = `Download (${ASR_MB} MB)`;
+    getBtn.disabled = !enabled;
+    getBtn.textContent = label;
+  }
+
+  function offerDownload(msg) {
+    listenMsg(msg);
+    stepButton(`Download (${ASR_MB} MB)`, true);
   }
 
   async function prepareListening() {
-    getBtn.hidden = true;
-    holdBtn.hidden = true;
-    listenMsg(asr ? '' : modelSaved() ? 'Loading...' : 'Downloading...');
-    asrProgress = (loaded, total) => listenMsg(`Downloading: ${Math.round(loaded / 1e6)} of ${Math.round(total / 1e6)} MB`);
+    const saved = asr || modelSaved();
+    stepButton(asr ? 'Starting...' : saved ? 'Loading...' : 'Downloading...', false);
+    if (!saved) listenMsg('Keep this open until the download finishes.');
+    asrProgress = saved ? null : (loaded, total) => { getBtn.textContent = `Downloading ${Math.round(loaded / 1e6)} of ${Math.round(total / 1e6)} MB`; };
     try {
       await loadAsr();
     } catch (err) {
       try { localStorage.removeItem(READY_KEY); } catch {}
-      return offerDownload(navigator.onLine
+      offerDownload(navigator.onLine
         ? `Could not load the listening model (${err.message || err}). Try again on Wi-Fi.`
         : 'The listening model is not on this phone. Connect to the internet to download it.');
+      if (navigator.onLine) getBtn.textContent = 'Try again';
+      return;
     }
     if (listenEl.hidden) return;
+    getBtn.textContent = 'Starting the microphone...';
     try {
       // Asked for here, not on the first hold, so the permission prompt does not eat the press.
       mic ||= await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
     } catch {
       listenMsg('Listening needs the microphone. Allow it for this site in Settings, then try again.');
+      stepButton('Try again', true);
       return;
     }
     if (listenEl.hidden) return releaseMic();
     listenMsg('Hold the button while they speak and let go when they stop. Audio stays on this phone and is discarded after.');
+    getBtn.hidden = true;
     holdBtn.hidden = false;
   }
 

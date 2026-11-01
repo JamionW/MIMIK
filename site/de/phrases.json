@@ -110,7 +110,16 @@
         },
         { "id": "wein", "en": "A glass of red / white wine", "text": "Ein Glas Rotwein / Weißwein", "say": "Ein Glas Rotwein. Ein Glas Weißwein.", "ph": "ine GLAHS ROHT-vine / VICE-vine" },
         { "id": "prost", "en": "Cheers!", "text": "Prost!", "ph": "PROHST", "note": "Look each person in the eye as you clink." },
-        { "id": "lecker", "en": "It was delicious", "text": "Es war sehr lecker", "ph": "es VAHR zair LEK-ker" },
+        {
+          "id": "lecker", "en": "It was delicious", "text": "Es war sehr lecker", "ph": "es VAHR zair LEK-ker",
+          "replies": [
+            { "id": "lecker-r1", "text": "Hat es Ihnen geschmeckt?", "en": "Did you enjoy it?" },
+            { "id": "lecker-r2", "text": "War alles recht?", "en": "Was everything all right?" },
+            { "id": "lecker-r3", "text": "Darf es noch ein Dessert sein?", "en": "Would you like dessert?" },
+            { "id": "lecker-r4", "text": "Noch einen Kaffee?", "en": "Another coffee?" },
+            { "id": "lecker-r5", "text": "Das freut mich!", "en": "Glad to hear it!" }
+          ]
+        },
         { "id": "taxi", "en": "Can you call me a taxi?", "text": "Können Sie mir ein Taxi rufen?", "ph": "KURN-nen zee meer ine TAHK-see ROO-fen" }
       ]
     },
@@ -147,8 +156,25 @@
       "id": "around",
       "title": "Getting around",
       "phrases": [
-        { "id": "toilette", "en": "Where is the toilet?", "text": "Wo ist die Toilette?", "ph": "VOH ist dee toy-LET-tuh", "note": "Station toilets usually cost 50 cents to 1 euro." },
-        { "id": "bahnhof", "en": "Where is the station?", "text": "Wo ist der Bahnhof?", "ph": "VOH ist dair BAHN-hohf" },
+        {
+          "id": "toilette", "en": "Where is the toilet?", "text": "Wo ist die Toilette?", "ph": "VOH ist dee toy-LET-tuh", "note": "Station toilets usually cost 50 cents to 1 euro.",
+          "replies": [
+            { "id": "toilette-r1", "text": "Rechts.", "en": "On the right." },
+            { "id": "toilette-r2", "text": "Links.", "en": "On the left." },
+            { "id": "toilette-r3", "text": "Hinten durch.", "en": "Through at the back." },
+            { "id": "toilette-r4", "text": "Die Treppe runter.", "en": "Down the stairs." },
+            { "id": "toilette-r5", "text": "Oben.", "en": "Upstairs." }
+          ]
+        },
+        {
+          "id": "bahnhof", "en": "Where is the station?", "text": "Wo ist der Bahnhof?", "ph": "VOH ist dair BAHN-hohf",
+          "replies": [
+            { "id": "bahnhof-r1", "text": "Geradeaus.", "en": "Straight ahead." },
+            { "id": "bahnhof-r2", "text": "Rechts.", "en": "On the right." },
+            { "id": "bahnhof-r3", "text": "Links.", "en": "On the left." },
+            { "id": "bahnhof-r4", "text": "Gleich um die Ecke.", "en": "Just round the corner." }
+          ]
+        },
         {
           "id": "ist-es-weit", "en": "Is it far?", "text": "Ist es weit?", "ph": "ist es VITE",
           "replies": [

@@ -119,7 +119,16 @@
         },
         { "id": "vinho", "en": "A glass of red / white wine", "text": "Um copo de vinho tinto / branco", "say": "Um copo de vinho tinto. Um copo de vinho branco.", "ph": "oom KOH-poo duh VEEN-yoo TEEN-too / BRAHN-koo" },
         { "id": "saude", "en": "Cheers!", "text": "Saúde!", "ph": "suh-OOD" },
-        { "id": "delicioso", "en": "It was delicious", "text": "Estava delicioso", "ph": "ish-TAH-vuh duh-lee-see-OH-zoo" },
+        {
+          "id": "delicioso", "en": "It was delicious", "text": "Estava delicioso", "ph": "ish-TAH-vuh duh-lee-see-OH-zoo",
+          "replies": [
+            { "id": "delicioso-r1", "text": "Estava tudo bem?", "en": "Was everything all right?" },
+            { "id": "delicioso-r2", "text": "Gostaram?", "en": "Did you enjoy it?" },
+            { "id": "delicioso-r3", "text": "Querem sobremesa?", "en": "Would you like dessert?" },
+            { "id": "delicioso-r4", "text": "Querem café?", "en": "Would you like coffee?" },
+            { "id": "delicioso-r5", "text": "Ainda bem!", "en": "Glad to hear it!" }
+          ]
+        },
         { "id": "taxi", "en": "Can you call a taxi?", "text": "Pode chamar um táxi?", "ph": "POHD shuh-MAR oom TAK-see" }
       ]
     },
@@ -152,8 +161,25 @@
       "id": "around",
       "title": "Getting around",
       "phrases": [
-        { "id": "casa-de-banho", "en": "Where is the bathroom?", "text": "Onde é a casa de banho?", "ph": "OHND EH uh KAH-zuh duh BAHN-yoo" },
-        { "id": "onde-metro", "en": "Where is the metro?", "text": "Onde é o metro?", "ph": "OHND EH oo MEH-troo" },
+        {
+          "id": "casa-de-banho", "en": "Where is the bathroom?", "text": "Onde é a casa de banho?", "ph": "OHND EH uh KAH-zuh duh BAHN-yoo",
+          "replies": [
+            { "id": "casa-de-banho-r1", "text": "À direita.", "en": "On the right." },
+            { "id": "casa-de-banho-r2", "text": "À esquerda.", "en": "On the left." },
+            { "id": "casa-de-banho-r3", "text": "Ao fundo.", "en": "At the back." },
+            { "id": "casa-de-banho-r4", "text": "Lá em baixo.", "en": "Downstairs." },
+            { "id": "casa-de-banho-r5", "text": "Lá em cima.", "en": "Upstairs." }
+          ]
+        },
+        {
+          "id": "onde-metro", "en": "Where is the metro?", "text": "Onde é o metro?", "ph": "OHND EH oo MEH-troo",
+          "replies": [
+            { "id": "onde-metro-r1", "text": "Sempre em frente.", "en": "Straight ahead." },
+            { "id": "onde-metro-r2", "text": "À direita.", "en": "On the right." },
+            { "id": "onde-metro-r3", "text": "À esquerda.", "en": "On the left." },
+            { "id": "onde-metro-r4", "text": "Ali, ao virar da esquina.", "en": "Just round the corner." }
+          ]
+        },
         {
           "id": "fica-longe", "en": "Is it far?", "text": "Fica longe?", "ph": "FEE-kuh LOHNZH",
           "replies": [
