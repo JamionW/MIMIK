@@ -654,6 +654,13 @@
   let labVoice = true;
   try { if (LAB && localStorage.getItem('lab-voice') === '0') labVoice = false; } catch {}
   const micAudio = () => ({ echoCancellation: labVoice, noiseSuppression: true, autoGainControl: true });
+  // Input. Headphone microphones (AirPods) are tuned to the wearer's voice, and on iOS their
+  // recordings were cut at 0.53 s or empty; the person to be heard is across the table. So the
+  // phone's own microphone is used whenever it is listed, with headphones still playing audio.
+  // The lab can switch to the system's choice to compare.
+  let labPhoneMic = true;
+  try { if (LAB && localStorage.getItem('lab-input') === 'system') labPhoneMic = false; } catch {}
+  const BUILT_IN = /iphone|ipad|built-?in|internal/i;
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
   const listenEl = document.getElementById('listen');
@@ -785,7 +792,33 @@
   // Opens the microphone and drops it when iOS ends its track (a route change), so the next
   // press opens it again on whatever input is now current.
   async function openMic() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
+    let audioOpts = micAudio();
+    if (labPhoneMic) {
+      // Labels are only listed once microphone permission has been granted; before that, or if
+      // no built-in input is found, the system's choice is used.
+      try {
+        const own = (await navigator.mediaDevices.enumerateDevices()).find(d => d.kind === 'audioinput' && BUILT_IN.test(d.label));
+        if (own && own.deviceId) audioOpts = { ...audioOpts, deviceId: { exact: own.deviceId } };
+      } catch {}
+    }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: audioOpts }); }
+    catch (err) {
+      if (!audioOpts.deviceId) throw err;
+      stream = await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
+    }
+    // The first opening has no labels to choose from; once it has them, reopen on the phone's own.
+    if (labPhoneMic && !audioOpts.deviceId) {
+      const t = stream.getAudioTracks()[0];
+      if (t && !BUILT_IN.test(t.label)) {
+        const own = (await navigator.mediaDevices.enumerateDevices()).find(d => d.kind === 'audioinput' && BUILT_IN.test(d.label));
+        if (own && own.deviceId) {
+          for (const x of stream.getTracks()) x.stop();
+          try { stream = await navigator.mediaDevices.getUserMedia({ audio: { ...micAudio(), deviceId: { exact: own.deviceId } } }); }
+          catch { stream = await navigator.mediaDevices.getUserMedia({ audio: micAudio() }); }
+        }
+      }
+    }
     for (const t of stream.getAudioTracks()) t.addEventListener('ended', () => {
       labEntry({ outcome: 'microphone ended', track: { label: t.label } });
       if (mic === stream && !recorder) releaseMic();
@@ -902,6 +935,12 @@
     holdBtn.disabled = true;
     listenMsg('Working...');
     try {
+      if (!blob.size) {
+        labEntry({ outcome: 'empty', capture });
+        releaseMic();
+        listenMsg('Nothing was recorded. If headphones just connected, try again.');
+        return;
+      }
       const pcm = await decode16k(await blob.arrayBuffer());
       const decoded = performance.now();
       capture.peak = 0;
@@ -997,7 +1036,7 @@
     if (!LAB) return null;
     const track = mic && mic.getAudioTracks()[0];
     const entry = {
-      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, voiceProcessing: labVoice, mic: track ? track.label : null,
+      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, voiceProcessing: labVoice, input: labPhoneMic ? 'phone' : 'system', mic: track ? track.label : null,
       homeScreen: !!(navigator.standalone || matchMedia('(display-mode: standalone)').matches),
       ...fields, truth: null,
     };
@@ -1072,7 +1111,11 @@
     voice.append(new Option('Mic: raw', '0'), new Option('Mic: voice processing', '1'));
     voice.value = labVoice ? '1' : '0';
     voice.onchange = () => { try { localStorage.setItem('lab-voice', voice.value); } catch {} location.reload(); };
-    bar.append(copy, share, clear, hear, model, voice);
+    const input = el('select');
+    input.append(new Option('Input: phone microphone', 'phone'), new Option('Input: system choice', 'system'));
+    input.value = labPhoneMic ? 'phone' : 'system';
+    input.onchange = () => { try { localStorage.setItem('lab-input', input.value); } catch {} location.reload(); };
+    bar.append(copy, share, clear, hear, model, voice, input);
   }
 
   async function init() {
