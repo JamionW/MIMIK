@@ -661,11 +661,12 @@
   let labPhoneMic = true;
   try { if (LAB && localStorage.getItem('lab-input') === 'system') labPhoneMic = false; } catch {}
   const BUILT_IN = /iphone|ipad|built-?in|internal/i;
-  // Capture. 'recorder' is MediaRecorder (AAC on iOS), decoded afterwards. 'webaudio' takes the raw
-  // samples from the audio graph instead. With headphones connected, MediaRecorder recordings on
-  // iOS stopped at about 0.53 s (25 AAC frames) whatever the input; the lab compares the two.
-  let labCapture = 'recorder';
-  try { if (LAB && localStorage.getItem('lab-capture') === 'webaudio') labCapture = 'webaudio'; } catch {}
+  // Capture. 'webaudio' takes the raw samples from the audio graph; 'recorder' is MediaRecorder
+  // (AAC on iOS), decoded afterwards. With AirPods connected, MediaRecorder recordings on iOS were
+  // cut at about 0.53 s or empty whatever the input, while Web Audio recorded in full, so Web
+  // Audio is the default. The lab can switch back to compare.
+  let labCapture = 'webaudio';
+  try { if (LAB && localStorage.getItem('lab-capture') === 'recorder') labCapture = 'recorder'; } catch {}
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
   const listenEl = document.getElementById('listen');
@@ -882,6 +883,7 @@
     holdBtn.classList.add('on');
     holdBtn.querySelector('span').textContent = 'Listening... let go when they stop';
     timeline = [];
+    mark(releasePlayback() ? 'playback released' : 'no playback to release');
     // An AudioContext has to be created inside the press for iOS to let it run.
     const ctx = labCapture === 'webaudio' ? new AudioContext() : null;
     if (!micLive()) {
@@ -900,7 +902,6 @@
     }
     // Keeps the release on this button even if the finger or pointer drifts off it.
     try { holdBtn.setPointerCapture(e.pointerId); } catch {}
-    audio.pause();
     recChunks = [];
     try {
       if (ctx) {
@@ -927,6 +928,20 @@
     if (!pressed) return stopHearing({ type: 'released while starting', preventDefault() {} });
     clearTimeout(holdTimer);
     holdTimer = setTimeout(() => stopHearing({ type: 'timeout', preventDefault() {} }), MAX_HOLD_MS);
+  }
+
+  // With AirPods connected, recordings made after a clip had played were all zeros, even on a
+  // freshly opened microphone: iOS kept the page's audio in playback. So before recording, the
+  // player lets go of its clip, speech stops, and the lock-screen entry is cleared. Returns
+  // whether there was a clip loaded.
+  function releasePlayback() {
+    const had = !!audio.getAttribute('src');
+    audio.pause();
+    if (had) { audio.removeAttribute('src'); audio.load(); }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    if (media) { try { media.playbackState = 'none'; media.metadata = null; } catch {} }
+    clearActive();
+    return had;
   }
 
   function resetHoldButton() {
@@ -1038,9 +1053,13 @@
       // Below this a recording held no speech; Whisper would invent a word. Real-world silent
       // attempts peaked at 0.004 or less, quiet speech on the phone microphone at 0.007 and up.
       if (capture.peak < 0.005) {
-        labEntry({ outcome: 'silent', seconds: pcm.length / 16000, capture });
+        // Exactly zero is not a quiet room: iOS handed over silence (seen after playback).
+        const zeros = capture.peak === 0;
+        labEntry({ outcome: zeros ? 'zeros' : 'silent', seconds: pcm.length / 16000, capture });
         releaseMic();
-        listenMsg('The microphone recorded silence. Try again; if it keeps happening, close Listen and reopen it.');
+        listenMsg(zeros
+          ? 'The phone gave the microphone no sound, which can happen just after audio played. Try again.'
+          : 'The microphone recorded silence. Try again; if it keeps happening, close Listen and reopen it.');
         return;
       }
       // Whisper's input features depend on level, and the phone microphone records quietly, so
