@@ -128,16 +128,18 @@ Each configuration ran in a fresh page. Reply matching at the 0.5 cutoff; "top m
 - **Whisper's own translation is better in base but still far from the bar**: roughly 20 of 56 usable ("Do you have reservation?", "In or out?", "2 adults"), against about 8 for tiny. It confirms the no-go for open interpretation.
 - The 64-token cap held: no runaway loops (worst clip 4.7 s, the first one after warm-up).
 
-### Third run, threaded
+### Third run, threaded: not possible here
 
-Pending: whether two threads (Safari reports 4 cores; ONNX Runtime uses half) bring base under 3 s. Then the live test and the battery soak.
+On the phone, `/lab/?mt` stayed un-isolated (`crossOriginIsolated` false), although the same lab service worker isolates the page in Chromium. Safari does not appear to accept the isolation headers when a service worker supplies them, and GitHub Pages cannot send them itself, so WebAssembly threads are unavailable to this site on iOS. The app is hosted the same way, so a shipped feature would run on one thread too: **the one-thread numbers above are the realistic ones.** Threads would need a host that can set response headers (Cloudflare Pages or Netlify, for example), which is a hosting decision, not something to resolve in this spike.
+
+Still pending: the live test with real voices (including lines that are not in the app, and with AirPods connected) and the battery soak, both on one thread.
 
 ## Decision
 
 Provisional:
 
 - **Open interpreter (translate anything said): no-go.** The only models that run on the phone, tiny and, probably, base on WebAssembly, translate too poorly to act on, and the models that might translate well enough do not fit.
-- **Reply recognition (tell the user which expected reply they just heard, with its English): likely go**, pending the live test. It reuses the "What you'll hear" data, needs one model for all languages, and can say "not sure" instead of guessing. On synthetic clips, tiny (44 MB) answers in about 1.2 s with 51 of 56 right and 1 wrong; base (80 MB) answers in about 3 s on one thread with 54 right and none wrong. If threads bring base under 3 s it is the choice; otherwise tiny, with a stricter cutoff.
+- **Reply recognition (tell the user which expected reply they just heard, with its English): likely go**, pending the live test. It reuses the "What you'll hear" data, needs one model for all languages, and can say "not sure" instead of guessing. On synthetic clips, tiny (44 MB) answers in about 1.2 s with 51 of 56 right and 1 wrong; base (80 MB) answers in about 3 s on one thread with 54 right and none wrong. Threads are not available on this hosting (see the threaded run), so the choice is between base, about 3 s and no wrong answers, and tiny, about 1.2 s and one wrong answer; the live test decides it.
 
 Whatever the outcome, any go is conditional on push-to-listen (never always-on listening), audio processed on the phone and discarded once transcribed, and nothing stored or sent, which addresses most of the bystander concern and also limits battery use.
 
