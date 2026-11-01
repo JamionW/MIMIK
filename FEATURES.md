@@ -77,5 +77,7 @@ Out of the Feature 9 spike (`docs/spike-interpreter.md`). Hold a button while th
 
 Decided in the spike: whisper-base on WebAssembly (80 MB, shared by all languages, an optional download), a 0.6 similarity cutoff, the user's own phrases as distractors, push-to-listen only, audio discarded after transcription. First step before calling it done: a real voice, ideally a native speaker, saying the replies themselves, and a few lines with AirPods connected.
 
+Found in real-world testing (lab copy at `/lab/<code>/`): the phone microphone needs iOS voice processing (raw input peaked at -40 dB); holds must ignore iOS's long-press cancel; matching works sentence by sentence. Listening does not work with headphones connected: with AirPods, iOS gave cut-off, empty or all-zero recordings from either microphone over six sessions, so the sheet pauses listening while headphones are connected.
+
 Touches: `app/index.html` (listen button and sheet, recording, matching), `app/sw.js` (cache the engine for offline use), README.
 

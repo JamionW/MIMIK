@@ -175,3 +175,11 @@ Choices for the build:
 Any go is conditional on push-to-listen (never always-on listening), audio processed on the phone and discarded once transcribed, and nothing stored or sent, which addresses most of the bystander concern and also limits battery use.
 
 Card suggestion follows from reply recognition: a recognised reply belongs to a known card, so the app knows which exchange is under way and can surface the natural next card. That is a product decision on top of the measurement, not something to benchmark.
+
+## After the build: real-world testing (1 November 2026)
+
+Six sessions with the lab copy of the app (`/lab/<code>/`), Portuguese, iPhone 15 Pro, iOS 26.6:
+
+- **Phone microphone needs voice processing.** Raw, speech peaked around 0.01 (-40 dB) and Whisper heard "A"; with iOS voice processing (`echoCancellation: true`) it peaked around 0.4. With it on, 8 answers were shown, all right, none wrong.
+- **Holds must ignore iOS's long-press cancel**, and matching works sentence by sentence ("Boa noite! Bem-vindos! Tem reserva?" gives "Têm reserva?").
+- **Headphones: not supported.** With AirPods connected, iOS gave the page cut-off (0.53 s) or empty recordings through MediaRecorder from either microphone, and all-zero samples through Web Audio once a clip had played, even after releasing playback; the AirPods' own microphone hears the wearer and caught 1 of 3 lines from across the table. The Listen sheet now says listening does not work with headphones connected and hides its button until they are gone. Worth retesting with new iOS releases.
