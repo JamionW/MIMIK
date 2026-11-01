@@ -647,6 +647,12 @@
   let labModel = 'base';
   try { if (LAB && ASR_MODELS[localStorage.getItem('lab-model')]) labModel = localStorage.getItem('lab-model'); } catch {}
   const [ASR_MODEL, ASR_MB] = ASR_MODELS[labModel];
+  // Microphone processing. Off, iOS gives the raw signal with no automatic gain: real-world speech
+  // at arm's length peaked around 0.01 (-40 dB). On, it applies the voice processing used for
+  // calls, which includes gain. The lab switches between them to measure which recognises better.
+  let labVoice = false;
+  try { labVoice = LAB && localStorage.getItem('lab-voice') === '1'; } catch {}
+  const micAudio = () => ({ echoCancellation: labVoice, noiseSuppression: true, autoGainControl: true });
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
   const listenEl = document.getElementById('listen');
@@ -738,7 +744,7 @@
     if (listenEl.hidden) return;
     try {
       // Asked for here, not on the first hold, so the permission prompt does not eat the press.
-      mic ||= await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true } });
+      mic ||= await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
     } catch {
       listenMsg('Listening needs the microphone. Allow it for this site in Settings, then try again.');
       return;
@@ -789,7 +795,7 @@
     if (!asr || recorder || hearing) return;
     if (!micLive()) {
       releaseMic();
-      try { mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true } }); }
+      try { mic = await navigator.mediaDevices.getUserMedia({ audio: micAudio() }); }
       catch { listenMsg('Listening needs the microphone. Allow it for this site in Settings, then try again.'); return; }
       // Released while the microphone was reopening: nothing to record.
       if (!pressed) return;
@@ -844,13 +850,19 @@
         listenMsg('Too short. Hold the button for as long as they speak.');
         return;
       }
-      // A recording this quiet is a microphone problem, not speech; Whisper would invent a word.
-      if (capture.peak < 0.01) {
+      // Below this a recording held no speech; Whisper would invent a word. Real-world silent
+      // attempts peaked at 0.004 or less, quiet speech on the phone microphone at 0.007 and up.
+      if (capture.peak < 0.005) {
         labEntry({ outcome: 'silent', seconds: pcm.length / 16000, capture });
         releaseMic();
         listenMsg('The microphone recorded silence. Try again; if it keeps happening, close Listen and reopen it.');
         return;
       }
+      // Whisper's input features depend on level, and the phone microphone records quietly, so
+      // the recording is brought up to a peak of 0.5, with the boost capped at 40 times.
+      const boost = Math.min(40, 0.5 / capture.peak);
+      capture.gain = boost > 1.2 ? +boost.toFixed(1) : 1;
+      if (capture.gain > 1) for (let i = 0; i < pcm.length; i++) pcm[i] *= capture.gain;
       const out = await asr(pcm, { language: lang.split('-')[0].toLowerCase(), task: 'transcribe', max_new_tokens: 64 });
       const transcript = (out.text || '').trim();
       const { match, ranked } = matchReply(transcript);
@@ -907,7 +919,7 @@
     if (!LAB) return null;
     const track = mic && mic.getAudioTracks()[0];
     const entry = {
-      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, mic: track ? track.label : null,
+      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, voiceProcessing: labVoice, mic: track ? track.label : null,
       homeScreen: !!(navigator.standalone || matchMedia('(display-mode: standalone)').matches),
       ...fields, truth: null,
     };
@@ -978,7 +990,11 @@
       src.onended = () => ctx.close();
       src.start();
     };
-    bar.append(copy, share, clear, hear, model);
+    const voice = el('select');
+    voice.append(new Option('Mic: raw', '0'), new Option('Mic: voice processing', '1'));
+    voice.value = labVoice ? '1' : '0';
+    voice.onchange = () => { try { localStorage.setItem('lab-voice', voice.value); } catch {} location.reload(); };
+    bar.append(copy, share, clear, hear, model, voice);
   }
 
   async function init() {
