@@ -649,9 +649,10 @@
   const [ASR_MODEL, ASR_MB] = ASR_MODELS[labModel];
   // Microphone processing. Off, iOS gives the raw signal with no automatic gain: real-world speech
   // at arm's length peaked around 0.01 (-40 dB). On, it applies the voice processing used for
-  // calls, which includes gain. The lab switches between them to measure which recognises better.
-  let labVoice = false;
-  try { labVoice = LAB && localStorage.getItem('lab-voice') === '1'; } catch {}
+  // calls, which includes gain: the same speech peaked around 0.4, and recognition improved. On is
+  // the default; the lab can still switch it off to compare.
+  let labVoice = true;
+  try { if (LAB && localStorage.getItem('lab-voice') === '0') labVoice = false; } catch {}
   const micAudio = () => ({ echoCancellation: labVoice, noiseSuppression: true, autoGainControl: true });
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
@@ -769,7 +770,7 @@
     getBtn.textContent = 'Starting the microphone...';
     try {
       // Asked for here, not on the first hold, so the permission prompt does not eat the press.
-      mic ||= await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
+      mic ||= await openMic();
     } catch {
       listenMsg('Listening needs the microphone. Allow it for this site in Settings, then try again.');
       stepButton('Try again', true);
@@ -779,6 +780,17 @@
     listenMsg('Hold the button while they speak and let go when they stop. Audio stays on this phone and is discarded after.');
     getBtn.hidden = true;
     holdBtn.hidden = false;
+  }
+
+  // Opens the microphone and drops it when iOS ends its track (a route change), so the next
+  // press opens it again on whatever input is now current.
+  async function openMic() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: micAudio() });
+    for (const t of stream.getAudioTracks()) t.addEventListener('ended', () => {
+      labEntry({ outcome: 'microphone ended', track: { label: t.label } });
+      if (mic === stream && !recorder) releaseMic();
+    });
+    return stream;
   }
 
   function micState() {
@@ -828,8 +840,12 @@
     if (!asr || recorder || hearing) return;
     if (!micLive()) {
       releaseMic();
-      try { mic = await navigator.mediaDevices.getUserMedia({ audio: micAudio() }); }
-      catch { listenMsg('Listening needs the microphone. Allow it for this site in Settings, then try again.'); return; }
+      try { mic = await openMic(); }
+      catch (err) {
+        labEntry({ outcome: 'error', stage: 'open microphone', error: String(err && err.message || err) });
+        listenMsg('Could not open the microphone. If you just connected or disconnected headphones, try again; otherwise allow it in Settings.');
+        return;
+      }
       // Released while the microphone was reopening: nothing to record.
       if (!pressed) return;
     }
@@ -837,9 +853,18 @@
     try { holdBtn.setPointerCapture(e.pointerId); } catch {}
     audio.pause();
     recChunks = [];
-    recorder = new MediaRecorder(mic);
-    recorder.ondataavailable = ev => { if (ev.data.size) recChunks.push(ev.data); };
-    recorder.start();
+    try {
+      recorder = new MediaRecorder(mic);
+      recorder.ondataavailable = ev => { if (ev.data.size) recChunks.push(ev.data); };
+      recorder.onerror = ev => labEntry({ outcome: 'error', stage: 'recording', error: String(ev.error && ev.error.message || ev.error || 'recorder error'), track: micState() });
+      recorder.start();
+    } catch (err) {
+      recorder = null;
+      releaseMic();
+      labEntry({ outcome: 'error', stage: 'start recording', error: String(err && err.message || err), track: micState() });
+      listenMsg('Could not start recording. Try again.');
+      return;
+    }
     clearTimeout(holdTimer);
     holdTimer = setTimeout(() => stopHearing({ type: 'timeout', preventDefault() {} }), MAX_HOLD_MS);
     holdBtn.classList.add('on');
@@ -866,9 +891,12 @@
     holdBtn.classList.remove('on');
     holdBtn.querySelector('span').textContent = 'Hold while they speak';
     const released = performance.now();
-    await new Promise(res => { r.onstop = res; r.stop(); });
-    const blob = new Blob(recChunks, { type: r.mimeType });
-    const capture = { mime: r.mimeType, bytes: blob.size, chunks: recChunks.length, track: micState(), endedBy: e.type, heldMs: Math.round(heldMs) };
+    // iOS ends the microphone's track when the audio route changes (headphones connecting, say),
+    // and the recorder stops by itself; stop() on it would throw.
+    const stoppedEarly = r.state === 'inactive';
+    if (!stoppedEarly) await new Promise(res => { r.onstop = res; r.stop(); });
+    const blob = new Blob(recChunks, { type: r.mimeType || 'audio/mp4' });
+    const capture = { mime: r.mimeType, bytes: blob.size, chunks: recChunks.length, track: micState(), endedBy: e.type, heldMs: Math.round(heldMs), stoppedEarly };
     recChunks = [];
     hearing = true;
     holdBtn.disabled = true;
@@ -912,8 +940,10 @@
         top: ranked.slice(0, 3).map(c => ({ text: c.mine ? c.text : c.reply.text, mine: !!c.mine, score: +c.score.toFixed(3) })),
       });
       showHeard(transcript, match || phrase, entry);
-      listenMsg('');
+      listenMsg(stoppedEarly ? 'The microphone changed during that recording (headphones?), so it may be cut short. Try again if the answer looks wrong.' : '');
     } catch (err) {
+      labEntry({ outcome: 'error', stage: 'process', error: String(err && err.message || err), capture });
+      releaseMic();
       listenMsg(`Could not process that (${err.message || err}). Try again.`);
     } finally {
       hearing = false;
@@ -1077,6 +1107,16 @@
       holdBtn.addEventListener('touchcancel', stopHearing);
       holdBtn.addEventListener('contextmenu', e => e.preventDefault());
       document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('show').hidden) closeListen(); });
+      // Headphones connecting or disconnecting change the input: the open microphone is dropped so
+      // the next press opens the new one, unless a recording is under way.
+      navigator.mediaDevices.addEventListener('devicechange', async () => {
+        if (LAB) {
+          let inputs = [];
+          try { inputs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput').map(d => d.label); } catch {}
+          labEntry({ outcome: 'device change', inputs, track: micState() });
+        }
+        if (!recorder) releaseMic();
+      });
       // The microphone is released whenever the app goes to the background.
       document.addEventListener('visibilitychange', () => { if (document.hidden) closeListen(); });
     }

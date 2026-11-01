@@ -22,7 +22,8 @@
           "replies": [
             { "id": "um-cafe-r1", "text": "É para aqui ou para levar?", "en": "For here or to take away?" },
             { "id": "um-cafe-r2", "text": "Mais alguma coisa?", "en": "Anything else?" },
-            { "id": "um-cafe-r3", "text": "Algo mais?", "en": "Anything else?" }
+            { "id": "um-cafe-r3", "text": "Algo mais?", "en": "Anything else?" },
+            { "id": "um-cafe-r4", "text": "É para comer aqui ou para levar?", "en": "To eat here or to take away?" }
           ]
         },
         { "id": "dois-cafes", "en": "Two coffees, please", "text": "Dois cafés, por favor", "ph": "DOYSH kuh-FESH, poor fuh-VOR" },
