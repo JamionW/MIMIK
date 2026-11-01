@@ -39,6 +39,12 @@
 <h1>Mimik lab: on-device interpreter benchmark</h1>
 <p>Runs speech recognition and translation to English on this phone, with no server. Keep the screen on and the app in front while a test runs. Models download once per configuration (sizes below); use Wi-Fi.</p>
 
+<h2>Real-world listening test</h2>
+<section>
+  <p>The real app with listening, plus a log of every attempt (timings, what was heard, the top matches, the microphone used) and a picker for what was actually said. Open a language, tap Listen, and after each attempt mark the truth. Copy the log from the bottom of the Listen sheet when done. Transcripts only; no audio is kept.</p>
+  <div id="lab-langs" class="row"></div>
+</section>
+
 <h2>Device</h2>
 <section><p id="device" class="status">Checking...</p></section>
 
@@ -84,6 +90,10 @@
 </section>
 
 <script type="module">
+// Links to the build's lab copies of the app, one per language.
+fetch('../languages.json').then(r => r.json()).then(ls => {
+  for (const l of ls) { const a = document.createElement('a'); a.href = `${l.code}/`; a.textContent = l.name; a.style.marginRight = '14px'; document.getElementById('lab-langs').append(a); }
+}).catch(() => {});
 // The transformers.js build, pinned. ?tjs= overrides it (used to test this page with a mock).
 // The isolating worker answers navigations only for ?mt, so the plain page is unaffected.
 if ('serviceWorker' in navigator) {
