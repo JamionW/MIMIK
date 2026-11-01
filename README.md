@@ -28,6 +28,8 @@ Tapping the text of a card (or of a regional row) opens show mode: the phrase al
 
 The last phrase played can be replayed without taking the phone out. On the lock screen and in Control Centre, play replays it, the forward button replays it slowly, and the back button replays it at normal speed; on AirPods the same mapping applies to a single press, a double press and a triple press. The lock screen shows the phrase and its English. iOS shows these controls only for the voice clips, not for phrases spoken by the device voice, and drops them a short while after the screen locks.
 
+The Listen button at the bottom helps with the other half of the conversation. Hold its button while the other person speaks, and the app shows which of the language's "What you'll hear" replies they said, with its English, or "Not sure" when it does not match one closely enough. It runs speech recognition (Whisper) on the phone, and the recording is discarded once transcribed. It needs a one-time 80 MB download, shared by every language and kept for offline use, and the microphone. It recognises only the replies in the phrase file, so the more predictable exchanges have replies, the more it helps. Why it works this way, and not as a general interpreter, is in `docs/spike-interpreter.md`.
+
 The magnifier beside the language name searches every section at once, matching English, the phrase in either gender, romanization, regional rows and replies. Accents and Japanese macrons are optional (`cafe` finds café, `kado` or `kaado` finds kādo). Cancel returns to the clock.
 
 The He / She toggle switches gendered forms (obrigado, obrigada) and the voice. The choice persists on the device and carries across languages.
@@ -98,7 +100,7 @@ Each language folder has its own service worker scoped to that folder, so a phon
 
 A native speaker's recording can replace any clip. Put it at `site/<code>/audio-human/<id>.m4a` for the He voice or `site/<code>/audio-human/f/<id>.m4a` for the She voice; each replaces only its own voice. Unlike the TTS clips, these are source files and are committed. The build lists them in `human.json`, the generator skips TTS for them, and the app and worker play and cache them in place of the TTS clip. Record the most used phrases first, and those where the TTS sounds worst.
 
-Each language's worker caches its page and every clip at install, and it answers Safari's range requests for audio so playback works offline. The page asks its worker for a count of cached clips to drive the header's offline badge; when the count is short and the phone is online, the worker refetches what is missing. The deploy stamps the commit SHA into the workers, which is what triggers a refresh on the next online launch.
+Each language's worker caches its page and every clip at install, and it answers Safari's range requests for audio so playback works offline. The listening engine comes from jsdelivr at a pinned version; the workers cache it on first use in `mimik-listen-engine`, which every language shares and no deploy clears, and transformers.js keeps the model files in its own cache. The page asks its worker for a count of cached clips to drive the header's offline badge; when the count is short and the phone is online, the worker refetches what is missing. The deploy stamps the commit SHA into the workers, which is what triggers a refresh on the next online launch.
 
 ## Running locally
 

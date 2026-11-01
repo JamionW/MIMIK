@@ -127,8 +127,25 @@ async function ranged(req, res) {
   });
 }
 
+// Listening (Feature 10) loads its speech engine from jsdelivr at pinned versions. Those files
+// are cached on first use in a cache every language shares and no deploy clears, so listening
+// works offline once downloaded. transformers.js caches the model files itself.
+const ENGINE_CACHE = 'mimik-listen-engine';
+const ENGINE_HOST = 'https://cdn.jsdelivr.net/';
+
 self.addEventListener('fetch', e => {
   const req = e.request;
+  if (req.method === 'GET' && req.url.startsWith(ENGINE_HOST)) {
+    e.respondWith((async () => {
+      const c = await caches.open(ENGINE_CACHE);
+      const hit = await c.match(req);
+      if (hit) return hit;
+      const res = await fetch(req);
+      if (res.ok) await c.put(req, res.clone());
+      return res;
+    })());
+    return;
+  }
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   e.respondWith((async () => {
     const c = await caches.open(CACHE);

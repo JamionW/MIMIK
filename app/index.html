@@ -144,6 +144,42 @@
   .show-text { max-width: 100%; margin: 0; font-weight: 700; line-height: 1.15; text-align: center; overflow-wrap: normal; }
   .show-hint { margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
   body.showing { overflow: hidden; }
+
+  /* Listening: a floating button opens a sheet with hold-to-listen and the results. */
+  body { padding-bottom: calc(env(safe-area-inset-bottom) + 88px); }
+  .listen-fab {
+    position: fixed; z-index: 1; left: 50%; transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom) + 16px);
+    display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px 0 16px;
+    border: 0; border-radius: 24px; background: var(--accent); color: var(--accent-ink);
+    font: inherit; font-size: 16px; font-weight: 600; box-shadow: 0 4px 16px rgba(0, 0, 0, .25);
+  }
+  .listen-fab svg, .listen-hold svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .listen-fab[hidden], body.showing .listen-fab { display: none; }
+  .listen {
+    position: fixed; z-index: 2; left: 0; right: 0; bottom: 0; max-height: 80vh; overflow-y: auto;
+    background: var(--card); border-top: 1px solid var(--line); border-radius: 18px 18px 0 0;
+    padding: 14px 16px calc(env(safe-area-inset-bottom) + 16px); box-shadow: 0 -6px 24px rgba(0, 0, 0, .2);
+  }
+  .listen[hidden] { display: none; }
+  .listen-inner { max-width: 640px; margin: 0 auto; }
+  .listen-top { display: flex; justify-content: space-between; align-items: center; }
+  .listen-top b { font-size: 17px; }
+  .listen-top button, .listen-get { border: 0; background: none; color: var(--accent); font: inherit; font-size: 15px; padding: 6px 0; }
+  .listen-get { font-weight: 600; }
+  .listen-msg { color: var(--muted); font-size: 15px; margin: 8px 0; }
+  .listen-hold {
+    width: 100%; min-height: 72px; margin: 6px 0 4px; border: 0; border-radius: 14px;
+    background: var(--accent); color: var(--accent-ink); font: inherit; font-size: 18px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .listen-hold.on { opacity: .7; }
+  .listen-hold:disabled { opacity: .45; }
+  .heard { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
+  .heard-en { margin: 0; font-size: 22px; font-weight: 700; }
+  .heard .text { font-size: 20px; }
+  .heard .en { font-size: 14px; }
   .replies { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 8px; }
   .replies summary { color: var(--muted); font-size: 14px; padding: 4px 0; cursor: pointer; }
   .replies .row { margin-top: 10px; }
@@ -167,6 +203,16 @@
   <section id="now"></section>
   <section id="always"></section>
 </main>
+<button id="listen-fab" class="listen-fab" aria-label="Listen to a reply" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Listen</button>
+<div id="listen" class="listen" role="dialog" aria-label="Listen to a reply" hidden>
+  <div class="listen-inner">
+    <div class="listen-top"><b>What did they say?</b><button id="listen-close">Close</button></div>
+    <p id="listen-msg" class="listen-msg"></p>
+    <button id="listen-get" class="listen-get" hidden></button>
+    <button id="listen-hold" class="listen-hold" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg><span>Hold while they speak</span></button>
+    <div id="listen-out"></div>
+  </div>
+</div>
 <div id="show" class="show" role="dialog" aria-modal="true" hidden>
   <p class="show-en"></p>
   <div class="show-fit"><p class="show-text"></p></div>
@@ -582,6 +628,210 @@
     preload(g);
   }
 
+  // Listening (Feature 10): hold a button while the other person speaks. The phone transcribes
+  // the audio with Whisper and shows which of this language's replies it was, with its English,
+  // or "not sure". Audio never leaves the phone and is dropped once transcribed. The model is an
+  // optional 80 MB download, shared by every language. Choices are from docs/spike-interpreter.md.
+  const ASR_LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2';
+  const ASR_MODEL = 'onnx-community/whisper-base';
+  const ASR_MB = 80;
+  const MATCH_MIN = 0.6;
+  const READY_KEY = 'listen-ready';
+  const listenEl = document.getElementById('listen');
+  const holdBtn = document.getElementById('listen-hold');
+  const getBtn = document.getElementById('listen-get');
+  let asr = null, asrLoading = null, asrProgress = null, mic = null, recorder = null, recChunks = [], matchers = null, hearing = false;
+
+  // Comparison drops case, accents, punctuation and spaces, and squashes runaway repeats.
+  const matchKey = s => (s || '').toLowerCase().normalize('NFD').replace(/[\p{M}\p{P}\p{S}\s]/gu, '').replace(/(.)\1{3,}/gu, '$1');
+  function editDistance(a, b) {
+    a = [...a]; b = [...b];
+    let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i];
+      for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+
+  // Candidates are the replies, plus the user's own phrases as distractors: the phone hears its
+  // owner too, and a transcript closest to one of those is not a reply.
+  function buildMatchers() {
+    const list = new Map();
+    for (const sec of data.sections) for (const p of sec.phrases) for (const r of p.replies || []) {
+      const key = matchKey(r.text);
+      if (key && !list.has(key)) list.set(key, { key, reply: { ...r, reply: true }, phrase: p });
+    }
+    for (const sec of data.sections) for (const p of sec.phrases) {
+      for (const x of [p, p.f, ...(p.alt || [])]) {
+        if (!x || !x.text) continue;
+        for (const part of [x.text, ...x.text.split('/')]) {
+          const key = matchKey(part);
+          if (key && !list.has(key)) list.set(key, { key, mine: true });
+        }
+      }
+    }
+    return [...list.values()];
+  }
+
+  function matchReply(transcript) {
+    const t = matchKey(transcript);
+    let best = null, score = -1;
+    for (const c of matchers) {
+      const sc = 1 - editDistance(t, c.key) / Math.max([...t].length, [...c.key].length, 1);
+      if (sc > score) { best = c; score = sc; }
+    }
+    return best && !best.mine && score >= MATCH_MIN ? { ...best, score } : null;
+  }
+
+  function loadAsr() {
+    asrLoading ||= (async () => {
+      const { pipeline, env } = await import(ASR_LIB);
+      env.allowLocalModels = false;
+      const p = await pipeline('automatic-speech-recognition', ASR_MODEL, {
+        device: 'wasm',
+        dtype: 'q8',
+        progress_callback: e => { if (e.status === 'progress_total' && asrProgress) asrProgress(e.loaded, e.total); },
+      });
+      try { localStorage.setItem(READY_KEY, '1'); } catch {}
+      return (asr = p);
+    })().catch(err => { asrLoading = null; throw err; });
+    return asrLoading;
+  }
+
+  const listenMsg = t => { document.getElementById('listen-msg').textContent = t; };
+  const modelSaved = () => { try { return localStorage.getItem(READY_KEY) === '1'; } catch { return false; } };
+
+  function offerDownload(msg) {
+    listenMsg(msg);
+    holdBtn.hidden = true;
+    getBtn.hidden = false;
+    getBtn.textContent = `Download (${ASR_MB} MB)`;
+  }
+
+  async function prepareListening() {
+    getBtn.hidden = true;
+    holdBtn.hidden = true;
+    listenMsg(asr ? '' : modelSaved() ? 'Loading...' : 'Downloading...');
+    asrProgress = (loaded, total) => listenMsg(`Downloading: ${Math.round(loaded / 1e6)} of ${Math.round(total / 1e6)} MB`);
+    try {
+      await loadAsr();
+    } catch (err) {
+      try { localStorage.removeItem(READY_KEY); } catch {}
+      return offerDownload(navigator.onLine
+        ? `Could not load the listening model (${err.message || err}). Try again on Wi-Fi.`
+        : 'The listening model is not on this phone. Connect to the internet to download it.');
+    }
+    if (listenEl.hidden) return;
+    try {
+      // Asked for here, not on the first hold, so the permission prompt does not eat the press.
+      mic ||= await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true } });
+    } catch {
+      listenMsg('Listening needs the microphone. Allow it for this site in Settings, then try again.');
+      return;
+    }
+    if (listenEl.hidden) return releaseMic();
+    listenMsg('Hold the button while they speak and let go when they stop. Audio stays on this phone and is discarded after.');
+    holdBtn.hidden = false;
+  }
+
+  function releaseMic() {
+    if (mic) for (const t of mic.getTracks()) t.stop();
+    mic = null;
+  }
+
+  function openListen() {
+    if (!data) return;
+    matchers ||= buildMatchers();
+    listenEl.hidden = false;
+    document.getElementById('listen-fab').hidden = true;
+    if (asr || modelSaved()) prepareListening();
+    else offerDownload(`To understand replies, this phone needs a one-time ${ASR_MB} MB download, shared by every language and kept for offline use. Use Wi-Fi.`);
+  }
+
+  function closeListen() {
+    if (listenEl.hidden) return;
+    if (recorder) { recorder.onstop = null; recorder.stop(); recorder = null; }
+    recChunks = [];
+    holdBtn.classList.remove('on');
+    listenEl.hidden = true;
+    document.getElementById('listen-fab').hidden = false;
+    releaseMic();
+  }
+
+  function startHearing(e) {
+    e.preventDefault();
+    if (!asr || !mic || recorder || hearing) return;
+    // Keeps the release on this button even if the finger or pointer drifts off it.
+    try { holdBtn.setPointerCapture(e.pointerId); } catch {}
+    audio.pause();
+    recChunks = [];
+    recorder = new MediaRecorder(mic);
+    recorder.ondataavailable = ev => { if (ev.data.size) recChunks.push(ev.data); };
+    recorder.start();
+    holdBtn.classList.add('on');
+    holdBtn.querySelector('span').textContent = 'Listening... let go when they stop';
+  }
+
+  async function decode16k(buf) {
+    const ab = await new OfflineAudioContext(1, 16000, 16000).decodeAudioData(buf);
+    if (ab.numberOfChannels === 1) return ab.getChannelData(0);
+    const out = new Float32Array(ab.length);
+    for (let c = 0; c < ab.numberOfChannels; c++) ab.getChannelData(c).forEach((v, i) => { out[i] += v / ab.numberOfChannels; });
+    return out;
+  }
+
+  async function stopHearing(e) {
+    e.preventDefault();
+    const r = recorder;
+    if (!r) return;
+    recorder = null;
+    holdBtn.classList.remove('on');
+    holdBtn.querySelector('span').textContent = 'Hold while they speak';
+    await new Promise(res => { r.onstop = res; r.stop(); });
+    const blob = new Blob(recChunks, { type: r.mimeType });
+    recChunks = [];
+    hearing = true;
+    holdBtn.disabled = true;
+    listenMsg('Working...');
+    try {
+      const pcm = await decode16k(await blob.arrayBuffer());
+      if (pcm.length < 16000 * 0.4) { listenMsg('Too short. Hold the button for as long as they speak.'); return; }
+      const out = await asr(pcm, { language: lang.split('-')[0].toLowerCase(), task: 'transcribe', max_new_tokens: 64 });
+      showHeard((out.text || '').trim(), matchReply(out.text || ''));
+      listenMsg('');
+    } catch (err) {
+      listenMsg(`Could not process that (${err.message || err}). Try again.`);
+    } finally {
+      hearing = false;
+      holdBtn.disabled = false;
+    }
+  }
+
+  // Newest result on top; the last three are kept so a quick exchange can be read back.
+  function showHeard(transcript, m) {
+    const box = el('div', 'heard');
+    if (m) {
+      const row = el('div', 'row');
+      const t = el('div', 'txt');
+      t.append(el('p', 'heard-en', m.reply.en));
+      const native = el('p', 'text', m.reply.text);
+      native.lang = lang;
+      t.append(native);
+      if (m.reply.rom) t.append(el('p', 'rom', m.reply.rom));
+      t.append(el('p', 'en', `A reply to: ${form(m.phrase).en}`));
+      row.append(t, controls(m.reply));
+      box.append(row);
+    } else {
+      box.append(el('p', 'heard-en', 'Not sure'));
+      box.append(el('p', 'en', transcript ? `Heard: ${transcript}` : 'Nothing was heard.'));
+    }
+    const out = document.getElementById('listen-out');
+    out.prepend(box);
+    while (out.children.length > 3) out.lastChild.remove();
+  }
+
   async function init() {
     data = await (await fetch('phrases.json')).json();
     try {
@@ -600,6 +850,20 @@
     q.oninput = () => { query = q.value; render(); window.scrollTo(0, 0); };
     q.onkeydown = e => { if (e.key === 'Escape') closeSearch(); else if (e.key === 'Enter') q.blur(); };
     setupMedia();
+    if ('MediaRecorder' in window && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      const fab = document.getElementById('listen-fab');
+      fab.hidden = false;
+      fab.onclick = openListen;
+      document.getElementById('listen-close').onclick = closeListen;
+      getBtn.onclick = prepareListening;
+      holdBtn.addEventListener('pointerdown', startHearing);
+      holdBtn.addEventListener('pointerup', stopHearing);
+      holdBtn.addEventListener('pointercancel', stopHearing);
+      holdBtn.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('show').hidden) closeListen(); });
+      // The microphone is released whenever the app goes to the background.
+      document.addEventListener('visibilitychange', () => { if (document.hidden) closeListen(); });
+    }
     setGender(gender);
     tick();
     setInterval(tick, 20000);
