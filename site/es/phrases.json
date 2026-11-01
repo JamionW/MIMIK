@@ -109,7 +109,17 @@
         { "id": "vino", "en": "A glass of red / white wine", "text": "Una copa de vino tinto / blanco", "say": "Una copa de vino tinto. Una copa de vino blanco.", "ph": "OO-nah KOH-pah deh VEE-noh TEEN-toh / BLAHN-koh" },
         { "id": "mezcal", "en": "A mezcal, please", "text": "Un mezcal, por favor", "ph": "oon mehs-KAHL, por fah-VOR", "note": "Sip it; it comes with orange slices and chili salt." },
         { "id": "salud", "en": "Cheers!", "text": "¡Salud!", "ph": "sah-LOOD" },
-        { "id": "estuvo-delicioso", "en": "It was delicious", "text": "Estuvo delicioso", "ph": "ehs-TOO-voh deh-lee-SYOH-soh" },
+        {
+          "id": "estuvo-delicioso", "en": "It was delicious", "text": "Estuvo delicioso", "ph": "ehs-TOO-voh deh-lee-SYOH-soh",
+          "replies": [
+            { "id": "estuvo-delicioso-r1", "text": "¿Todo bien?", "en": "Was everything all right?" },
+            { "id": "estuvo-delicioso-r2", "text": "¿Les gustó?", "en": "Did you enjoy it?" },
+            { "id": "estuvo-delicioso-r3", "text": "¿Algo de postre?", "en": "Any dessert?" },
+            { "id": "estuvo-delicioso-r4", "text": "¿Un cafecito?", "en": "A coffee?" },
+            { "id": "estuvo-delicioso-r5", "text": "¿Les traigo la cuenta?", "en": "Shall I bring the bill?" },
+            { "id": "estuvo-delicioso-r6", "text": "¡Qué bueno!", "en": "Glad to hear it!" }
+          ]
+        },
         { "id": "taxi", "en": "Can you get me a taxi?", "text": "¿Me puede pedir un taxi?", "ph": "meh PWEH-deh peh-DEER oon TAHK-see", "note": "Use an app or a taxi de sitio (from a stand) rather than hailing one." }
       ]
     },
@@ -144,8 +154,25 @@
       "id": "around",
       "title": "Getting around",
       "phrases": [
-        { "id": "bano", "en": "Where is the bathroom?", "text": "¿Dónde está el baño?", "ph": "DOHN-deh ehs-TAH el BAH-nyoh" },
-        { "id": "metro", "en": "Where is the metro?", "text": "¿Dónde está el metro?", "ph": "DOHN-deh ehs-TAH el MEH-troh" },
+        {
+          "id": "bano", "en": "Where is the bathroom?", "text": "¿Dónde está el baño?", "ph": "DOHN-deh ehs-TAH el BAH-nyoh",
+          "replies": [
+            { "id": "bano-r1", "text": "A la derecha.", "en": "On the right." },
+            { "id": "bano-r2", "text": "A la izquierda.", "en": "On the left." },
+            { "id": "bano-r3", "text": "Al fondo.", "en": "At the back." },
+            { "id": "bano-r4", "text": "Arriba.", "en": "Upstairs." },
+            { "id": "bano-r5", "text": "Abajo.", "en": "Downstairs." }
+          ]
+        },
+        {
+          "id": "metro", "en": "Where is the metro?", "text": "¿Dónde está el metro?", "ph": "DOHN-deh ehs-TAH el MEH-troh",
+          "replies": [
+            { "id": "metro-r1", "text": "Todo derecho.", "en": "Straight ahead." },
+            { "id": "metro-r2", "text": "A la derecha.", "en": "On the right." },
+            { "id": "metro-r3", "text": "A la izquierda.", "en": "On the left." },
+            { "id": "metro-r4", "text": "Aquí a la vuelta.", "en": "Just round the corner." }
+          ]
+        },
         {
           "id": "esta-lejos", "en": "Is it far?", "text": "¿Está lejos?", "ph": "ehs-TAH LEH-hohs",
           "replies": [

@@ -109,8 +109,21 @@
           ]
         },
         { "id": "kanpai", "en": "Cheers!", "text": "乾杯！", "rom": "kanpai", "ph": "kahn-pai" },
-        { "id": "oishii", "en": "Delicious!", "text": "おいしいです", "rom": "oishii desu", "ph": "oy-shee des" },
-        { "id": "gochisousama", "en": "Thank you for the meal (on leaving)", "text": "ごちそうさまでした", "rom": "gochisōsama deshita", "ph": "goh-chee-soh-sah-mah desh-tah" },
+        {
+          "id": "oishii", "en": "Delicious!", "text": "おいしいです", "rom": "oishii desu", "ph": "oy-shee des",
+          "replies": [
+            { "id": "oishii-r1", "text": "ありがとうございます。", "rom": "arigatō gozaimasu", "en": "Thank you." },
+            { "id": "oishii-r2", "text": "デザートはいかがですか？", "rom": "dezāto wa ikaga desu ka", "en": "Would you like dessert?" },
+            { "id": "oishii-r3", "text": "お下げしてもよろしいですか？", "rom": "osage shite mo yoroshii desu ka", "en": "May I clear the plates?" }
+          ]
+        },
+        {
+          "id": "gochisousama", "en": "Thank you for the meal (on leaving)", "text": "ごちそうさまでした", "rom": "gochisōsama deshita", "ph": "goh-chee-soh-sah-mah desh-tah",
+          "replies": [
+            { "id": "gochisousama-r1", "text": "ありがとうございました。", "rom": "arigatō gozaimashita", "en": "Thank you very much." },
+            { "id": "gochisousama-r2", "text": "またお越しください。", "rom": "mata okoshi kudasai", "en": "Please come again." }
+          ]
+        },
         { "id": "takushii", "en": "Can you call a taxi?", "text": "タクシーを呼んでもらえますか？", "rom": "takushī o yonde moraemasu ka", "ph": "tahk-shee oh yohn-deh moh-rah-eh-mahs kah", "note": "The rear door opens and closes by itself." }
       ]
     },
@@ -140,9 +153,33 @@
       "id": "around",
       "title": "Getting around",
       "phrases": [
-        { "id": "toire", "en": "Where is the toilet?", "text": "トイレはどこですか？", "rom": "toire wa doko desu ka", "ph": "toy-reh wah doh-koh des kah" },
-        { "id": "eki", "en": "Where is the station?", "text": "駅はどこですか？", "rom": "eki wa doko desu ka", "ph": "eh-kee wah doh-koh des kah" },
-        { "id": "tooi", "en": "Is it far?", "text": "遠いですか？", "rom": "tōi desu ka", "ph": "toh-ee des kah" },
+        {
+          "id": "toire", "en": "Where is the toilet?", "text": "トイレはどこですか？", "rom": "toire wa doko desu ka", "ph": "toy-reh wah doh-koh des kah",
+          "replies": [
+            { "id": "toire-r1", "text": "右です。", "rom": "migi desu", "en": "On the right." },
+            { "id": "toire-r2", "text": "左です。", "rom": "hidari desu", "en": "On the left." },
+            { "id": "toire-r3", "text": "奥です。", "rom": "oku desu", "en": "At the back." },
+            { "id": "toire-r4", "text": "二階です。", "rom": "nikai desu", "en": "Upstairs (on the first floor)." },
+            { "id": "toire-r5", "text": "地下です。", "rom": "chika desu", "en": "In the basement." }
+          ]
+        },
+        {
+          "id": "eki", "en": "Where is the station?", "text": "駅はどこですか？", "rom": "eki wa doko desu ka", "ph": "eh-kee wah doh-koh des kah",
+          "replies": [
+            { "id": "eki-r1", "text": "まっすぐです。", "rom": "massugu desu", "en": "Straight ahead." },
+            { "id": "eki-r2", "text": "右です。", "rom": "migi desu", "en": "On the right." },
+            { "id": "eki-r3", "text": "左です。", "rom": "hidari desu", "en": "On the left." },
+            { "id": "eki-r4", "text": "すぐそこです。", "rom": "sugu soko desu", "en": "It's just over there." }
+          ]
+        },
+        {
+          "id": "tooi", "en": "Is it far?", "text": "遠いですか？", "rom": "tōi desu ka", "ph": "toh-ee des kah",
+          "replies": [
+            { "id": "tooi-r1", "text": "いいえ、すぐそこです。", "rom": "iie, sugu soko desu", "en": "No, it's just over there." },
+            { "id": "tooi-r2", "text": "歩いて五分くらいです。", "rom": "aruite gofun kurai desu", "en": "About five minutes on foot." },
+            { "id": "tooi-r3", "text": "タクシーのほうがいいです。", "rom": "takushī no hō ga ii desu", "en": "A taxi would be better." }
+          ]
+        },
         {
           "id": "made", "en": "To ..., please (taxi)", "text": "... までお願いします", "say": "までお願いします", "rom": "... made onegai shimasu", "ph": "... mah-deh oh-neh-gai shee-mahs", "note": "Show the driver the address on your phone as you say it.",
           "replies": [

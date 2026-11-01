@@ -108,7 +108,15 @@
         },
         { "id": "vin", "en": "A glass of red / white wine", "text": "Un verre de vin rouge / blanc", "say": "Un verre de vin rouge. Un verre de vin blanc.", "ph": "uhn VEHR duh van ROOZH / BLAHN" },
         { "id": "sante", "en": "Cheers!", "text": "Santé !", "say": "Santé !", "ph": "sahn-TAY", "note": "Also: à la vôtre (ah lah VOH-truh)." },
-        { "id": "delicieux", "en": "It was delicious", "text": "C'était délicieux", "ph": "say-TEH day-lee-SYUH" },
+        {
+          "id": "delicieux", "en": "It was delicious", "text": "C'était délicieux", "ph": "say-TEH day-lee-SYUH",
+          "replies": [
+            { "id": "delicieux-r1", "text": "Ça a été ?", "en": "Was everything all right?" },
+            { "id": "delicieux-r2", "text": "Vous prendrez un dessert ?", "en": "Will you have dessert?" },
+            { "id": "delicieux-r3", "text": "Un café ?", "en": "A coffee?" },
+            { "id": "delicieux-r4", "text": "Tant mieux !", "en": "Glad to hear it!" }
+          ]
+        },
         { "id": "taxi", "en": "Can you call me a taxi?", "text": "Vous pouvez m'appeler un taxi ?", "ph": "voo poo-VAY mah-PLAY uhn tahk-SEE" }
       ]
     },
@@ -142,8 +150,25 @@
       "id": "around",
       "title": "Getting around",
       "phrases": [
-        { "id": "toilettes", "en": "Where are the toilets?", "text": "Où sont les toilettes ?", "ph": "OO sohn lay twah-LET" },
-        { "id": "metro", "en": "Where is the metro?", "text": "Où est le métro ?", "ph": "OO eh luh may-TROH" },
+        {
+          "id": "toilettes", "en": "Where are the toilets?", "text": "Où sont les toilettes ?", "ph": "OO sohn lay twah-LET",
+          "replies": [
+            { "id": "toilettes-r1", "text": "À droite.", "en": "On the right." },
+            { "id": "toilettes-r2", "text": "À gauche.", "en": "On the left." },
+            { "id": "toilettes-r3", "text": "Au fond.", "en": "At the back." },
+            { "id": "toilettes-r4", "text": "Au sous-sol.", "en": "In the basement." },
+            { "id": "toilettes-r5", "text": "En haut.", "en": "Upstairs." }
+          ]
+        },
+        {
+          "id": "metro", "en": "Where is the metro?", "text": "Où est le métro ?", "ph": "OO eh luh may-TROH",
+          "replies": [
+            { "id": "metro-r1", "text": "Tout droit.", "en": "Straight ahead." },
+            { "id": "metro-r2", "text": "À droite.", "en": "On the right." },
+            { "id": "metro-r3", "text": "À gauche.", "en": "On the left." },
+            { "id": "metro-r4", "text": "Juste au coin de la rue.", "en": "Just round the corner." }
+          ]
+        },
         {
           "id": "cest-loin", "en": "Is it far?", "text": "C'est loin ?", "ph": "seh LWAN",
           "replies": [
