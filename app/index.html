@@ -686,21 +686,36 @@
         if (!x || !x.text) continue;
         for (const part of [x.text, ...x.text.split('/')]) {
           const key = matchKey(part);
-          if (key && !list.has(key)) list.set(key, { key, mine: true, text: part.trim() });
+          if (key && !list.has(key)) list.set(key, { key, mine: true, text: part.trim(), en: x.tag ? `${p.en} (${x.tag})` : p.en, item: x === p.f ? form(p) : x });
         }
       }
     }
     return [...list.values()];
   }
 
-  // Returns the shown match (or null for "not sure") and every candidate ranked by similarity.
+  // People rarely say only the expected line ("Boa noite! Bem-vindos! Têm reserva?"), so the
+  // whole transcript, each sentence and each comma-separated part are matched separately. A
+  // part's closest candidate wins it if it scores MATCH_MIN or more. The best reply among the
+  // winners is shown; failing that, the best of the user's own phrases, labelled as such.
+  // Returns { match, phrase, ranked }, ranked being each candidate at its best score.
   function matchReply(transcript) {
-    const t = matchKey(transcript);
-    const ranked = matchers
-      .map(c => ({ ...c, score: 1 - editDistance(t, c.key) / Math.max([...t].length, [...c.key].length, 1) }))
-      .sort((a, b) => b.score - a.score);
-    const best = ranked[0];
-    return { match: best && !best.mine && best.score >= MATCH_MIN ? best : null, ranked };
+    const parts = new Set([transcript, ...transcript.split(/[.?!。？！]+/), ...transcript.split(/[.?!。？！,、]+/)].map(matchKey).filter(k => [...k].length >= 4));
+    if (!parts.size) parts.add(matchKey(transcript));
+    const best = new Map();
+    const winners = [];
+    for (const t of parts) {
+      let top = null;
+      for (const c of matchers) {
+        const score = 1 - editDistance(t, c.key) / Math.max([...t].length, [...c.key].length, 1);
+        if (!best.has(c) || score > best.get(c)) best.set(c, score);
+        if (!top || score > top.score) top = { ...c, score };
+      }
+      if (top && top.score >= MATCH_MIN) winners.push(top);
+    }
+    winners.sort((a, b) => b.score - a.score);
+    const ranked = [...best].map(([c, score]) => ({ ...c, score })).sort((a, b) => b.score - a.score);
+    const match = winners.find(w => !w.mine) || null;
+    return { match, phrase: match ? null : winners[0] || null, ranked };
   }
 
   function loadAsr() {
@@ -800,10 +815,16 @@
   // away), and a recorder on it captures silence. Such a track is replaced before recording.
   const micLive = () => mic && mic.getAudioTracks().some(t => t.readyState === 'live' && !t.muted && t.enabled);
 
-  let pressed = false;
+  // A hold that iOS reads as a long press (about half a second) used to end in pointercancel,
+  // cutting recordings at 0.53 s. touchstart is cancelled so the system never takes the touch,
+  // a touch's pointercancel is ignored, and the hold ends at the lift-off (pointerup or touchend),
+  // a touchcancel, or after MAX_HOLD_MS as a safety net.
+  const MAX_HOLD_MS = 30000;
+  let pressed = false, pressedAt = 0, holdTimer = null;
   async function startHearing(e) {
     e.preventDefault();
     pressed = true;
+    pressedAt = performance.now();
     if (!asr || recorder || hearing) return;
     if (!micLive()) {
       releaseMic();
@@ -819,6 +840,8 @@
     recorder = new MediaRecorder(mic);
     recorder.ondataavailable = ev => { if (ev.data.size) recChunks.push(ev.data); };
     recorder.start();
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => stopHearing({ type: 'timeout', preventDefault() {} }), MAX_HOLD_MS);
     holdBtn.classList.add('on');
     holdBtn.querySelector('span').textContent = 'Listening... let go when they stop';
   }
@@ -832,8 +855,11 @@
   }
 
   async function stopHearing(e) {
+    if (e.type === 'pointercancel' && e.pointerType === 'touch') return;
     e.preventDefault();
     pressed = false;
+    clearTimeout(holdTimer);
+    const heldMs = performance.now() - pressedAt;
     const r = recorder;
     if (!r) return;
     recorder = null;
@@ -842,7 +868,7 @@
     const released = performance.now();
     await new Promise(res => { r.onstop = res; r.stop(); });
     const blob = new Blob(recChunks, { type: r.mimeType });
-    const capture = { mime: r.mimeType, bytes: blob.size, chunks: recChunks.length, track: micState() };
+    const capture = { mime: r.mimeType, bytes: blob.size, chunks: recChunks.length, track: micState(), endedBy: e.type, heldMs: Math.round(heldMs) };
     recChunks = [];
     hearing = true;
     holdBtn.disabled = true;
@@ -877,15 +903,15 @@
       if (capture.gain > 1) for (let i = 0; i < pcm.length; i++) pcm[i] *= capture.gain;
       const out = await asr(pcm, { language: lang.split('-')[0].toLowerCase(), task: 'transcribe', max_new_tokens: 64 });
       const transcript = (out.text || '').trim();
-      const { match, ranked } = matchReply(transcript);
+      const { match, phrase, ranked } = matchReply(transcript);
       const done = performance.now();
       const entry = labEntry({
-        outcome: match ? 'reply' : 'not sure', seconds: pcm.length / 16000,
+        outcome: match ? 'reply' : phrase ? 'own phrase' : 'not sure', seconds: pcm.length / 16000,
         decodeMs: decoded - released, transcribeMs: done - decoded, totalMs: done - released,
-        transcript, shown: match ? match.reply.text : null, score: ranked[0] ? ranked[0].score : null, capture,
+        transcript, shown: match ? match.reply.text : phrase ? phrase.text : null, score: ranked[0] ? ranked[0].score : null, capture,
         top: ranked.slice(0, 3).map(c => ({ text: c.mine ? c.text : c.reply.text, mine: !!c.mine, score: +c.score.toFixed(3) })),
       });
-      showHeard(transcript, match, entry);
+      showHeard(transcript, match || phrase, entry);
       listenMsg('');
     } catch (err) {
       listenMsg(`Could not process that (${err.message || err}). Try again.`);
@@ -898,7 +924,17 @@
   // Newest result on top; the last three are kept so a quick exchange can be read back.
   function showHeard(transcript, m, entry) {
     const box = el('div', 'heard');
-    if (m) {
+    if (m && m.mine) {
+      const row = el('div', 'row');
+      const t = el('div', 'txt');
+      t.append(el('p', 'heard-en', m.en));
+      const native = el('p', 'text', m.text);
+      native.lang = lang;
+      t.append(native);
+      t.append(el('p', 'en', 'One of your phrases'));
+      row.append(t, controls(m.item));
+      box.append(row);
+    } else if (m) {
       const row = el('div', 'row');
       const t = el('div', 'txt');
       t.append(el('p', 'heard-en', m.reply.en));
@@ -952,7 +988,7 @@
     sel.onchange = () => set(sel.value);
     if (m) {
       const right = el('button', null, 'Right');
-      right.onclick = () => set(m.reply.text);
+      right.onclick = () => set(m.mine ? 'mine' : m.reply.text);
       box.append(right);
     }
     box.append(sel);
@@ -1036,6 +1072,9 @@
       holdBtn.addEventListener('pointerdown', startHearing);
       holdBtn.addEventListener('pointerup', stopHearing);
       holdBtn.addEventListener('pointercancel', stopHearing);
+      holdBtn.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+      holdBtn.addEventListener('touchend', stopHearing);
+      holdBtn.addEventListener('touchcancel', stopHearing);
       holdBtn.addEventListener('contextmenu', e => e.preventDefault());
       document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('show').hidden) closeListen(); });
       // The microphone is released whenever the app goes to the background.
