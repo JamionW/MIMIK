@@ -21,7 +21,8 @@
           ],
           "replies": [
             { "id": "um-cafe-r1", "text": "É para aqui ou para levar?", "en": "For here or to take away?" },
-            { "id": "um-cafe-r2", "text": "Mais alguma coisa?", "en": "Anything else?" }
+            { "id": "um-cafe-r2", "text": "Mais alguma coisa?", "en": "Anything else?" },
+            { "id": "um-cafe-r3", "text": "Algo mais?", "en": "Anything else?" }
           ]
         },
         { "id": "dois-cafes", "en": "Two coffees, please", "text": "Dois cafés, por favor", "ph": "DOYSH kuh-FESH, poor fuh-VOR" },
@@ -47,7 +48,10 @@
           "replies": [
             { "id": "mesa-dois-l-r1", "text": "Têm reserva?", "en": "Do you have a reservation?" },
             { "id": "mesa-dois-l-r2", "text": "Dentro ou na esplanada?", "en": "Inside or on the terrace?" },
-            { "id": "mesa-dois-l-r3", "text": "Neste momento estamos cheios.", "en": "We're full at the moment." }
+            { "id": "mesa-dois-l-r3", "text": "Neste momento estamos cheios.", "en": "We're full at the moment." },
+            { "id": "mesa-dois-l-r4", "text": "Querem beber alguma coisa?", "en": "Would you like something to drink?" },
+            { "id": "mesa-dois-l-r5", "text": "Sigam-me, por favor.", "en": "Follow me, please." },
+            { "id": "mesa-dois-l-r6", "text": "Aqui está a ementa.", "en": "Here's the menu." }
           ]
         },
         { "id": "ementa", "en": "The menu, please", "text": "A ementa, por favor", "ph": "uh ee-MEN-tuh, poor fuh-VOR" },
@@ -107,7 +111,10 @@
           "replies": [
             { "id": "tem-mesa-r1", "text": "Têm reserva?", "en": "Do you have a reservation?" },
             { "id": "tem-mesa-r2", "text": "Dentro ou na esplanada?", "en": "Inside or on the terrace?" },
-            { "id": "tem-mesa-r3", "text": "Neste momento estamos cheios.", "en": "We're full at the moment." }
+            { "id": "tem-mesa-r3", "text": "Neste momento estamos cheios.", "en": "We're full at the moment." },
+            { "id": "tem-mesa-r4", "text": "Querem beber alguma coisa?", "en": "Would you like something to drink?" },
+            { "id": "tem-mesa-r5", "text": "Sigam-me, por favor.", "en": "Follow me, please." },
+            { "id": "tem-mesa-r6", "text": "Aqui está a ementa.", "en": "Here's the menu." }
           ]
         },
         {
