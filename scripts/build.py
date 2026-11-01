@@ -1,8 +1,7 @@
 """Assemble each language folder in site/ from the shared app shell in app/.
 
 Every folder site/<code>/ holding a phrases.json is a language. Into each one this writes
-index.html and sw.js from app/ (and a lab copy of the page at site/lab/<code>/ that logs
-listening attempts), plus a manifest.webmanifest naming the language and a
+index.html and sw.js from app/, plus a manifest.webmanifest naming the language and a
 human.json listing which clips have human recordings in audio-human/, and it writes
 site/languages.json for the root picker. All of these are build output.
 
@@ -110,13 +109,6 @@ def main():
         human = {g: sorted(p.stem for p in (folder / "audio-human" / sub).glob("*.m4a")) for g, sub in (("m", ""), ("f", "f"))}
         (folder / "human.json").write_text(json.dumps(human, ensure_ascii=False) + "\n")
         listing.append({"code": code, "name": data["name"], "native": data["native"], "color": data["color"]})
-        # The lab copy: the same page with LAB on, pointed at this folder's files by a base URL.
-        lab = SITE / "lab" / code
-        lab.mkdir(parents=True, exist_ok=True)
-        lab_page = page.replace("<title>" + title + "</title>", f"<title>Mimik lab {code.upper()}</title>", 1)
-        lab_page = lab_page.replace('<meta charset="utf-8">', f'<meta charset="utf-8">\n<base href="../../{code}/">\n<meta name="robots" content="noindex">', 1)
-        lab_page = lab_page.replace("const LAB = false;", "const LAB = true;", 1)
-        (lab / "index.html").write_text(lab_page)
 
     listing.sort(key=lambda l: l["name"])
     (SITE / "languages.json").write_text(json.dumps(listing, indent=2, ensure_ascii=False) + "\n")
