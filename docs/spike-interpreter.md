@@ -38,14 +38,19 @@ Engine: transformers.js 4.3.2 (ONNX Runtime Web), WebGPU with a WebAssembly fall
 2. **Live.** Hold-to-listen recording from the microphone; times release to English, which includes decoding the recording.
 3. **Soak.** Ten minutes of back-to-back translation with the screen held on; battery percentage entered by hand before and after (Safari does not expose it).
 
-Configurations:
+Configurations (second version, after the first run; see Results):
 
 | Id | Model | Backend | Precision |
 | --- | --- | --- | --- |
+| tiny-wasm | whisper-tiny | WebAssembly | 8-bit |
+| base-wasm | whisper-base | WebAssembly | 8-bit |
+| small-wasm | whisper-small | WebAssembly | 8-bit |
+| tiny-webgpu-fp32 | whisper-tiny | WebGPU | fp32 throughout, to separate a broken 4-bit kernel from a broken backend |
 | tiny-webgpu | whisper-tiny | WebGPU | encoder fp32, decoder 4-bit |
 | base-webgpu | whisper-base | WebGPU | encoder fp32, decoder 4-bit |
 | small-webgpu | whisper-small | WebGPU | encoder fp16, decoder 4-bit |
-| base-wasm | whisper-base | WebAssembly | 8-bit |
+
+The WebAssembly configurations run twice: on one thread at `/lab/`, and on several at `/lab/?mt`, where the lab's own service worker adds the cross-origin isolation headers that GitHub Pages cannot send (results saved with an `-mt` suffix). A run records the step it has reached as it goes, so a configuration that kills the tab is marked with where it crashed, and the suite moves on.
 
 The clips are synthetic voices: cleaner than a café, so the suite flatters accuracy. The live test is the check against real speech and noise.
 
@@ -54,12 +59,28 @@ Results persist in the page's storage, so a tab killed for memory resumes where 
 ## Running it (on the phone)
 
 1. On Wi-Fi, open https://jamionw.github.io/MIMIK/lab/ in Safari. Disconnect AirPods for now.
-2. **Run all remaining.** Keep the screen on and Safari in front. If the tab reloads mid-run, the model ran out of memory; tap Run all remaining again and it continues with the next configuration.
-3. **Live:** pick the fastest configuration that finished, load it, and have someone say a few lines in one or two languages (or play them from a video). Then connect AirPods and repeat a couple, with the phone held towards the speaker.
-4. **Soak:** unplug, note the battery, start with the configuration you would choose, enter the battery after 10 minutes, Save.
-5. **Copy results** (or Share) and paste the JSON into the conversation.
+2. **Run all remaining.** Keep the screen on and Safari in front. If the tab reloads mid-run, that configuration crashed; tap Run all remaining again and it continues with the next.
+3. Open **threaded mode** from the link on the page (`/lab/?mt`) and Run all remaining again; this runs the WebAssembly configurations on several cores.
+4. **Live:** pick the fastest configuration that finished, load it, and have someone say a few lines in one or two languages (or play them from a video). Then connect AirPods and repeat a couple, with the phone held towards the speaker.
+5. **Soak:** unplug, note the battery, start with the configuration you would choose, enter the battery after 10 minutes, Save.
+6. **Copy results** (or Share) and paste the JSON into the conversation.
 
 ## Results
+
+### First run (page version 1, 1 November 2026)
+
+| Config | Download | Load | Clips | Translate median / p90 | Transcript error rate (median) |
+| --- | --- | --- | --- | --- | --- |
+| tiny-webgpu | | | crashed | | |
+| base-webgpu | | | crashed | | |
+| small-webgpu | | | crashed | | |
+| base-wasm (one thread) | 80 MB | 3.1 s | 18 of 56 (partial) | 2477 / 5455 ms | 8% |
+
+All three WebGPU configurations killed the tab; version 1 recorded nothing before a model finished loading, so where they crashed is unknown. Since whisper-tiny with a 4-bit decoder is a few tens of MB on an 8 GB phone, plain memory exhaustion is unlikely; a WebGPU or 4-bit kernel failure in ONNX Runtime Web on Safari is the leading suspect. Version 2 records the crash step and adds an fp32-only WebGPU configuration to tell the two apart.
+
+The single-threaded WebAssembly result is the first real signal: transcription accuracy is good (8% character error rate on the median clip), and the median nearly meets the 3 s bar, but the p90 does not, for clips of only 1 to 3 seconds. Threads are the obvious lever, hence threaded mode.
+
+### Second run
 
 Pending.
 
