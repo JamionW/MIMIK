@@ -2,6 +2,7 @@
 site/*/audio/
 site/*/index.html
 !site/lab/index.html
+site/lab/*/
 site/*/sw.js
 !site/lab/sw.js
 site/*/manifest.webmanifest

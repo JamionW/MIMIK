@@ -180,6 +180,11 @@
   .heard-en { margin: 0; font-size: 22px; font-weight: 700; }
   .heard .text { font-size: 20px; }
   .heard .en { font-size: 14px; }
+  .lab-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .lab-bar button, .lab-truth button { border: 1px solid var(--line); border-radius: 8px; background: none; color: var(--accent); font: inherit; font-size: 14px; padding: 4px 10px; }
+  .lab-bar select, .lab-truth select { font: inherit; font-size: 14px; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px; }
+  .lab-truth { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .lab-truth.done select { border-color: var(--accent); }
   .replies { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 8px; }
   .replies summary { color: var(--muted); font-size: 14px; padding: 4px 0; cursor: pointer; }
   .replies .row { margin-top: 10px; }
@@ -211,6 +216,7 @@
     <button id="listen-get" class="listen-get" hidden></button>
     <button id="listen-hold" class="listen-hold" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg><span>Hold while they speak</span></button>
     <div id="listen-out"></div>
+    <div id="lab-bar" class="lab-bar" hidden></div>
   </div>
 </div>
 <div id="show" class="show" role="dialog" aria-modal="true" hidden>
@@ -632,9 +638,15 @@
   // the audio with Whisper and shows which of this language's replies it was, with its English,
   // or "not sure". Audio never leaves the phone and is dropped once transcribed. The model is an
   // optional 80 MB download, shared by every language. Choices are from docs/spike-interpreter.md.
+  // The /lab/<code>/ copy that build.py writes sets LAB: it logs every attempt for tuning
+  // (see labEntry below), offers a model switch, and does not register the worker.
+  const LAB = false;
+  const LAB_KEY = 'mimik-lab-listen';
   const ASR_LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2';
-  const ASR_MODEL = 'onnx-community/whisper-base';
-  const ASR_MB = 80;
+  const ASR_MODELS = { base: ['onnx-community/whisper-base', 80], tiny: ['onnx-community/whisper-tiny', 44] };
+  let labModel = 'base';
+  try { if (LAB && ASR_MODELS[localStorage.getItem('lab-model')]) labModel = localStorage.getItem('lab-model'); } catch {}
+  const [ASR_MODEL, ASR_MB] = ASR_MODELS[labModel];
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
   const listenEl = document.getElementById('listen');
@@ -668,21 +680,21 @@
         if (!x || !x.text) continue;
         for (const part of [x.text, ...x.text.split('/')]) {
           const key = matchKey(part);
-          if (key && !list.has(key)) list.set(key, { key, mine: true });
+          if (key && !list.has(key)) list.set(key, { key, mine: true, text: part.trim() });
         }
       }
     }
     return [...list.values()];
   }
 
+  // Returns the shown match (or null for "not sure") and every candidate ranked by similarity.
   function matchReply(transcript) {
     const t = matchKey(transcript);
-    let best = null, score = -1;
-    for (const c of matchers) {
-      const sc = 1 - editDistance(t, c.key) / Math.max([...t].length, [...c.key].length, 1);
-      if (sc > score) { best = c; score = sc; }
-    }
-    return best && !best.mine && score >= MATCH_MIN ? { ...best, score } : null;
+    const ranked = matchers
+      .map(c => ({ ...c, score: 1 - editDistance(t, c.key) / Math.max([...t].length, [...c.key].length, 1) }))
+      .sort((a, b) => b.score - a.score);
+    const best = ranked[0];
+    return { match: best && !best.mine && best.score >= MATCH_MIN ? best : null, ranked };
   }
 
   function loadAsr() {
@@ -736,6 +748,11 @@
     holdBtn.hidden = false;
   }
 
+  function micState() {
+    const t = mic && mic.getAudioTracks()[0];
+    return t ? { label: t.label, state: t.readyState, muted: t.muted, enabled: t.enabled } : null;
+  }
+
   function releaseMic() {
     if (mic) for (const t of mic.getTracks()) t.stop();
     mic = null;
@@ -746,6 +763,7 @@
     matchers ||= buildMatchers();
     listenEl.hidden = false;
     document.getElementById('listen-fab').hidden = true;
+    labRender();
     if (asr || modelSaved()) prepareListening();
     else offerDownload(`To understand replies, this phone needs a one-time ${ASR_MB} MB download, shared by every language and kept for offline use. Use Wi-Fi.`);
   }
@@ -760,9 +778,22 @@
     releaseMic();
   }
 
-  function startHearing(e) {
+  // iOS can mute or end an open microphone track (after the app plays audio, or after a switch
+  // away), and a recorder on it captures silence. Such a track is replaced before recording.
+  const micLive = () => mic && mic.getAudioTracks().some(t => t.readyState === 'live' && !t.muted && t.enabled);
+
+  let pressed = false;
+  async function startHearing(e) {
     e.preventDefault();
-    if (!asr || !mic || recorder || hearing) return;
+    pressed = true;
+    if (!asr || recorder || hearing) return;
+    if (!micLive()) {
+      releaseMic();
+      try { mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true } }); }
+      catch { listenMsg('Listening needs the microphone. Allow it for this site in Settings, then try again.'); return; }
+      // Released while the microphone was reopening: nothing to record.
+      if (!pressed) return;
+    }
     // Keeps the release on this button even if the finger or pointer drifts off it.
     try { holdBtn.setPointerCapture(e.pointerId); } catch {}
     audio.pause();
@@ -784,22 +815,53 @@
 
   async function stopHearing(e) {
     e.preventDefault();
+    pressed = false;
     const r = recorder;
     if (!r) return;
     recorder = null;
     holdBtn.classList.remove('on');
     holdBtn.querySelector('span').textContent = 'Hold while they speak';
+    const released = performance.now();
     await new Promise(res => { r.onstop = res; r.stop(); });
     const blob = new Blob(recChunks, { type: r.mimeType });
+    const capture = { mime: r.mimeType, bytes: blob.size, chunks: recChunks.length, track: micState() };
     recChunks = [];
     hearing = true;
     holdBtn.disabled = true;
     listenMsg('Working...');
     try {
       const pcm = await decode16k(await blob.arrayBuffer());
-      if (pcm.length < 16000 * 0.4) { listenMsg('Too short. Hold the button for as long as they speak.'); return; }
+      const decoded = performance.now();
+      capture.peak = 0;
+      let sq = 0;
+      for (const v of pcm) { const a = Math.abs(v); if (a > capture.peak) capture.peak = a; sq += v * v; }
+      capture.rms = Math.sqrt(sq / Math.max(pcm.length, 1));
+      capture.peak = +capture.peak.toFixed(4);
+      capture.rms = +capture.rms.toFixed(5);
+      if (LAB) labLast = pcm;
+      if (pcm.length < 16000 * 0.4) {
+        labEntry({ outcome: 'too short', seconds: pcm.length / 16000, capture });
+        listenMsg('Too short. Hold the button for as long as they speak.');
+        return;
+      }
+      // A recording this quiet is a microphone problem, not speech; Whisper would invent a word.
+      if (capture.peak < 0.01) {
+        labEntry({ outcome: 'silent', seconds: pcm.length / 16000, capture });
+        releaseMic();
+        listenMsg('The microphone recorded silence. Try again; if it keeps happening, close Listen and reopen it.');
+        return;
+      }
       const out = await asr(pcm, { language: lang.split('-')[0].toLowerCase(), task: 'transcribe', max_new_tokens: 64 });
-      showHeard((out.text || '').trim(), matchReply(out.text || ''));
+      const transcript = (out.text || '').trim();
+      const { match, ranked } = matchReply(transcript);
+      const done = performance.now();
+      const entry = labEntry({
+        outcome: match ? 'reply' : 'not sure', seconds: pcm.length / 16000,
+        decodeMs: decoded - released, transcribeMs: done - decoded, totalMs: done - released,
+        transcript, shown: match ? match.reply.text : null, score: ranked[0] ? ranked[0].score : null, capture,
+        top: ranked.slice(0, 3).map(c => ({ text: c.mine ? c.text : c.reply.text, mine: !!c.mine, score: +c.score.toFixed(3) })),
+      });
+      showHeard(transcript, match, entry);
       listenMsg('');
     } catch (err) {
       listenMsg(`Could not process that (${err.message || err}). Try again.`);
@@ -810,7 +872,7 @@
   }
 
   // Newest result on top; the last three are kept so a quick exchange can be read back.
-  function showHeard(transcript, m) {
+  function showHeard(transcript, m, entry) {
     const box = el('div', 'heard');
     if (m) {
       const row = el('div', 'row');
@@ -827,9 +889,96 @@
       box.append(el('p', 'heard-en', 'Not sure'));
       box.append(el('p', 'en', transcript ? `Heard: ${transcript}` : 'Nothing was heard.'));
     }
+    if (entry) box.append(labTruth(entry, m));
     const out = document.getElementById('listen-out');
     out.prepend(box);
     while (out.children.length > 3) out.lastChild.remove();
+  }
+
+  // Lab log: one entry per attempt, kept in localStorage and exported as JSON. Transcripts only,
+  // never audio. "truth" is what the tester says was actually said, set from each result.
+  let labLog = [], labLast = null;
+  try { if (LAB) labLog = JSON.parse(localStorage.getItem(LAB_KEY)) || []; } catch {}
+  function labSave() {
+    try { localStorage.setItem(LAB_KEY, JSON.stringify(labLog)); } catch {}
+    labRender();
+  }
+  function labEntry(fields) {
+    if (!LAB) return null;
+    const track = mic && mic.getAudioTracks()[0];
+    const entry = {
+      at: new Date().toISOString(), lang, model: labModel, cutoff: MATCH_MIN, mic: track ? track.label : null,
+      homeScreen: !!(navigator.standalone || matchMedia('(display-mode: standalone)').matches),
+      ...fields, truth: null,
+    };
+    for (const k of ['seconds', 'decodeMs', 'transcribeMs', 'totalMs', 'score']) if (typeof entry[k] === 'number') entry[k] = +entry[k].toFixed(k === 'score' || k === 'seconds' ? 3 : 0);
+    labLog.push(entry);
+    labSave();
+    return entry;
+  }
+
+  function labTruth(entry, m) {
+    const box = el('div', 'lab-truth');
+    const sel = el('select');
+    sel.append(new Option('They actually said...', ''));
+    const seen = new Set();
+    for (const c of matchers) if (!c.mine && !seen.has(c.reply.text)) { seen.add(c.reply.text); sel.append(new Option(`${c.reply.text} (${c.reply.en})`, c.reply.text)); }
+    sel.append(new Option('One of my own phrases', 'mine'), new Option('Something not in the app', 'other'), new Option('Nothing / noise', 'nothing'));
+    const set = v => { entry.truth = v || null; sel.value = v; box.classList.toggle('done', !!v); labSave(); };
+    sel.onchange = () => set(sel.value);
+    if (m) {
+      const right = el('button', null, 'Right');
+      right.onclick = () => set(m.reply.text);
+      box.append(right);
+    }
+    box.append(sel);
+    const note = el('button', null, 'Note');
+    note.onclick = () => { const n = prompt('Note for this attempt (accent, noise, distance...)', entry.note || ''); if (n != null) { entry.note = n; labSave(); } };
+    box.append(note);
+    return box;
+  }
+
+  function labRender() {
+    if (!LAB) return;
+    const bar = document.getElementById('lab-bar');
+    bar.hidden = false;
+    bar.replaceChildren();
+    const marked = labLog.filter(e => e.truth).length;
+    bar.append(el('span', null, `Lab log: ${labLog.length} attempts, ${marked} marked.`));
+    const copy = el('button', null, 'Copy');
+    copy.onclick = async () => {
+      const text = JSON.stringify({ app: 'mimik-lab-listen', exported: new Date().toISOString(), ua: navigator.userAgent, entries: labLog }, null, 1);
+      try { await navigator.clipboard.writeText(text); copy.textContent = 'Copied'; } catch { prompt('Copy this:', text); }
+      setTimeout(() => { copy.textContent = 'Copy'; }, 1500);
+    };
+    const share = el('button', null, 'Share');
+    share.onclick = () => {
+      const text = JSON.stringify({ app: 'mimik-lab-listen', exported: new Date().toISOString(), ua: navigator.userAgent, entries: labLog }, null, 1);
+      const file = new File([text], 'mimik-lab-listen.json', { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file] }).catch(() => {});
+      else if (navigator.share) navigator.share({ text }).catch(() => {});
+    };
+    const clear = el('button', null, 'Clear');
+    clear.onclick = () => { if (confirm('Delete the lab log on this phone?')) { labLog = []; labSave(); } };
+    const model = el('select');
+    for (const k of Object.keys(ASR_MODELS)) model.append(new Option(`whisper-${k}`, k));
+    model.value = labModel;
+    // WebAssembly memory is not given back, so a model switch needs a fresh page.
+    model.onchange = () => { try { localStorage.setItem('lab-model', model.value); } catch {} location.reload(); };
+    // Plays the last recording from memory, to hear whether the microphone caught the speech.
+    const hear = el('button', null, 'Play last recording');
+    hear.onclick = () => {
+      if (!labLast) return;
+      const ctx = new AudioContext();
+      const buf = ctx.createBuffer(1, labLast.length, 16000);
+      buf.copyToChannel(labLast, 0);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.onended = () => ctx.close();
+      src.start();
+    };
+    bar.append(copy, share, clear, hear, model);
   }
 
   async function init() {
@@ -872,7 +1021,7 @@
     if ('speechSynthesis' in window) speechSynthesis.getVoices();
   }
 
-  if ('serviceWorker' in navigator) {
+  if (!LAB && 'serviceWorker' in navigator) {
     regReady = navigator.serviceWorker.register('sw.js');
     // Reload once when an updated worker takes over, but not on the very first install,
     // including when the root worker controlled this page before ours claimed it.
