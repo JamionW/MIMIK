@@ -15,6 +15,7 @@ Status values: `planned`, `in progress`, `done`, `dropped`.
 | 7 | Human recordings override TTS | done (branch `claude/stoic-cori-vgqowh`) |
 | 8 | Numbers and prices | dropped |
 | 9 | Live earbud interpreter (research spike) | done: no-go for open interpretation, go for reply recognition (`docs/spike-interpreter.md`) |
+| 10 | Reply recognition | in progress |
 
 ## 1. Offline-ready indicator
 
@@ -69,3 +70,12 @@ Touches: a numbers block per language in `phrases.json` (number grammar differs 
 ## 9. Live earbud interpreter (research spike)
 
 The app listens to the person speaking, transcribes and translates on device, shows the gist, and suggests which card to play in response. Candidate stack: Whisper tiny or base via WASM or WebGPU plus a small translation model. Open questions before any build: model download size per language, latency and battery on an iPhone, Safari WebGPU support, and the ethics of recording bystanders. The deliverable is a written go or no-go with measurements, not a feature.
+
+## 10. Reply recognition
+
+Out of the Feature 9 spike (`docs/spike-interpreter.md`). Hold a button while the other person speaks; the phone transcribes it with Whisper and shows which of the language's "What you'll hear" replies it was, with its English, or "not sure". Open interpretation was a no-go; this narrower version measured 53 of 56 right with none wrong on synthetic replies, and rejected all 11 out-of-list live lines.
+
+Decided in the spike: whisper-base on WebAssembly (80 MB, shared by all languages, an optional download), a 0.6 similarity cutoff, the user's own phrases as distractors, push-to-listen only, audio discarded after transcription. First step before calling it done: a real voice, ideally a native speaker, saying the replies themselves, and a few lines with AirPods connected.
+
+Touches: `app/index.html` (listen button and sheet, recording, matching), `app/sw.js` (cache the engine for offline use), README.
+
