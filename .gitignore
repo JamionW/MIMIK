@@ -3,6 +3,7 @@ site/*/audio/
 site/*/index.html
 !site/lab/index.html
 site/*/sw.js
+!site/lab/sw.js
 site/*/manifest.webmanifest
 site/*/human.json
 site/languages.json

@@ -44,7 +44,8 @@
 
 <h2>1. Benchmark suite</h2>
 <section>
-  <p>Each configuration downloads its model, then transcribes and translates 8 recorded replies per language (56 clips). Start with the first; run the others if it works. Already finished configurations are skipped unless you tick redo.</p>
+  <p>Each configuration downloads its model, then transcribes and translates 8 recorded replies per language (56 clips). If the tab reloads mid-run, that configuration crashed: it is marked with the step it reached, and Run all remaining moves on to the next. Finished and crashed configurations are skipped unless you tick redo.</p>
+  <p id="mt-note"></p>
   <div id="configs"></div>
   <div class="row"><button id="run-all">Run all remaining</button><label><input type="checkbox" id="redo"> redo finished ones</label></div>
   <p id="suite-status" class="status"></p>
@@ -84,6 +85,16 @@
 
 <script type="module">
 // The transformers.js build, pinned. ?tjs= overrides it (used to test this page with a mock).
+// The isolating worker answers navigations only for ?mt, so the plain page is unaffected.
+if ('serviceWorker' in navigator) {
+  const reg = await navigator.serviceWorker.register('sw.js');
+  if (new URLSearchParams(location.search).has('mt') && !self.crossOriginIsolated && !sessionStorage.getItem('lab-mt-reload')) {
+    sessionStorage.setItem('lab-mt-reload', '1');
+    await navigator.serviceWorker.ready;
+    location.reload();
+    await new Promise(() => {});
+  }
+}
 const TJS = new URLSearchParams(location.search).get('tjs') || 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2';
 let pipeline, env;
 try {
@@ -94,14 +105,23 @@ try {
 }
 env.allowLocalModels = false;
 
-// Whisper-sized candidates. On WebGPU the encoder stays at higher precision and the decoder is
-// 4-bit, as the transformers.js Whisper demos do; WebAssembly gets the 8-bit build.
+// Opened as ?mt, the page is cross-origin isolated by its own worker (sw.js), which lets
+// WebAssembly run on several threads. GitHub Pages cannot send the headers itself.
+const MT = new URLSearchParams(location.search).has('mt');
+
+// Whisper-sized candidates, the ones that worked first. WebAssembly uses the 8-bit build; its
+// results are kept apart (-mt) when threads are on. On WebGPU the 4-bit decoder follows the
+// transformers.js demos; tiny-webgpu-fp32 avoids the 4-bit kernels, to tell a broken kernel
+// from a broken backend.
 const CONFIGS = [
+  { id: 'tiny-wasm', model: 'onnx-community/whisper-tiny', device: 'wasm', dtype: 'q8' },
+  { id: 'base-wasm', model: 'onnx-community/whisper-base', device: 'wasm', dtype: 'q8' },
+  { id: 'small-wasm', model: 'onnx-community/whisper-small', device: 'wasm', dtype: 'q8' },
+  { id: 'tiny-webgpu-fp32', model: 'onnx-community/whisper-tiny', device: 'webgpu', dtype: 'fp32' },
   { id: 'tiny-webgpu', model: 'onnx-community/whisper-tiny', device: 'webgpu', dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' } },
   { id: 'base-webgpu', model: 'onnx-community/whisper-base', device: 'webgpu', dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' } },
   { id: 'small-webgpu', model: 'onnx-community/whisper-small', device: 'webgpu', dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' } },
-  { id: 'base-wasm', model: 'onnx-community/whisper-base', device: 'wasm', dtype: 'q8' },
-];
+].map(c => ({ ...c, id: MT && c.device === 'wasm' ? `${c.id}-mt` : c.id }));
 const LANGS = { pt: 'portuguese', es: 'spanish', fr: 'french', de: 'german', nl: 'dutch', bs: 'bosnian', ja: 'japanese' };
 const PER_LANG = 8;
 const SOAK_MS = 10 * 60 * 1000;
@@ -118,6 +138,11 @@ try { results = JSON.parse(localStorage.getItem(KEY)) || {}; } catch { results =
 results.runs ||= {};
 results.live ||= [];
 results.soak ||= [];
+// A run that never finished nor failed was cut off by the tab reloading: on iOS that is the
+// page being killed, usually for memory. Record where it got to.
+for (const r of Object.values(results.runs)) {
+  if (!r.finished && !r.error) r.error = `crashed (tab reloaded) during ${r.stage || 'an unrecorded step'}`;
+}
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(results)); } catch {}
   $('json').value = JSON.stringify(results, null, 1);
@@ -135,6 +160,7 @@ async function deviceInfo() {
     ua: navigator.userAgent,
     webgpu: 'gpu' in navigator,
     crossOriginIsolated: self.crossOriginIsolated,
+    wasmThreads: env.backends?.onnx?.wasm?.numThreads ?? null,
     cores: navigator.hardwareConcurrency,
     when: new Date().toISOString(),
   };
@@ -143,7 +169,7 @@ async function deviceInfo() {
     if (a) info.gpu = { vendor: a.info?.vendor, architecture: a.info?.architecture, f16: a.features.has('shader-f16'), maxBuffer: a.limits.maxBufferSize };
   } catch (e) { info.gpuError = String(e); }
   results.device = info;
-  $('device').textContent = `WebGPU: ${info.webgpu ? 'yes' : 'no'}${info.gpu ? ` (${info.gpu.vendor || '?'} ${info.gpu.architecture || ''}, f16 ${info.gpu.f16 ? 'yes' : 'no'})` : ''}\n${info.ua}`;
+  $('device').textContent = `Threads for WebAssembly: ${self.crossOriginIsolated ? 'on' : 'off'}. WebGPU: ${info.webgpu ? 'yes' : 'no'}${info.gpu ? ` (${info.gpu.vendor || '?'} ${info.gpu.architecture || ''}, f16 ${info.gpu.f16 ? 'yes' : 'no'})` : ''}\n${info.ua}`;
   save();
 }
 
@@ -191,16 +217,25 @@ function cer(ref, hyp) {
   return prev[b.length] / a.length;
 }
 
-async function load(cfg, onStatus) {
-  let bytes = 0;
+// rec, when given, gets its stage and download size saved as they change, so a crash
+// leaves a trace of how far it got.
+async function load(cfg, onStatus, rec) {
+  let bytes = 0, lastSave = 0;
   const t0 = now();
+  const stage = st => { if (rec) { rec.stage = st; save(); } };
+  stage('download');
   const asr = await pipeline('automatic-speech-recognition', cfg.model, {
     device: cfg.device,
     dtype: cfg.dtype,
     progress_callback: p => {
-      if (p.status === 'progress_total') {
-        bytes = p.total;
-        onStatus(`Downloading ${cfg.id}: ${Math.round(p.loaded / 1e6)} / ${Math.round(p.total / 1e6)} MB`);
+      if (p.status !== 'progress_total') return;
+      bytes = p.total;
+      onStatus(`Downloading ${cfg.id}: ${Math.round(p.loaded / 1e6)} / ${Math.round(p.total / 1e6)} MB`);
+      if (rec && (!rec.downloadMB || p.loaded >= p.total || now() - lastSave > 2000)) {
+        rec.downloadMB = Math.round(p.total / 1e6);
+        lastSave = now();
+        if (p.loaded >= p.total) { rec.stage = 'model setup (after download)'; onStatus(`Setting up ${cfg.id}...`); }
+        save();
       }
     },
   });
@@ -223,8 +258,9 @@ async function runConfig(cfg) {
     const set = await loadTestSet();
     if (!set.length) throw new Error('no test clips could be loaded');
     status(`Loading ${cfg.id}...`);
-    const { asr, loadMs, bytes } = await load(cfg, status);
-    Object.assign(r, { loadMs, downloadMB: Math.round(bytes / 1e6) });
+    const { asr, loadMs, bytes } = await load(cfg, status, r);
+    Object.assign(r, { loadMs, downloadMB: Math.round(bytes / 1e6), stage: 'warm-up (first inference)' });
+    save();
     // The first call compiles shaders; time it separately so it does not skew the rest.
     let t0 = now();
     await asr(set[0].audio, { language: LANGS[set[0].code], task: 'transcribe' });
@@ -232,6 +268,7 @@ async function runConfig(cfg) {
     save();
     for (const [i, item] of set.entries()) {
       status(`${cfg.id}: clip ${i + 1} of ${set.length} (${item.code})`);
+      r.stage = `clip ${i + 1} (${item.code})`;
       const tr = await run(asr, item, 'transcribe');
       const tl = await run(asr, item, 'translate');
       r.clips.push({ code: item.code, id: item.id, seconds: +item.seconds.toFixed(2), ref: item.text, refEn: item.en, transcript: tr.text, transcribeMs: tr.ms, cer: +cer(item.text, tr.text).toFixed(3), english: tl.text, translateMs: tl.ms });
@@ -239,6 +276,7 @@ async function runConfig(cfg) {
     }
     await asr.dispose?.();
     r.finished = new Date().toISOString();
+    delete r.stage;
     status(`${cfg.id} finished.`);
   } catch (e) {
     r.error = String(e && e.message || e);
@@ -297,7 +335,7 @@ for (const cfg of CONFIGS) {
 $('run-all').onclick = () => guarded(async () => {
   for (const cfg of CONFIGS) {
     const r = results.runs[cfg.id];
-    if (r && r.finished && !$('redo').checked) continue;
+    if (r && (r.finished || r.error) && !$('redo').checked) continue;
     await runConfig(cfg);
   }
 });
@@ -413,6 +451,14 @@ $('clear').onclick = () => {
   save();
 };
 
+$('mt-note').textContent = MT
+  ? (self.crossOriginIsolated ? 'Threaded mode: WebAssembly runs on several cores. Results are saved as -mt.' : 'Threaded mode was requested but the page is not isolated; reload once.')
+  : '';
+if (!MT) {
+  const a = el('a', 'Open threaded mode');
+  a.href = '?mt';
+  $('mt-note').append('After this suite, run it again in threaded mode: ', a, '.');
+}
 $('talk').disabled = true;
 save();
 deviceInfo();
