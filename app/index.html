@@ -661,12 +661,12 @@
   let labPhoneMic = true;
   try { if (LAB && localStorage.getItem('lab-input') === 'system') labPhoneMic = false; } catch {}
   const BUILT_IN = /iphone|ipad|built-?in|internal/i;
-  // Capture. 'webaudio' takes the raw samples from the audio graph; 'recorder' is MediaRecorder
-  // (AAC on iOS), decoded afterwards. With AirPods connected, MediaRecorder recordings on iOS were
-  // cut at about 0.53 s or empty whatever the input, while Web Audio recorded in full, so Web
-  // Audio is the default. The lab can switch back to compare.
-  let labCapture = 'webaudio';
-  try { if (LAB && localStorage.getItem('lab-capture') === 'recorder') labCapture = 'recorder'; } catch {}
+  // Capture. 'recorder' is MediaRecorder (AAC on iOS), decoded afterwards: proven on the phone's
+  // microphone with voice processing. 'webaudio' takes the raw samples from the audio graph; it
+  // did better with AirPods connected, which listening no longer supports (see headphonesIn),
+  // so it stays a lab option.
+  let labCapture = 'recorder';
+  try { if (LAB && localStorage.getItem('lab-capture') === 'webaudio') labCapture = 'webaudio'; } catch {}
   const MATCH_MIN = 0.6;
   const READY_KEY = 'listen-ready';
   const listenEl = document.getElementById('listen');
@@ -790,9 +790,35 @@
       return;
     }
     if (listenEl.hidden) return releaseMic();
-    listenMsg('Hold the button while they speak and let go when they stop. Audio stays on this phone and is discarded after.');
     getBtn.hidden = true;
-    holdBtn.hidden = false;
+    await showReady();
+  }
+
+  // Headphones. In six lab sessions with AirPods connected, iOS gave the page broken recordings
+  // from either microphone: cut at 0.53 s or empty with MediaRecorder, all zeros after a clip had
+  // played with Web Audio, and the AirPods' own microphone hears the wearer, not the person across
+  // the table. So listening is paused while any input other than the phone's own is listed (labels
+  // are only listed once the microphone has been allowed), and resumes when it goes. The lab
+  // keeps the button, with a warning, so the case stays testable.
+  async function headphonesIn() {
+    try {
+      return (await navigator.mediaDevices.enumerateDevices())
+        .some(d => d.kind === 'audioinput' && d.label && !BUILT_IN.test(d.label));
+    } catch { return false; }
+  }
+
+  async function showReady() {
+    if (listenEl.hidden || !asr) return;
+    const phones = await headphonesIn();
+    if (phones) {
+      listenMsg(LAB
+        ? 'Headphones are connected: the app would pause listening here. The lab records anyway.'
+        : 'Listening does not work while headphones are connected: iOS gives the app no usable sound. Disconnect them, or turn Bluetooth off, and the button comes back.');
+      holdBtn.hidden = !LAB;
+    } else {
+      listenMsg('Hold the button while they speak and let go when they stop. Audio stays on this phone and is discarded after.');
+      holdBtn.hidden = false;
+    }
   }
 
   // Opens the microphone and drops it when iOS ends its track (a route change), so the next
@@ -1264,7 +1290,10 @@
         if (recorder) return;
         releaseMic();
         // Reopen now, so the next press does not wait for the new route.
-        if (!listenEl.hidden && asr) { try { mic = await openMic(); } catch {} }
+        if (!listenEl.hidden && asr) {
+          try { mic = await openMic(); } catch {}
+          showReady();
+        }
       });
       // The microphone is released whenever the app goes to the background.
       document.addEventListener('visibilitychange', () => { if (document.hidden) closeListen(); });
