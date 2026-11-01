@@ -276,7 +276,7 @@
     const v = pickVoice();
     if (v) { u.voice = v; u.lang = v.lang; }
     u.rate = slow ? 0.6 : 0.9;
-    u.onend = u.onerror = clearActive;
+    u.onend = u.onerror = () => { clearActive(); afterPlayback(); };
     speechSynthesis.speak(u);
   }
 
@@ -287,6 +287,7 @@
 
   // btn is the button to highlight while playing; replays from the lock screen pass none.
   function play(item, slow, btn) {
+    parkMic();
     audio.pause();
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     clearActive();
@@ -775,7 +776,11 @@
   // played with Web Audio, and the AirPods' own microphone hears the wearer, not the person across
   // the table. So listening is paused while any input other than the phone's own is listed (labels
   // are only listed once the microphone has been allowed), and resumes when it goes.
+  // The failure was iOS's, and only iOS names its own input "iPhone Microphone" (or iPad); other
+  // systems' inputs would all look like headphones, so the check is limited to iOS.
+  const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   async function headphonesIn() {
+    if (!IOS) return false;
     try {
       return (await navigator.mediaDevices.enumerateDevices())
         .some(d => d.kind === 'audioinput' && d.label && !BUILT_IN.test(d.label));
@@ -803,6 +808,29 @@
     });
     return stream;
   }
+
+  // While a microphone is open with voice processing, iOS treats the page like a phone call and
+  // sends playback to the earpiece, so clips sounded faint. Playing anything while Listen holds
+  // an idle microphone therefore releases it first, putting playback back on the loudspeaker,
+  // and the microphone is reopened in the background once playback ends, so the next hold is
+  // still quick.
+  let micParked = false, reopenTimer = null;
+  function parkMic() {
+    clearTimeout(reopenTimer);
+    if (!mic || recorder) return;
+    releaseMic();
+    micParked = true;
+  }
+  function afterPlayback() {
+    if (!micParked) return;
+    clearTimeout(reopenTimer);
+    reopenTimer = setTimeout(async () => {
+      if (!micParked || mic || recorder || !asr || listenEl.hidden || !audio.paused) return;
+      micParked = false;
+      try { mic = await openMic(); } catch {}
+    }, 400);
+  }
+  audio.addEventListener('ended', afterPlayback);
 
   function releaseMic() {
     if (mic) for (const t of mic.getTracks()) t.stop();
