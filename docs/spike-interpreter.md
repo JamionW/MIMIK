@@ -1,6 +1,6 @@
 # Spike: live interpreter (Feature 9)
 
-Status: **measuring, with a provisional answer.** Open interpretation is a no-go on this phone today. A narrower feature, recognising which of the app's known replies was said, looks like a go and is being confirmed (third run).
+Status: **done.** Open interpretation: **no-go**. Reply recognition, telling the user which of the app's known replies they just heard, with its English: **go**, with whisper-base on WebAssembly, one check left for the build (see Decision).
 
 ## Question
 
@@ -132,15 +132,46 @@ Each configuration ran in a fresh page. Reply matching at the 0.5 cutoff; "top m
 
 On the phone, `/lab/?mt` stayed un-isolated (`crossOriginIsolated` false), although the same lab service worker isolates the page in Chromium. Safari does not appear to accept the isolation headers when a service worker supplies them, and GitHub Pages cannot send them itself, so WebAssembly threads are unavailable to this site on iOS. The app is hosted the same way, so a shipped feature would run on one thread too: **the one-thread numbers above are the realistic ones.** Threads would need a host that can set response headers (Cloudflare Pages or Netlify, for example), which is a hosting decision, not something to resolve in this spike.
 
-Still pending: the live test with real voices (including lines that are not in the app, and with AirPods connected) and the battery soak, both on one thread.
+### Live test and battery soak (1 November 2026)
+
+**Live**, real voice, Portuguese, phone microphone. Every line spoken was one of the user's own phrases ("Uma mesa para dois, por favor", "Quanto custa isso?", "Fala inglês", "Onde fica a casa de banho?"), so these are all out-of-list for reply matching: the right answer each time is "not sure".
+
+| Config | Lines | Answer time, release to screen (median / max) | Shown as a reply | Best wrong score |
+| --- | --- | --- | --- | --- |
+| base-wasm | 5 | 2.36 / 2.76 s | 0 (all "not sure") | 0.476 |
+| tiny-wasm | 6 | 1.09 / 1.11 s | 0 (all "not sure") | 0.444 |
+
+- **No false answers.** All eleven came back "not sure", which is the behaviour that matters most: a confident wrong reply is worse than none.
+- **base transcribes a real voice well**: "Uma mesa para dois, por favor." and "Quanto custa isso?" exactly. tiny does not ("Uma mesma parte da restrição."), and on silence or rambling it produced Whisper's familiar training-data hallucinations ("Thank you for watching!", "THE END").
+- **Live answers are faster than the suite**: base at 2.4 s median, under the 3 s bar. Whisper pads every input to 30 seconds, so the time is roughly constant whatever the length; a 21-second recording took 2.8 s.
+- **The margin is thin at a 0.5 cutoff.** The closest out-of-list line scored 0.476 ("Um mês para dois, por favor" against "Sem flash, por favor."). At **0.6** the gap widens to 0.12; on the suite, base then shows 53 right instead of 54 (losing "Têm reserva?", matched at exactly 0.5), still with no wrong answers.
+- **Not measured:** a real voice saying one of the replies, and recording with AirPods connected.
+
+**Soak**, base-wasm, unplugged: 204 transcriptions back to back in 10 minutes cost 8% (36% to 28%). That is continuous inference, one call every 2.9 s; it fails the 5% bar as written, but the bar was meant for use, not saturation. At about 0.04% per call, a conversation with twenty listens costs under 1%.
 
 ## Decision
 
-Provisional:
+**Open interpreter (translate anything said): no-go.** Of the models that fit on the phone, base translates usably about 20 times in 56 and tiny about 8; small, the first size that might translate well enough, crashes for memory. WebGPU, which might have made larger models fast enough, crashes at model setup on iOS 26.6 with this engine. Worth revisiting only if WebGPU in ONNX Runtime Web starts working on iOS, or if the app moves to a host that can enable threads.
 
-- **Open interpreter (translate anything said): no-go.** The only models that run on the phone, tiny and, probably, base on WebAssembly, translate too poorly to act on, and the models that might translate well enough do not fit.
-- **Reply recognition (tell the user which expected reply they just heard, with its English): likely go**, pending the live test. It reuses the "What you'll hear" data, needs one model for all languages, and can say "not sure" instead of guessing. On synthetic clips, tiny (44 MB) answers in about 1.2 s with 51 of 56 right and 1 wrong; base (80 MB) answers in about 3 s on one thread with 54 right and none wrong. Threads are not available on this hosting (see the threaded run), so the choice is between base, about 3 s and no wrong answers, and tiny, about 1.2 s and one wrong answer; the live test decides it.
+**Reply recognition: go.** Hold a button while the other person speaks; the app transcribes on the phone, matches the transcript against the language's "What you'll hear" replies, and shows the closest reply with its stored English, or "not sure".
 
-Whatever the outcome, any go is conditional on push-to-listen (never always-on listening), audio processed on the phone and discarded once transcribed, and nothing stored or sent, which addresses most of the bystander concern and also limits battery use.
+| Criterion | Bar | Result (base-wasm, one thread) |
+| --- | --- | --- |
+| Speed | under 3 s | 2.4 s median live; 3.05 s on the suite clips: **pass, just** |
+| Download | under 150 MB | 80 MB, shared by all seven languages: **pass** |
+| Accuracy | 80% acted on correctly | 53 of 56 right and none wrong at a 0.6 cutoff (95%), the rest "not sure"; 11 of 11 out-of-list lines "not sure": **pass** on synthetic replies |
+| Battery | under 5% in 10 minutes of use | 8% for 10 minutes of continuous inference, under 1% for realistic use: **pass** for the intent |
+| Offline | works with no connection once downloaded | not measured; the model and engine files can be precached like the audio, which is ordinary engineering |
+
+Choices for the build:
+
+- **whisper-base, not tiny.** tiny is twice as fast but made a confident wrong match on the clips, mangles real speech, and hallucinates on silence. base is the one a user can trust.
+- **Cutoff 0.6**, from the live margin above.
+- **Treat the user's own phrases as known distractors**: if the transcript is closer to one of the user's phrases than to any reply, answer "not sure". The live test shows why: the phone hears its owner too.
+- **Ship it as an optional download**, since 80 MB is several times the size of a language's audio.
+
+**One check left, to do first in the build:** a real voice, ideally a native speaker, saying the replies themselves, plus a couple with AirPods connected. The live test confirmed rejection, not recognition, and the suite's voices are synthetic. If recognition of real replies falls well short of the suite, the feature does not ship.
+
+Any go is conditional on push-to-listen (never always-on listening), audio processed on the phone and discarded once transcribed, and nothing stored or sent, which addresses most of the bystander concern and also limits battery use.
 
 Card suggestion follows from reply recognition: a recognised reply belongs to a known card, so the app knows which exchange is under way and can surface the natural next card. That is a product decision on top of the measurement, not something to benchmark.
