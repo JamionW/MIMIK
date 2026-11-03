@@ -45,5 +45,33 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild build -project Mimik.xcodeproj -scheme Mimik -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO 2>&1 \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO 2>&1 \
             | (grep -E "error:|warning: .*\.swift|BUILD (SUCCEEDED|FAILED)" || true)
+      # Launches the app, opens Portuguese through the widget's link, and fails if it is not
+      # still running a few seconds later. The screenshots are kept as the run's artifact.
+      - name: Launch in the simulator
+        working-directory: ios
+        run: |
+          udid=$(xcrun simctl list devices available | grep -m1 -E "^ +iPhone" | grep -oE "[0-9A-F-]{36}")
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid"
+          app=build/Build/Products/Debug-iphonesimulator/Mimik.app
+          ls "$app/Phrases" "$app/Audio/pt/audio" | head -5
+          mkdir -p shots
+          xcrun simctl install "$udid" "$app"
+          xcrun simctl launch "$udid" com.jamionw.mimik
+          sleep 5
+          xcrun simctl io "$udid" screenshot shots/1-picker.png
+          xcrun simctl openurl "$udid" mimik://pt
+          sleep 5
+          xcrun simctl io "$udid" screenshot shots/2-portuguese.png
+          xcrun simctl ui "$udid" appearance dark
+          sleep 2
+          xcrun simctl io "$udid" screenshot shots/3-portuguese-dark.png
+          xcrun simctl spawn "$udid" launchctl list | grep -q com.jamionw.mimik || { echo "Mimik is not running"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simulator-screenshots
+          path: ios/shots/
+          if-no-files-found: ignore
