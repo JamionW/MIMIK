@@ -1,0 +1,11 @@
+# Written by scripts/bundle_ios.py and xcodegen.
+Generated/
+*.xcodeproj/
+Mimik/Info.plist
+MimikWidget/Info.plist
+*.entitlements
+# Swift package and Xcode build state.
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
