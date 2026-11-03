@@ -1,0 +1,49 @@
+name: iOS
+
+# Tests the shared logic on Linux, then builds the app for the simulator on macOS. The macOS job
+# fetches clips from the deployed site rather than running edge-tts, so a phrase added in the same
+# change builds without its audio and falls back to the device voice.
+on:
+  push:
+    paths: ["ios/**", "site/*/phrases.json", "scripts/bundle_ios.py", "scripts/build.py", ".github/workflows/ios.yml"]
+  pull_request:
+    paths: ["ios/**", "site/*/phrases.json", "scripts/bundle_ios.py", "scripts/build.py", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    container: swift:6.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test --package-path ios/MimikCore
+
+  app:
+    needs: core
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bundle phrases and clips
+        run: python scripts/bundle_ios.py --fetch https://jamionw.github.io/MIMIK/
+      - run: brew install xcodegen
+      - name: Generate the Xcode project
+        working-directory: ios
+        run: xcodegen generate
+      - name: Build for the simulator
+        working-directory: ios
+        # The full log is long; this shows Swift errors and warnings and the result.
+        run: |
+          set -o pipefail
+          xcodebuild build -project Mimik.xcodeproj -scheme Mimik -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO 2>&1 \
+            | (grep -E "error:|warning: .*\.swift|BUILD (SUCCEEDED|FAILED)" || true)
