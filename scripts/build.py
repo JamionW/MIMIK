@@ -52,13 +52,8 @@ def toward(c, target, against, ratio):
     return target
 
 
-def theme(color):
-    """CSS overriding the blue accent tokens with ones built from the language's icon colour.
-
-    Light mode uses the colour itself, darkened if needed so phonetic text on the page and
-    white play arrows both stay readable (4.5:1). Dark mode uses a light tint of it, as the
-    blue theme does, with a near-black ink of the same hue.
-    """
+def theme_tokens(color):
+    """The accent tokens for light and dark mode as hex strings, shared with scripts/bundle_ios.py."""
     c = rgb(color)
     white, black = (255, 255, 255), (0, 0, 0)
     light = toward(c, black, [rgb(LIGHT_BG), white], 4.5)
@@ -67,7 +62,17 @@ def theme(color):
         "light": {"accent": light, "accent-ink": white, "tag": mix(c, white, 0.88)},
         "dark": {"accent": dark, "accent-ink": mix(c, black, 0.85), "tag": mix(c, rgb(DARK_BG), 0.82)},
     }
-    decl = {k: " ".join(f"--{n}: {hexa(v)};" for n, v in t.items()) for k, t in tokens.items()}
+    return {k: {n: hexa(v) for n, v in t.items()} for k, t in tokens.items()}
+
+
+def theme(color):
+    """CSS overriding the blue accent tokens with ones built from the language's icon colour.
+
+    Light mode uses the colour itself, darkened if needed so phonetic text on the page and
+    white play arrows both stay readable (4.5:1). Dark mode uses a light tint of it, as the
+    blue theme does, with a near-black ink of the same hue.
+    """
+    decl = {k: " ".join(f"--{n}: {v};" for n, v in t.items()) for k, t in theme_tokens(color).items()}
     return f":root {{ {decl['light']} }} @media (prefers-color-scheme: dark) {{ :root {{ {decl['dark']} }} }}"
 
 
@@ -118,4 +123,5 @@ def main():
     print(f"built {len(listing)} languages: {', '.join(l['code'] for l in listing)} ({version})")
 
 
-main()
+if __name__ == "__main__":
+    main()

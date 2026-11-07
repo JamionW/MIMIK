@@ -1,7 +1,7 @@
 """Draw each language's home-screen icon: the Mimik tilde on the language's colour.
 
 Reads "color" from each site/<code>/phrases.json and writes icon.svg, icon-180.png and
-icon-512.png into that folder. The output is committed, so deploys don't need Pillow;
+icon-512.png into that folder. Also writes the iOS app's 1024 px icon, in the picker's blue. The output is committed, so deploys don't need Pillow;
 rerun this after adding a language or changing a colour.
 
 Usage: python scripts/gen_icons.py   (requires: pip install pillow)
@@ -11,7 +11,11 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-SITE = Path(__file__).resolve().parent.parent / "site"
+ROOT = Path(__file__).resolve().parent.parent
+SITE = ROOT / "site"
+IOS_ICON = ROOT / "ios" / "Mimik" / "Assets.xcassets" / "AppIcon.appiconset" / "icon-1024.png"
+# The root picker's colour (site/icon.svg); the iOS app holds every language, so it uses this one.
+ROOT_COLOR = "#1f4e9c"
 # Same mark as site/icon.svg, in its 100-unit viewBox.
 CURVES = [((24, 58), (32, 38), (44, 39), (50, 50)), ((50, 50), (56, 61), (68, 62), (76, 42))]
 STROKE = 10
@@ -52,6 +56,9 @@ def main():
         for size in (180, 512):
             png(color, size).save(folder / f"icon-{size}.png", optimize=True)
         print(f"{folder.name}: {color}")
+    IOS_ICON.parent.mkdir(parents=True, exist_ok=True)
+    png(ROOT_COLOR, 1024).save(IOS_ICON, optimize=True)
+    print(f"ios: {ROOT_COLOR}")
 
 
 main()

@@ -111,6 +111,23 @@ python3 -m http.server -d site 8000
 
 Rerun the build after editing anything in `app/` or adding a language. Audio requires generating clips first (`pip install edge-tts`, then `python3 scripts/gen_audio.py`, optionally followed by language codes such as `es ja`); without them the page falls back to the device voice. `python3 scripts/gen_audio.py --dry-run` lists every phrase and its feminine form without touching the network.
 
+## iOS app
+
+`ios/` holds a native app with every language and a "Phrases for now" widget for the home and lock screens (Feature 11 in `FEATURES.md`). It reads the same `phrases.json` files and recordings as the web app. `ios/MimikCore` is a Swift package with the shared logic; its tests run on Linux or macOS and read the real phrase files:
+
+```sh
+swift test --package-path ios/MimikCore
+```
+
+Building the app needs a Mac with Xcode 16 and XcodeGen (`brew install xcodegen`):
+
+```sh
+python3 scripts/bundle_ios.py --fetch https://jamionw.github.io/MIMIK/
+cd ios && xcodegen generate && open Mimik.xcodeproj
+```
+
+`bundle_ios.py` copies the phrase files and clips into `ios/Generated/`, taking clips from `site/` where they have been generated locally and fetching the rest from the deployed site. The Xcode project and `Generated/` are build output and stay out of git. To run on a phone, set `DEVELOPMENT_TEAM` in `ios/project.yml` and change the `com.jamionw` bundle ids and app group to ones your account owns. `.github/workflows/ios.yml` runs the Core tests and a simulator build whenever `ios/` or a phrase file changes.
+
 ## Deployment
 
 `.github/workflows/deploy.yml` runs on every push to `main` and on manual dispatch, building the language folders, generating audio and publishing `site/` to GitHub Pages. The `github-pages` environment allows deploys from `main` only.
